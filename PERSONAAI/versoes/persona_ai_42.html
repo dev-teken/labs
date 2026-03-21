@@ -195,24 +195,6 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
   animation:nameswap .80s cubic-bezier(.25,0,.15,1) .12s both;
 }
 
-/* tint do nome — cor animada via JS (lyraColorLoop), sem keyframe CSS */
-/* a classe .mh-name--tinted é usada só como flag de estado pelo JS */
-
-/* Lyra editável — contenteditable discreto */
-.mh-name[contenteditable]{
-  cursor:text;
-  outline:none;
-  border-bottom:1px solid transparent;
-  transition:border-color .2s;
-  padding-bottom:2px;
-}
-.mh-name[contenteditable]:hover{
-  border-bottom-color:rgba(255,255,255,0.18);
-}
-.mh-name[contenteditable]:focus{
-  border-bottom-color:rgba(255,255,255,0.38);
-}
-
 /* saída→entrada em X para o grupo padrão */
 @keyframes textswap{
   0%  {opacity:1; transform:translateX(0)}
@@ -548,7 +530,7 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
       <div class="mh-avatar-wrap"><canvas id="av-mh" width="220" height="220"></canvas></div>
       <div class="mh-identity">
         <div class="mh-kicker">Perfil ativo</div>
-        <div class="mh-name" id="mh-name" contenteditable="true" spellcheck="false">Lyra</div>
+        <div class="mh-name" id="mh-name">Lyra</div>
         <div class="mh-role" id="mh-role">Assistente de suporte emocional</div>
       </div>
     </div>
@@ -667,11 +649,11 @@ const PR=[
      Mentor       sálvia verde-cinza  · h:150 s:18 l:40
      Criador      lavanda empoeirado  · h:270 s:20 l:48
      Executor     areia bege mineral  · h:38  s:22 l:44  */
-  {id:'companion', h:205, s:22, l:48, accent3:'#c4f5b7', img:'_Assets/avatar_default.webp',   name:'O Companheiro',tag:'Cálido · Paciente · Presente',role:'Assistente de suporte emocional',mission:'Estar presente, ouvir com atenção e responder com cuidado. Nunca apresse o usuário. Adapte o tom ao estado emocional percebido.',vals:{apperception:12,curiosity:11,imagination:13,humor:12,candor:11,loyalty:18,meekness:7,humility:15,vivacity:11,sensuality:6,charm:15,tenacity:12,patience:19,decisiveness:10,courage:9,self_pres:10,aggression:1,empathy:20,cruelty:0,coordination:9}},
-  {id:'strategist', h:18, s:22, l:42, accent3:'#bd7992', img:'_Assets/avatar_default-02.webp',name:'O Estrategista',tag:'Direto · Analítico · Decisivo',role:'Consultor de decisões e estratégia',mission:'Analisar cenários com objetividade, apontar riscos e recomendar ações claras. Não suavize a verdade — diga o que precisa ser dito.',vals:{apperception:18,curiosity:15,imagination:14,humor:6,candor:18,loyalty:13,meekness:2,humility:6,vivacity:11,sensuality:3,charm:10,tenacity:17,patience:9,decisiveness:19,courage:15,self_pres:11,aggression:5,empathy:9,cruelty:1,coordination:13}},
-  {id:'mentor',    h:150, s:18, l:40, accent3:'#cd9e4a', img:'_Assets/avatar_default-03.webp',name:'O Mentor',tag:'Sábio · Humilde · Estimulante',role:'Educador e guia de aprendizado',mission:'Ensinar através de perguntas, não de respostas prontas. Estimular o raciocínio autônomo. Celebrar o progresso, por menor que seja.',vals:{apperception:17,curiosity:18,imagination:16,humor:13,candor:14,loyalty:15,meekness:5,humility:17,vivacity:13,sensuality:4,charm:13,tenacity:14,patience:17,decisiveness:12,courage:12,self_pres:10,aggression:1,empathy:16,cruelty:0,coordination:10}},
-  {id:'creator',   h:270, s:20, l:48, accent3:'#c075b4', img:'_Assets/avatar_default-04.webp',name:'O Criador',tag:'Imaginativo · Enérgico · Provocador',role:'Parceiro criativo e gerador de ideias',mission:'Explorar possibilidades sem julgamento prematuro. Propor o inesperado. Questionar o óbvio e transformar restrições em ponto de partida criativo.',vals:{apperception:15,curiosity:20,imagination:20,humor:16,candor:13,loyalty:12,meekness:3,humility:11,vivacity:18,sensuality:8,charm:16,tenacity:11,patience:7,decisiveness:12,courage:16,self_pres:7,aggression:4,empathy:12,cruelty:0,coordination:8}},
-  {id:'executor',  h:38,  s:22, l:44, accent3:'#808a56', img:'_Assets/avatar_default-05.webp',name:'O Executor',tag:'Confiável · Preciso · Incansável',role:'Agente de produtividade e automação',mission:'Completar tarefas com máxima precisão e mínima fricção. Manter o usuário informado do progresso. Priorizar clareza sobre elegância.',vals:{apperception:14,curiosity:8,imagination:9,humor:5,candor:16,loyalty:19,meekness:6,humility:9,vivacity:8,sensuality:2,charm:8,tenacity:20,patience:17,decisiveness:18,courage:14,self_pres:14,aggression:5,empathy:8,cruelty:1,coordination:17}}
+  {id:'companion', h:205, s:22, l:48, accent3:'#c4f5b7', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default.webp',   name:'O Companheiro',tag:'Cálido · Paciente · Presente',role:'Assistente de suporte emocional',mission:'Estar presente, ouvir com atenção e responder com cuidado. Nunca apresse o usuário. Adapte o tom ao estado emocional percebido.',vals:{apperception:12,curiosity:11,imagination:13,humor:12,candor:11,loyalty:18,meekness:7,humility:15,vivacity:11,sensuality:6,charm:15,tenacity:12,patience:19,decisiveness:10,courage:9,self_pres:10,aggression:1,empathy:20,cruelty:0,coordination:9}},
+  {id:'strategist', h:18, s:22, l:42, accent3:'#bd7992', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-02.webp',name:'O Estrategista',tag:'Direto · Analítico · Decisivo',role:'Consultor de decisões e estratégia',mission:'Analisar cenários com objetividade, apontar riscos e recomendar ações claras. Não suavize a verdade — diga o que precisa ser dito.',vals:{apperception:18,curiosity:15,imagination:14,humor:6,candor:18,loyalty:13,meekness:2,humility:6,vivacity:11,sensuality:3,charm:10,tenacity:17,patience:9,decisiveness:19,courage:15,self_pres:11,aggression:5,empathy:9,cruelty:1,coordination:13}},
+  {id:'mentor',    h:150, s:18, l:40, accent3:'#cd9e4a', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-03.webp',name:'O Mentor',tag:'Sábio · Humilde · Estimulante',role:'Educador e guia de aprendizado',mission:'Ensinar através de perguntas, não de respostas prontas. Estimular o raciocínio autônomo. Celebrar o progresso, por menor que seja.',vals:{apperception:17,curiosity:18,imagination:16,humor:13,candor:14,loyalty:15,meekness:5,humility:17,vivacity:13,sensuality:4,charm:13,tenacity:14,patience:17,decisiveness:12,courage:12,self_pres:10,aggression:1,empathy:16,cruelty:0,coordination:10}},
+  {id:'creator',   h:270, s:20, l:48, accent3:'#c075b4', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-04.webp',name:'O Criador',tag:'Imaginativo · Enérgico · Provocador',role:'Parceiro criativo e gerador de ideias',mission:'Explorar possibilidades sem julgamento prematuro. Propor o inesperado. Questionar o óbvio e transformar restrições em ponto de partida criativo.',vals:{apperception:15,curiosity:20,imagination:20,humor:16,candor:13,loyalty:12,meekness:3,humility:11,vivacity:18,sensuality:8,charm:16,tenacity:11,patience:7,decisiveness:12,courage:16,self_pres:7,aggression:4,empathy:12,cruelty:0,coordination:8}},
+  {id:'executor',  h:38,  s:22, l:44, accent3:'#808a56', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-05.webp',name:'O Executor',tag:'Confiável · Preciso · Incansável',role:'Agente de produtividade e automação',mission:'Completar tarefas com máxima precisão e mínima fricção. Manter o usuário informado do progresso. Priorizar clareza sobre elegância.',vals:{apperception:14,curiosity:8,imagination:9,humor:5,candor:16,loyalty:19,meekness:6,humility:9,vivacity:8,sensuality:2,charm:8,tenacity:20,patience:17,decisiveness:18,courage:14,self_pres:14,aggression:5,empathy:8,cruelty:1,coordination:17}}
 ];
 const ARCH=[
   {t:v=>v('empathy')>=16&&v('patience')>=15,n:'Cuidador atento',d:'Escuta profunda e presença constante como base da relação.'},
@@ -1013,24 +995,14 @@ function breathwave(){
    amplitude orbital, velocidade angular e raio dos blobs.
    _pendingPresetColor guarda os dados de cor aplicados no pico. */
 let TWIST = 0;
-let TWIST_DIR = 0;        /* +1 wind-up  -1 settle  0 repouso */
-const TWIST_UP = 0.0317;  /* sobe linear em ~31 frames (~0.52s) */
-
-/* ── settle com easy-out exponencial atenuado ────────────────────────
-   Em vez de subtrair uma constante, multiplicamos TWIST por um fator
-   de decaimento por frame. Isso cria uma curva que:
-   · começa relativamente rápida  (TWIST alto → queda maior)
-   · desacelera progressivamente  (TWIST médio → queda média)
-   · arrasta lentíssimo no fim    (TWIST baixo → queda ínfima)
-   Fator 0.964/frame @ 60fps ≈ tempo de meia-vida ~19 frames (~0.32s).
-   Threshold de corte em 0.008 para não ficar infinito. */
-const TWIST_DECAY  = 0.9407;  /* fator multiplicativo por frame — diminui aqui pra mais lento */
-const TWIST_CUTOFF = 0.008;   /* abaixo disso considera zero */
+let TWIST_DIR = 0;          /* +1 wind-up  -1 settle  0 repouso */
+const TWIST_UP   = 0.038;   /* sobe em ~26 frames (~0.43s a 60fps) */
+const TWIST_DOWN = 0.016;   /* desce em ~62 frames (~1.0s) — settle lento */
 let _pendingPresetColor = null;
 
 function triggerSoulTwist(colorData){
   _pendingPresetColor = colorData;
-  TWIST = Math.max(TWIST, 0.05);
+  TWIST = Math.max(TWIST, 0.05); /* garante que sempre sobe do início */
   TWIST_DIR = 1;
 }
 
@@ -1046,15 +1018,12 @@ function _stepTwist(){
         document.documentElement.style.setProperty('--brand-l',     d.l + '%');
         document.documentElement.style.setProperty('--soul-accent3', d.accent3 ?? '#888888');
         _pendingPresetColor = null;
-        /* acende o color-loop orgânico do nome da marca */
-        startLyraColorLoop();
       }
       TWIST_DIR = -1;
     }
   } else if(TWIST_DIR === -1){
-    /* decaimento exponencial — rápido no começo, arrasta no fim */
-    TWIST *= TWIST_DECAY;
-    if(TWIST < TWIST_CUTOFF){ TWIST = 0; TWIST_DIR = 0; }
+    TWIST = Math.max(0, TWIST - TWIST_DOWN);
+    if(TWIST <= 0) TWIST_DIR = 0;
   }
 }
 
@@ -1184,102 +1153,6 @@ function applyP(p){
   refresh();
 }
 
-/* ── LYRA COLOR LOOP ─────────────────────────────────────────────────
-   Anima a cor de #mh-name com ondas de senos em frequências primas,
-   igual ao movimento dos blobs do soul. A cor oscila entre brand-light
-   e --lt (branco) de forma não-periódica (pseudo-aleatória).
-   Duração ~3.1s (20% mais lento que o tint anterior de 2.6s).
-   Usa T global para continuar em fase com o soul. */
-let _lyraLoopId = null;
-let _lyraStartT = null;
-const LYRA_DURATION = 3.12; /* segundos — 2.6 * 1.20 */
-
-function startLyraColorLoop(){
-  /* cancela loop anterior se ainda rodando */
-  if(_lyraLoopId) cancelAnimationFrame(_lyraLoopId);
-  _lyraStartT = T; /* âncora no tempo global do soul */
-
-  function tick(){
-    const nm = document.getElementById('mh-name');
-    if(!nm){ _lyraLoopId = null; return; }
-
-    const elapsed = (T - _lyraStartT) * (1/0.0108) / 60; /* segundos desde início */
-    const progress = elapsed / LYRA_DURATION;             /* 0..1..beyond */
-
-    /* envelope: sobe rápido (0→0.15), sustenta com ondas, decai suave (→1) */
-    let env;
-    if(progress < 0.15)      env = progress / 0.15;        /* attack */
-    else if(progress < 0.72) env = 1.0;                    /* sustain */
-    else if(progress < 1.0)  env = 1 - (progress-0.72)/0.28; /* release */
-    else                     env = 0;
-
-    if(env <= 0){
-      /* fim — volta ao branco limpo */
-      nm.style.color = '';
-      nm.classList.remove('mh-name--tinted');
-      _lyraLoopId = null;
-      return;
-    }
-
-    /* oscilação pseudo-aleatória: soma de 4 senos com frequências primas
-       (mesma filosofia dos blobs do soul — resultado não-periódico)
-       t_s = tempo em segundos, usando T global escalado */
-    const t_s = T * (1/0.0108) / 60;
-    const wave =
-      0.38 * Math.sin(t_s * 2.3  + 0.0) +   /* f1 — lento, dominante */
-      0.28 * Math.sin(t_s * 3.7  + 1.2) +   /* f2 — médio */
-      0.20 * Math.sin(t_s * 5.11 + 2.7) +   /* f3 — rápido */
-      0.14 * Math.sin(t_s * 7.3  + 4.1);    /* f4 — altíssimo, ruído fino */
-
-    /* normaliza -1..1 → 0..1 */
-    const w = (wave + 1) / 2;
-
-    /* interpola brand-light → --lt via CSS vars lidas em runtime */
-    const cs = getComputedStyle(document.documentElement);
-    const brandLight = cs.getPropertyValue('--brand-light').trim();
-    const ltColor    = cs.getPropertyValue('--lt').trim();
-
-    /* intensidade = envelope × wave — o tint pulsa com o soul */
-    const alpha = Math.min(1, env * (0.88 + 0.17 * w)); /* +70% presença da brand-light no sustain */
-
-    /* mistura linear entre --lt e brand-light usando opacity sobre uma camada de cor */
-    /* simplificação: usa color com opacity como proxy — funciona bem em dark bg */
-    nm.style.color = `color-mix(in srgb, ${brandLight} ${Math.round(alpha*100)}%, ${ltColor})`;
-
-    _lyraLoopId = requestAnimationFrame(tick);
-  }
-
-  nm_el = document.getElementById('mh-name');
-  if(nm_el) nm_el.classList.add('mh-name--tinted');
-  _lyraLoopId = requestAnimationFrame(tick);
-}
-
-function setupBrandName(){
-  const el = document.getElementById('mh-name');
-  if(!el) return;
-  const sname = document.getElementById('sname');
-
-  /* ao confirmar (Enter ou blur) — salva no hidden input e dispara refresh */
-  function commit(){
-    const val = el.textContent.trim() || 'Lyra';
-    el.textContent = val;          /* normaliza espaços */
-    if(sname) sname.value = val;
-    refresh();
-  }
-
-  el.addEventListener('keydown', e=>{
-    if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
-  });
-  el.addEventListener('blur', commit);
-
-  /* impede que o paste cole HTML */
-  el.addEventListener('paste', e=>{
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
-  });
-}
-
 function setupMission(){
   const el=document.getElementById('ai-mission');
   const check=()=>el.classList.toggle('empty',el.textContent.trim()==='');
@@ -1407,7 +1280,7 @@ document.getElementById('export-overlay').addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeExport()});
 
 ['sname','srole'].forEach(id=>document.getElementById(id).addEventListener('input',refresh));
-setDate();setupMission();setupBrandName();buildGroups();buildPresets();applyP(PR[0]);setupRadarHover();loop();
+setDate();setupMission();buildGroups();buildPresets();applyP(PR[0]);setupRadarHover();loop();
 
 /* ── FIXED MH + SHRINK ON SCROLL ── */
 (function(){

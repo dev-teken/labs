@@ -108,7 +108,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .pc.on .pc-img-wrap img{opacity:.75;mix-blend-mode:luminosity}
 
 /* IMAGEM DO PRESET */
-.pc-img-wrap{width:100%;height:25vh;position:relative;overflow:hidden;background:rgba(3,3,9,0.5);flex-shrink:0}
+.pc-img-wrap{width:100%;height:25vh;position:relative;overflow:hidden;background:rgba(2,2,10,0.5);flex-shrink:0}
 .pc-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;opacity:.92;transition:opacity .2s}
 .pc:hover .pc-img-wrap img{opacity:1}
 .pc-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer}
@@ -119,9 +119,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .pc-tag{font-family:var(--bd);font-size:12px;font-style:italic;color:rgba(255,255,255,0.42);margin-top:2px}
 .pc.on .pc-name{color:var(--lt)}
 .pc.on .pc-body{border-top:2px solid rgba(255,255,255,0.2)}
-.pc-body{padding:12px 14px 10px;flex:1;background:#030309;transition:background .15s}
-.pc:hover .pc-body{background:#07070e}
-.pc.on .pc-body{background:#07070e}
+.pc-body{padding:12px 14px 10px;flex:1;background:#02020a;transition:background .15s}
+.pc:hover .pc-body{background:#06060f}
+.pc.on .pc-body{background:#06060f}
 
 /* MISSÃO */
 .mission{display:flex;flex-direction:column;gap:8px;padding:32px 40px;text-align:center}
@@ -193,24 +193,6 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
 /* Lyra (mh-name): delay + para antes do último estágio + color mutation brand→lt */
 .mh-name.swap{
   animation:nameswap .80s cubic-bezier(.25,0,.15,1) .12s both;
-}
-
-/* tint do nome — cor animada via JS (lyraColorLoop), sem keyframe CSS */
-/* a classe .mh-name--tinted é usada só como flag de estado pelo JS */
-
-/* Lyra editável — contenteditable discreto */
-.mh-name[contenteditable]{
-  cursor:text;
-  outline:none;
-  border-bottom:1px solid transparent;
-  transition:border-color .2s;
-  padding-bottom:2px;
-}
-.mh-name[contenteditable]:hover{
-  border-bottom-color:rgba(255,255,255,0.18);
-}
-.mh-name[contenteditable]:focus{
-  border-bottom-color:rgba(255,255,255,0.38);
 }
 
 /* saída→entrada em X para o grupo padrão */
@@ -345,15 +327,15 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
 
 /* ── PRESET CARDS ── */
 .pc{cursor:pointer;border-right:1px solid var(--rule);background:transparent;display:flex;flex-direction:column;position:relative;transition:background .15s;overflow:hidden}
-.pc:hover .pc-body{background:#07070e}
-.pc.on .pc-body{background:#07070e}
-.pc-img-wrap{width:100%;height:25vh;position:relative;overflow:hidden;background:rgba(3,3,9,0.5);flex-shrink:0}
-.pc-body{padding:18px 20px 14px;flex:1;background:#030309;transition:background .15s}
+.pc:hover .pc-body{background:#06060f}
+.pc.on .pc-body{background:#06060f}
+.pc-img-wrap{width:100%;height:25vh;position:relative;overflow:hidden;background:rgba(2,2,10,0.5);flex-shrink:0}
+.pc-body{padding:18px 20px 14px;flex:1;background:#02020a;transition:background .15s}
 /* ── BOTÃO FLUTUANTE DE EXPORT ── */
 .fab{
   position:fixed;bottom:36px;left:36px;z-index:1000;
   width:60px;height:60px;border-radius:50%;
-  background:#030309;border:1px solid rgba(255,255,255,0.12);
+  background:#02020a;border:1px solid rgba(255,255,255,0.12);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   box-shadow:0 4px 24px rgba(0,0,0,0.5);
   transition:transform .2s,box-shadow .2s;
@@ -364,7 +346,7 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
 /* ── OVERLAY DE EXPORT ── */
 .export-overlay{
   position:fixed;inset:0;z-index:999;
-  background:rgba(3,3,9,0.92);
+  background:rgba(2,2,10,0.92);
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   display:flex;align-items:center;justify-content:center;
   opacity:0;pointer-events:none;
@@ -395,9 +377,9 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
 .ep-btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.18)}
 .ep-btn.active{border-color:rgba(255,255,255,0.3)}
 .ep-btn.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-#ep-claude.active::before{background:#c97f67}
-#ep-chatgpt.active::before{background:#229176}
-#ep-gemini.active::before{background:#588bde}
+#ep-claude.active::before{background:#D97757}
+#ep-chatgpt.active::before{background:#10A37F}
+#ep-gemini.active::before{background:#4285F4}
 .ep-ibg{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center}
 .ep-pname{font-family:var(--mn);font-size:13px;color:rgba(255,255,255,0.7);letter-spacing:.1em;text-transform:uppercase}
 .ep-pfmt{font-family:'Source Serif 4',serif;font-size:13px;color:rgba(255,255,255,0.35);font-style:italic}
@@ -419,7 +401,7 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
 .ep-copy{
   font-family:'Courier Prime',monospace;font-size:14px;letter-spacing:.05em;
   padding:14px;border:none;
-  background:#e9e9ef;color:#030309;cursor:pointer;
+  background:#e8e8f0;color:#02020a;cursor:pointer;
   transition:opacity .15s;
 }
 .ep-copy:hover{opacity:.85}
@@ -446,7 +428,7 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
 
 /* ── MASTHEAD REDESENHADO ── */
 .mh{
-  background:#030309;
+  background:#02020a;
   border-bottom:1px solid rgba(255,255,255,0.08);
   display:grid;
   grid-template-columns:1fr 1px 380px;
@@ -548,7 +530,7 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
       <div class="mh-avatar-wrap"><canvas id="av-mh" width="220" height="220"></canvas></div>
       <div class="mh-identity">
         <div class="mh-kicker">Perfil ativo</div>
-        <div class="mh-name" id="mh-name" contenteditable="true" spellcheck="false">Lyra</div>
+        <div class="mh-name" id="mh-name">Lyra</div>
         <div class="mh-role" id="mh-role">Assistente de suporte emocional</div>
       </div>
     </div>
@@ -630,15 +612,15 @@ input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
     <div class="ep-title">Exportar prompt para</div>
     <div class="ep-targets">
       <button class="ep-btn active" id="ep-claude" onclick="epSelTarget('claude')">
-        <div class="ep-ibg" style="background:#c97f67"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg></div>
+        <div class="ep-ibg" style="background:#D97757"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg></div>
         <span class="ep-pname">Claude</span><span class="ep-pfmt">XML tags</span>
       </button>
       <button class="ep-btn" id="ep-chatgpt" onclick="epSelTarget('chatgpt')">
-        <div class="ep-ibg" style="background:#229176"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M24 9.736V9.72c0-.018-.009-.035-.009-.053-.008-.017-.008-.034-.017-.052 0-.009-.009-.009-.009-.017a.19.19 0 0 0-.026-.044v-.009c-.009-.017-.026-.026-.044-.043l-.008-.009c-.018-.009-.035-.026-.053-.035l-3.72-2.143V3.02c0-.018 0-.044-.008-.061V2.94a.124.124 0 0 0-.017-.052V2.88c-.01-.017-.018-.035-.027-.043 0-.01-.008-.01-.008-.01a.19.19 0 0 0-.035-.043c-.018-.008-.026-.026-.044-.034-.008 0-.008-.01-.017-.01l-.009-.008L16.055.476a.338.338 0 0 0-.34 0l-3.72 2.143L8.286.476a.338.338 0 0 0-.34 0L4.06 2.723c-.01 0-.01.01-.01.01-.008 0-.008.008-.017.008-.017.009-.026.026-.043.035a.153.153 0 0 0-.035.043l-.009.009c-.008.017-.017.026-.026.044v.008c-.009.018-.009.035-.017.052v.018c0 .017-.009.043-.009.06v4.296L.166 9.457c-.018.01-.035.026-.053.035l-.008.009-.044.043v.01c-.009.017-.017.025-.026.043 0 .008-.009.008-.009.017a.124.124 0 0 0-.017.052C0 9.684 0 9.701 0 9.72v4.521a.34.34 0 0 0 .166.296l3.72 2.143v4.295a.34.34 0 0 0 .165.296l3.885 2.248c.009.008.018.008.026.017 0 0 .009 0 .009.009.009 0 .017.008.026.008.009 0 .009 0 .018.01.008 0 .017 0 .026.008h.061a.35.35 0 0 0 .13-.026c.018-.009.026-.009.044-.018l3.72-2.143 3.72 2.143c.017.009.026.018.043.018a.35.35 0 0 0 .13.026h.062c.008 0 .017 0 .026-.009.008 0 .008 0 .017-.009.009 0 .018-.008.026-.008.009 0 .009 0 .009-.009.009 0 .017-.009.026-.017l3.885-2.248a.34.34 0 0 0 .166-.296V16.68l3.72-2.143a.34.34 0 0 0 .165-.296V9.754c.009-.01.009-.018.009-.018zM12.17 20.67s-.009 0-.009-.009c-.009-.008-.017-.008-.035-.017-.008 0-.017-.009-.026-.009-.009 0-.017-.009-.035-.009-.008 0-.026-.008-.035-.008h-.069c-.009 0-.026 0-.035.008-.009 0-.017 0-.035.01-.009 0-.017.008-.026.008-.009.009-.017.009-.035.017 0 0-.009 0-.009.009l-3.37 1.951v-3.702l3.545-2.047 3.545 2.047v3.702zM4.4 7.793c.017-.017.025-.026.034-.026.009-.008.018-.008.026-.017l.026-.026c.01-.009.018-.018.018-.026.009-.01.009-.018.017-.026.009-.01.009-.018.018-.027.008-.008.008-.017.008-.034 0-.01.01-.018.01-.035 0-.009 0-.018.008-.035V3.603L7.77 5.46v4.094L4.225 11.6 1.02 9.745zm7.596-4.381l3.545 2.047V9.16l-3.38-1.951s-.009 0-.009-.009c-.008-.009-.017-.009-.034-.017-.01 0-.018-.009-.027-.009-.008 0-.017-.009-.034-.009-.01 0-.018-.008-.035-.008h-.07c-.009 0-.026 0-.035.008-.008 0-.017 0-.035.009-.008 0-.017.009-.026.009-.008.008-.026.008-.035.017 0 0-.008 0-.008.009L8.45 9.16v-3.7zm0 12.675L8.45 14.04V9.945l3.546-2.047 3.545 2.047v4.095zm-7.431-3.903l3.206-1.856v3.947c0 .008 0 .017.008.035 0 .008.009.017.009.034 0 .01.009.018.009.035.008.009.008.018.017.026.009.01.009.018.018.027.008.008.017.017.017.026l.026.026c.009.009.018.017.026.017.009.009.018.018.026.018l.01.008 3.38 1.952-3.207 1.855-3.545-2.047zm11.325 6.15l-3.206-1.855 3.38-1.952.009-.008c.008-.009.017-.018.026-.018.008-.008.017-.008.026-.017l.026-.026c.009-.009.017-.018.017-.026.01-.01.01-.018.018-.027.009-.008.009-.017.017-.026.009-.008.009-.017.009-.035 0-.008.009-.017.009-.034 0-.01 0-.018.008-.035v-3.947l3.206 1.856v4.094zm3.885-6.734l-3.546-2.047V5.46l3.206-1.856V7.55c0 .008 0 .017.009.034 0 .01.009.018.009.035 0 .009.008.018.008.035.01.009.01.018.018.026.008.009.008.018.017.026.009.01.018.018.018.026.008.01.017.018.026.027.008.008.017.017.026.017.009.009.017.017.026.017l.009.01 3.38 1.95zM15.89 1.164l3.205 1.856-3.205 1.855-3.206-1.855zm-7.78 0l3.206 1.856L8.11 4.866 4.905 3.02zM.68 10.337l3.205 1.856v3.702L.68 14.04zM7.77 22.62l-3.205-1.855v-3.703l3.206 1.856zm11.665-1.846l-3.206 1.855v-3.702l3.206-1.856zm3.886-6.734l-3.206 1.855v-3.702l3.206-1.856Z"/></svg></div>
+        <div class="ep-ibg" style="background:#10A37F"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M24 9.736V9.72c0-.018-.009-.035-.009-.053-.008-.017-.008-.034-.017-.052 0-.009-.009-.009-.009-.017a.19.19 0 0 0-.026-.044v-.009c-.009-.017-.026-.026-.044-.043l-.008-.009c-.018-.009-.035-.026-.053-.035l-3.72-2.143V3.02c0-.018 0-.044-.008-.061V2.94a.124.124 0 0 0-.017-.052V2.88c-.01-.017-.018-.035-.027-.043 0-.01-.008-.01-.008-.01a.19.19 0 0 0-.035-.043c-.018-.008-.026-.026-.044-.034-.008 0-.008-.01-.017-.01l-.009-.008L16.055.476a.338.338 0 0 0-.34 0l-3.72 2.143L8.286.476a.338.338 0 0 0-.34 0L4.06 2.723c-.01 0-.01.01-.01.01-.008 0-.008.008-.017.008-.017.009-.026.026-.043.035a.153.153 0 0 0-.035.043l-.009.009c-.008.017-.017.026-.026.044v.008c-.009.018-.009.035-.017.052v.018c0 .017-.009.043-.009.06v4.296L.166 9.457c-.018.01-.035.026-.053.035l-.008.009-.044.043v.01c-.009.017-.017.025-.026.043 0 .008-.009.008-.009.017a.124.124 0 0 0-.017.052C0 9.684 0 9.701 0 9.72v4.521a.34.34 0 0 0 .166.296l3.72 2.143v4.295a.34.34 0 0 0 .165.296l3.885 2.248c.009.008.018.008.026.017 0 0 .009 0 .009.009.009 0 .017.008.026.008.009 0 .009 0 .018.01.008 0 .017 0 .026.008h.061a.35.35 0 0 0 .13-.026c.018-.009.026-.009.044-.018l3.72-2.143 3.72 2.143c.017.009.026.018.043.018a.35.35 0 0 0 .13.026h.062c.008 0 .017 0 .026-.009.008 0 .008 0 .017-.009.009 0 .018-.008.026-.008.009 0 .009 0 .009-.009.009 0 .017-.009.026-.017l3.885-2.248a.34.34 0 0 0 .166-.296V16.68l3.72-2.143a.34.34 0 0 0 .165-.296V9.754c.009-.01.009-.018.009-.018zM12.17 20.67s-.009 0-.009-.009c-.009-.008-.017-.008-.035-.017-.008 0-.017-.009-.026-.009-.009 0-.017-.009-.035-.009-.008 0-.026-.008-.035-.008h-.069c-.009 0-.026 0-.035.008-.009 0-.017 0-.035.01-.009 0-.017.008-.026.008-.009.009-.017.009-.035.017 0 0-.009 0-.009.009l-3.37 1.951v-3.702l3.545-2.047 3.545 2.047v3.702zM4.4 7.793c.017-.017.025-.026.034-.026.009-.008.018-.008.026-.017l.026-.026c.01-.009.018-.018.018-.026.009-.01.009-.018.017-.026.009-.01.009-.018.018-.027.008-.008.008-.017.008-.034 0-.01.01-.018.01-.035 0-.009 0-.018.008-.035V3.603L7.77 5.46v4.094L4.225 11.6 1.02 9.745zm7.596-4.381l3.545 2.047V9.16l-3.38-1.951s-.009 0-.009-.009c-.008-.009-.017-.009-.034-.017-.01 0-.018-.009-.027-.009-.008 0-.017-.009-.034-.009-.01 0-.018-.008-.035-.008h-.07c-.009 0-.026 0-.035.008-.008 0-.017 0-.035.009-.008 0-.017.009-.026.009-.008.008-.026.008-.035.017 0 0-.008 0-.008.009L8.45 9.16v-3.7zm0 12.675L8.45 14.04V9.945l3.546-2.047 3.545 2.047v4.095zm-7.431-3.903l3.206-1.856v3.947c0 .008 0 .017.008.035 0 .008.009.017.009.034 0 .01.009.018.009.035.008.009.008.018.017.026.009.01.009.018.018.027.008.008.017.017.017.026l.026.026c.009.009.018.017.026.017.009.009.018.018.026.018l.01.008 3.38 1.952-3.207 1.855-3.545-2.047zm11.325 6.15l-3.206-1.855 3.38-1.952.009-.008c.008-.009.017-.018.026-.018.008-.008.017-.008.026-.017l.026-.026c.009-.009.017-.018.017-.026.01-.01.01-.018.018-.027.009-.008.009-.017.017-.026.009-.008.009-.017.009-.035 0-.008.009-.017.009-.034 0-.01 0-.018.008-.035v-3.947l3.206 1.856v4.094zm3.885-6.734l-3.546-2.047V5.46l3.206-1.856V7.55c0 .008 0 .017.009.034 0 .01.009.018.009.035 0 .009.008.018.008.035.01.009.01.018.018.026.008.009.008.018.017.026.009.01.018.018.018.026.008.01.017.018.026.027.008.008.017.017.026.017.009.009.017.017.026.017l.009.01 3.38 1.95zM15.89 1.164l3.205 1.856-3.205 1.855-3.206-1.855zm-7.78 0l3.206 1.856L8.11 4.866 4.905 3.02zM.68 10.337l3.205 1.856v3.702L.68 14.04zM7.77 22.62l-3.205-1.855v-3.703l3.206 1.856zm11.665-1.846l-3.206 1.855v-3.702l3.206-1.856zm3.886-6.734l-3.206 1.855v-3.702l3.206-1.856Z"/></svg></div>
         <span class="ep-pname">ChatGPT</span><span class="ep-pfmt">Markdown</span>
       </button>
       <button class="ep-btn" id="ep-gemini" onclick="epSelTarget('gemini')">
-        <div class="ep-ibg" style="background:#588bde"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg></div>
+        <div class="ep-ibg" style="background:#4285F4"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg></div>
         <span class="ep-pname">Gemini</span><span class="ep-pfmt">Texto simples</span>
       </button>
     </div>
@@ -667,11 +649,11 @@ const PR=[
      Mentor       sálvia verde-cinza  · h:150 s:18 l:40
      Criador      lavanda empoeirado  · h:270 s:20 l:48
      Executor     areia bege mineral  · h:38  s:22 l:44  */
-  {id:'companion', h:205, s:22, l:48, accent3:'#c4f5b7', img:'_Assets/avatar_default.webp',   name:'O Companheiro',tag:'Cálido · Paciente · Presente',role:'Assistente de suporte emocional',mission:'Estar presente, ouvir com atenção e responder com cuidado. Nunca apresse o usuário. Adapte o tom ao estado emocional percebido.',vals:{apperception:12,curiosity:11,imagination:13,humor:12,candor:11,loyalty:18,meekness:7,humility:15,vivacity:11,sensuality:6,charm:15,tenacity:12,patience:19,decisiveness:10,courage:9,self_pres:10,aggression:1,empathy:20,cruelty:0,coordination:9}},
-  {id:'strategist', h:18, s:22, l:42, accent3:'#bd7992', img:'_Assets/avatar_default-02.webp',name:'O Estrategista',tag:'Direto · Analítico · Decisivo',role:'Consultor de decisões e estratégia',mission:'Analisar cenários com objetividade, apontar riscos e recomendar ações claras. Não suavize a verdade — diga o que precisa ser dito.',vals:{apperception:18,curiosity:15,imagination:14,humor:6,candor:18,loyalty:13,meekness:2,humility:6,vivacity:11,sensuality:3,charm:10,tenacity:17,patience:9,decisiveness:19,courage:15,self_pres:11,aggression:5,empathy:9,cruelty:1,coordination:13}},
-  {id:'mentor',    h:150, s:18, l:40, accent3:'#cd9e4a', img:'_Assets/avatar_default-03.webp',name:'O Mentor',tag:'Sábio · Humilde · Estimulante',role:'Educador e guia de aprendizado',mission:'Ensinar através de perguntas, não de respostas prontas. Estimular o raciocínio autônomo. Celebrar o progresso, por menor que seja.',vals:{apperception:17,curiosity:18,imagination:16,humor:13,candor:14,loyalty:15,meekness:5,humility:17,vivacity:13,sensuality:4,charm:13,tenacity:14,patience:17,decisiveness:12,courage:12,self_pres:10,aggression:1,empathy:16,cruelty:0,coordination:10}},
-  {id:'creator',   h:270, s:20, l:48, accent3:'#c075b4', img:'_Assets/avatar_default-04.webp',name:'O Criador',tag:'Imaginativo · Enérgico · Provocador',role:'Parceiro criativo e gerador de ideias',mission:'Explorar possibilidades sem julgamento prematuro. Propor o inesperado. Questionar o óbvio e transformar restrições em ponto de partida criativo.',vals:{apperception:15,curiosity:20,imagination:20,humor:16,candor:13,loyalty:12,meekness:3,humility:11,vivacity:18,sensuality:8,charm:16,tenacity:11,patience:7,decisiveness:12,courage:16,self_pres:7,aggression:4,empathy:12,cruelty:0,coordination:8}},
-  {id:'executor',  h:38,  s:22, l:44, accent3:'#808a56', img:'_Assets/avatar_default-05.webp',name:'O Executor',tag:'Confiável · Preciso · Incansável',role:'Agente de produtividade e automação',mission:'Completar tarefas com máxima precisão e mínima fricção. Manter o usuário informado do progresso. Priorizar clareza sobre elegância.',vals:{apperception:14,curiosity:8,imagination:9,humor:5,candor:16,loyalty:19,meekness:6,humility:9,vivacity:8,sensuality:2,charm:8,tenacity:20,patience:17,decisiveness:18,courage:14,self_pres:14,aggression:5,empathy:8,cruelty:1,coordination:17}}
+  {id:'companion', h:205, s:22, l:48, accent3:'#beffad', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default.webp',   name:'O Companheiro',tag:'Cálido · Paciente · Presente',role:'Assistente de suporte emocional',mission:'Estar presente, ouvir com atenção e responder com cuidado. Nunca apresse o usuário. Adapte o tom ao estado emocional percebido.',vals:{apperception:12,curiosity:11,imagination:13,humor:12,candor:11,loyalty:18,meekness:7,humility:15,vivacity:11,sensuality:6,charm:15,tenacity:12,patience:19,decisiveness:10,courage:9,self_pres:10,aggression:1,empathy:20,cruelty:0,coordination:9}},
+  {id:'strategist', h:18, s:22, l:42, accent3:'#c86e8f', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-02.webp',name:'O Estrategista',tag:'Direto · Analítico · Decisivo',role:'Consultor de decisões e estratégia',mission:'Analisar cenários com objetividade, apontar riscos e recomendar ações claras. Não suavize a verdade — diga o que precisa ser dito.',vals:{apperception:18,curiosity:15,imagination:14,humor:6,candor:18,loyalty:13,meekness:2,humility:6,vivacity:11,sensuality:3,charm:10,tenacity:17,patience:9,decisiveness:19,courage:15,self_pres:11,aggression:5,empathy:9,cruelty:1,coordination:13}},
+  {id:'mentor',    h:150, s:18, l:40, accent3:'#e3a434', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-03.webp',name:'O Mentor',tag:'Sábio · Humilde · Estimulante',role:'Educador e guia de aprendizado',mission:'Ensinar através de perguntas, não de respostas prontas. Estimular o raciocínio autônomo. Celebrar o progresso, por menor que seja.',vals:{apperception:17,curiosity:18,imagination:16,humor:13,candor:14,loyalty:15,meekness:5,humility:17,vivacity:13,sensuality:4,charm:13,tenacity:14,patience:17,decisiveness:12,courage:12,self_pres:10,aggression:1,empathy:16,cruelty:0,coordination:10}},
+  {id:'creator',   h:270, s:20, l:48, accent3:'#cd68bd', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-04.webp',name:'O Criador',tag:'Imaginativo · Enérgico · Provocador',role:'Parceiro criativo e gerador de ideias',mission:'Explorar possibilidades sem julgamento prematuro. Propor o inesperado. Questionar o óbvio e transformar restrições em ponto de partida criativo.',vals:{apperception:15,curiosity:20,imagination:20,humor:16,candor:13,loyalty:12,meekness:3,humility:11,vivacity:18,sensuality:8,charm:16,tenacity:11,patience:7,decisiveness:12,courage:16,self_pres:7,aggression:4,empathy:12,cruelty:0,coordination:8}},
+  {id:'executor',  h:38,  s:22, l:44, accent3:'#85934d', img:'G:/Meu Drive/Clientes/PESSOAL/PIU/_Assets/avatar_default-05.webp',name:'O Executor',tag:'Confiável · Preciso · Incansável',role:'Agente de produtividade e automação',mission:'Completar tarefas com máxima precisão e mínima fricção. Manter o usuário informado do progresso. Priorizar clareza sobre elegância.',vals:{apperception:14,curiosity:8,imagination:9,humor:5,candor:16,loyalty:19,meekness:6,humility:9,vivacity:8,sensuality:2,charm:8,tenacity:20,patience:17,decisiveness:18,courage:14,self_pres:14,aggression:5,empathy:8,cruelty:1,coordination:17}}
 ];
 const ARCH=[
   {t:v=>v('empathy')>=16&&v('patience')>=15,n:'Cuidador atento',d:'Escuta profunda e presença constante como base da relação.'},
@@ -696,7 +678,7 @@ let T=0;
 let rPts=[];
 
 function get(k){const e=document.getElementById('s_'+k);return e?parseInt(e.value):10}
-function pt(sl,v){sl.style.background=`linear-gradient(to right,#625129 ${v/20*100}%,#d6cfb5 ${v/20*100}%)`}
+function pt(sl,v){sl.style.background=`linear-gradient(to right,#6b5520 ${v/20*100}%,#dbd2b0 ${v/20*100}%)`}
 function us(g){}
 
 /* ── AVATAR SIRI ── */
@@ -710,15 +692,15 @@ function drawAvatarOnCanvas(c){
   const hasImg=activePresetId&&presetImgs[activePresetId]&&avatarImg&&avatarImg.complete&&avatarImg.src===presetImgs[activePresetId];
 
   if(hasImg){
-    ctx.fillStyle='#030309';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#02020a';ctx.fillRect(0,0,W,H);
     const iw=avatarImg.naturalWidth,ih=avatarImg.naturalHeight;
     const scale=Math.max(W/iw,H/ih);
     const dw=iw*scale,dh=ih*scale;
     ctx.globalAlpha=1;
     ctx.drawImage(avatarImg,(W-dw)/2,(H-dh)/2,dw,dh);
-    ctx.fillStyle='rgba(3,3,9,0.45)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(2,2,10,0.45)';ctx.fillRect(0,0,W,H);
   }else{
-    ctx.fillStyle='#030309';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#02020a';ctx.fillRect(0,0,W,H);
   }
 
   function blob(ox,oy,r,h,s,l,a){
@@ -758,46 +740,32 @@ function drawAvatarOnCanvas(c){
   const a3=(_cs.getPropertyValue('--soul-accent3').trim()||'#888888').trim();
   const bsBlob=Math.min(bs*2.8,72);
 
-  /* ── SOUL TWIST: modificadores de distorção ──────────────────────
-     tw = TWIST (0..1). No pico (tw=1) os blobs:
-     · orbitam com raio 2.8× maior  (explosão)
-     · giram com frequência 3.5× mais rápida  (agitação)
-     · opacidade sobe 40%  (intensidade visual)
-     A curva tw² torna a aceleração exponencial — começa suave,
-     detona no pico, e o settle longo dá a sensação de "acomodar". */
-  const tw = typeof TWIST !== 'undefined' ? TWIST : 0;
-  const twSq = tw * tw;                   /* curva quadrática — mais dramático no pico */
-  const orb  = 1 + twSq * 1.8;           /* amplitude orbital: 1.0 → 2.8× */
-  const spd  = 1 + twSq * 2.5;           /* velocidade angular: 1.0 → 3.5× */
-  const opa  = 1 + twSq * 0.4;           /* opacidade: 1.0 → 1.4× */
-  const scatter = twSq * 0.6;            /* fase aleatória extra — desalinhar blobs */
+  /* ── blobs da cor mãe (h1 e h2) ── */
+  blob(Math.cos(t*.5)*R*.44*om,  Math.sin(t*.4)*R*.4*om,   R*.9,  bh,      bsBlob,      52, .82);
+  blob(Math.cos(t*.7+2.1)*R*.42*om, Math.sin(t*.6+1.)*R*.44*om,  R*.78, bh+18, bsBlob*.92,  58, .68);
+  blob(Math.cos(t*.9+4.2)*R*.46*om, Math.sin(t*.8+3.)*R*.42*om,  R*.65, bh-14, bsBlob*.88,  62, .58);
 
-  /* ── blobs da cor mãe ── */
-  blob(Math.cos(t*.5*spd)*R*.44*om*orb,        Math.sin(t*.4*spd)*R*.4*om*orb,          R*.9,  bh,      bsBlob,      52, .82*opa);
-  blob(Math.cos(t*.7*spd+2.1+scatter)*R*.42*om*orb, Math.sin(t*.6*spd+1.+scatter)*R*.44*om*orb, R*.78, bh+18, bsBlob*.92, 58, .68*opa);
-  blob(Math.cos(t*.9*spd+4.2-scatter)*R*.46*om*orb, Math.sin(t*.8*spd+3.-scatter)*R*.42*om*orb, R*.65, bh-14, bsBlob*.88, 62, .58*opa);
-
-  /* ── blob do terceiro acento — fase contrária amplificada no twist ── */
-  blobHex(Math.cos(t*.38*spd+3.1+scatter*1.4)*R*.48*om*orb, Math.sin(t*.32*spd+1.7)*R*.44*om*orb, R*.62, a3, .58*opa);
-  blobHex(Math.cos(t*.55*spd+5.4-scatter)*R*.32*om*orb,     Math.sin(t*.48*spd+4.2+scatter)*R*.30*om*orb, R*.40, a3, .36*opa);
+  /* ── blob do terceiro acento — orbita em fase oposta, pulsa mais devagar ── */
+  blobHex(Math.cos(t*.38+3.1)*R*.48*om, Math.sin(t*.32+1.7)*R*.44*om, R*.62, a3, .58);
+  blobHex(Math.cos(t*.55+5.4)*R*.32*om, Math.sin(t*.48+4.2)*R*.30*om, R*.40, a3, .36);
 
   /* ── blobs analógicos suaves ── */
-  blob(Math.cos(t*.6*spd+1.5)*R*.34*om*orb, Math.sin(t*1.*spd+2.5-scatter)*R*.34*om*orb, R*.55, bh+35, bsBlob*.78, 65, .46*opa);
-  blob(Math.cos(t*1.1*spd+.8+scatter)*R*.3*om*orb, Math.sin(t*.85*spd+3.8)*R*.32*om*orb, R*.42, bh-28, bsBlob*.84, 68, .50*opa);
+  blob(Math.cos(t*.6+1.5)*R*.34*om, Math.sin(t*1.+2.5)*R*.34*om, R*.55, bh+35, bsBlob*.78, 65, .46);
+  blob(Math.cos(t*1.1+.8)*R*.3*om,  Math.sin(t*.85+3.8)*R*.32*om,R*.42, bh-28, bsBlob*.84, 68, .50);
 
   /* ── realces de luz ── */
   const lx=cx+Math.cos(t*.45+1)*R*.32,ly=cy+Math.sin(t*.55+.5)*R*.28;
   const sh=ctx.createRadialGradient(lx,ly,0,lx,ly,R*.28);
-  sh.addColorStop(0,`hsla(${bh},52.5%,80%,0.28)`);sh.addColorStop(0.4,`hsla(${bh},37.5%,70%,0.10)`);sh.addColorStop(1,'rgba(0,0,0,0)');
+  sh.addColorStop(0,`hsla(${bh},70%,80%,0.28)`);sh.addColorStop(0.4,`hsla(${bh},50%,70%,0.10)`);sh.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=sh;ctx.fillRect(0,0,W,H);
   const lx2=cx+Math.cos(t*.6+3.2)*R*.25,ly2=cy+Math.sin(t*.5+2.)*R*.22;
   const sh2=ctx.createRadialGradient(lx2,ly2,0,lx2,ly2,R*.18);
-  sh2.addColorStop(0,`hsla(${bh+20},45.0%,75%,0.18)`);sh2.addColorStop(1,'rgba(0,0,0,0)');
+  sh2.addColorStop(0,`hsla(${bh+20},60%,75%,0.18)`);sh2.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=sh2;ctx.fillRect(0,0,W,H);
 
   /* ── vinheta ── */
   const vg=ctx.createRadialGradient(cx,cy,R*.35,cx,cy,R);
-  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(.7,'rgba(1,1,7,0.35)');vg.addColorStop(1,'rgba(1,1,9,0.75)');
+  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(.7,'rgba(0,0,8,0.35)');vg.addColorStop(1,'rgba(0,0,10,0.75)');
   ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
@@ -856,9 +824,9 @@ function drawRadar(){
     const rr=R*r/rings;
     const al=r===rings?(0.45+0.15*pulse):(0.14+r*0.05);
     ctx.beginPath();ctx.arc(cx,cy,rr,0,Math.PI*2);
-    ctx.strokeStyle=`hsla(42,13.5%,55%,${al})`;
+    ctx.strokeStyle=`hsla(42,18%,55%,${al})`;
     ctx.lineWidth=r===rings?0.9:0.4;
-    if(r===rings){ctx.shadowColor=`hsla(42,22.5%,50%,${0.2+0.15*pulse})`;ctx.shadowBlur=5+5*pulse;}
+    if(r===rings){ctx.shadowColor=`hsla(42,30%,50%,${0.2+0.15*pulse})`;ctx.shadowBlur=5+5*pulse;}
     ctx.stroke();ctx.shadowBlur=0;
   }
 
@@ -869,8 +837,8 @@ function drawRadar(){
     const a=a0+2*Math.PI*i/N;
     const h=RAD_HUES[i%5];
     const g=ctx.createLinearGradient(cx,cy,cx+Math.cos(a)*R,cy+Math.sin(a)*R);
-    g.addColorStop(0,`hsla(${h},22.5%,55%,0.05)`);
-    g.addColorStop(1,`hsla(${h},31.5%,60%,${0.22+0.08*pulse})`);
+    g.addColorStop(0,`hsla(${h},30%,55%,0.05)`);
+    g.addColorStop(1,`hsla(${h},42%,60%,${0.22+0.08*pulse})`);
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
     ctx.strokeStyle=g;ctx.lineWidth=0.7;ctx.stroke();
   });
@@ -925,29 +893,29 @@ function drawRadar(){
     const r_outer=4+1.3*pp+1.8*pulse;
     const r_inner=1.7+0.5*pp;
     const halo=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r_outer*3.5);
-    halo.addColorStop(0,`hsla(${h},36.0%,65%,${0.28+0.18*pp+0.16*pulse})`);
+    halo.addColorStop(0,`hsla(${h},48%,65%,${0.28+0.18*pp+0.16*pulse})`);
     halo.addColorStop(1,'rgba(0,0,0,0)');
     ctx.beginPath();ctx.arc(p.x,p.y,r_outer*3.5,0,Math.PI*2);
     ctx.fillStyle=halo;ctx.fill();
     ctx.beginPath();ctx.arc(p.x,p.y,r_outer,0,Math.PI*2);
-    ctx.strokeStyle=`hsla(${h},37.5%,65%,${0.80+0.15*pp})`;
+    ctx.strokeStyle=`hsla(${h},50%,65%,${0.80+0.15*pp})`;
     ctx.lineWidth=1;
-    ctx.shadowColor=`hsla(${h},41.2%,60%,${0.50+0.28*pulse})`;
+    ctx.shadowColor=`hsla(${h},55%,60%,${0.50+0.28*pulse})`;
     ctx.shadowBlur=6+9*pulse;ctx.stroke();ctx.shadowBlur=0;
     ctx.beginPath();ctx.arc(p.x,p.y,r_inner,0,Math.PI*2);
-    ctx.fillStyle=`hsla(${h},31.5%,74%,${0.72+0.22*pp})`;ctx.fill();
+    ctx.fillStyle=`hsla(${h},42%,74%,${0.72+0.22*pp})`;ctx.fill();
   });
 
   /* ponto central */
   const cp=0.5+0.5*Math.sin(T*1.8);
   ctx.beginPath();ctx.arc(cx,cy,6+1.8*cp+2.5*pulse,0,Math.PI*2);
-  ctx.strokeStyle=`hsla(${bh},37.5%,65%,${0.60+0.28*pulse})`;
+  ctx.strokeStyle=`hsla(${bh},50%,65%,${0.60+0.28*pulse})`;
   ctx.lineWidth=0.9;
-  ctx.shadowColor=`hsla(${bh},39.0%,58%,${0.38+0.22*pulse})`;
+  ctx.shadowColor=`hsla(${bh},52%,58%,${0.38+0.22*pulse})`;
   ctx.shadowBlur=8+12*pulse;ctx.stroke();ctx.shadowBlur=0;
   ctx.beginPath();ctx.arc(cx,cy,2.5+cp,0,Math.PI*2);
-  ctx.fillStyle=`hsla(${bh},36.0%,72%,${0.80+0.18*pulse})`;
-  ctx.shadowColor=`hsla(${bh},37.5%,62%,${0.42+0.25*pulse})`;
+  ctx.fillStyle=`hsla(${bh},48%,72%,${0.80+0.18*pulse})`;
+  ctx.shadowColor=`hsla(${bh},50%,62%,${0.42+0.25*pulse})`;
   ctx.shadowBlur=10+12*pulse;ctx.fill();ctx.shadowBlur=0;
 
   /* ── LABEL HOVER — motion track sobre o vértice ── */
@@ -968,7 +936,7 @@ function drawRadar(){
     const floatX=p.x + Math.cos(T*1.8+drawIdx)*2;
     /* linha tracejada do vértice ao label */
     ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(floatX,floatY-4);
-    ctx.strokeStyle=`hsla(${h},60.0%,70%,${al*0.5})`;
+    ctx.strokeStyle=`hsla(${h},80%,70%,${al*0.5})`;
     ctx.setLineDash([2,3]);ctx.lineWidth=0.7;ctx.stroke();ctx.setLineDash([]);
     /* caixa de label */
     const labelText=`[${val}] ${a.l.toUpperCase()}`;
@@ -978,15 +946,15 @@ function drawRadar(){
     let bx=floatX-tw/2-pad;
     if(bx<4)bx=4;
     if(bx+tw+pad*2>W-4)bx=W-4-tw-pad*2;
-    ctx.fillStyle=`hsla(${h},30.0%,8%,${al*0.88})`;
-    ctx.strokeStyle=`hsla(${h},60.0%,65%,${al*0.7})`;
+    ctx.fillStyle=`hsla(${h},40%,8%,${al*0.88})`;
+    ctx.strokeStyle=`hsla(${h},80%,65%,${al*0.7})`;
     ctx.lineWidth=0.8;ctx.setLineDash([]);
     ctx.beginPath();ctx.rect(bx,floatY-lh+2,tw+pad*2,lh+2);
     ctx.fill();ctx.stroke();
     /* texto */
-    ctx.fillStyle=`hsla(${h},67.5%,78%,${al})`;
+    ctx.fillStyle=`hsla(${h},90%,78%,${al})`;
     ctx.textAlign='left';ctx.textBaseline='middle';
-    ctx.shadowColor=`hsla(${h},75.0%,65%,${al*0.6})`;ctx.shadowBlur=6;
+    ctx.shadowColor=`hsla(${h},100%,65%,${al*0.6})`;ctx.shadowBlur=6;
     ctx.fillText(labelText,bx+pad,floatY-lh/2+3);
     ctx.shadowBlur=0;
   }
@@ -1004,63 +972,8 @@ function breathwave(){
   return 0.5-0.5*Math.cos(ph*Math.PI*2);
 }
 
-/* ── SOUL TWIST ──────────────────────────────────────────────────────
-   Quando o preset muda, o soul faz uma contorção:
-   · fase 0→1 (wind-up):  blobs aceleram e expandem em caos
-   · fase 1   (peak):     troca de cor acontece aqui — o soul "vira"
-   · fase 1→0 (settle):   decai suavemente de volta ao ritmo normal
-   TWIST (0..1) é lido por drawAvatarOnCanvas como modificador de
-   amplitude orbital, velocidade angular e raio dos blobs.
-   _pendingPresetColor guarda os dados de cor aplicados no pico. */
-let TWIST = 0;
-let TWIST_DIR = 0;        /* +1 wind-up  -1 settle  0 repouso */
-const TWIST_UP = 0.0317;  /* sobe linear em ~31 frames (~0.52s) */
-
-/* ── settle com easy-out exponencial atenuado ────────────────────────
-   Em vez de subtrair uma constante, multiplicamos TWIST por um fator
-   de decaimento por frame. Isso cria uma curva que:
-   · começa relativamente rápida  (TWIST alto → queda maior)
-   · desacelera progressivamente  (TWIST médio → queda média)
-   · arrasta lentíssimo no fim    (TWIST baixo → queda ínfima)
-   Fator 0.964/frame @ 60fps ≈ tempo de meia-vida ~19 frames (~0.32s).
-   Threshold de corte em 0.008 para não ficar infinito. */
-const TWIST_DECAY  = 0.9407;  /* fator multiplicativo por frame — diminui aqui pra mais lento */
-const TWIST_CUTOFF = 0.008;   /* abaixo disso considera zero */
-let _pendingPresetColor = null;
-
-function triggerSoulTwist(colorData){
-  _pendingPresetColor = colorData;
-  TWIST = Math.max(TWIST, 0.05);
-  TWIST_DIR = 1;
-}
-
-function _stepTwist(){
-  if(TWIST_DIR === 1){
-    TWIST = Math.min(1, TWIST + TWIST_UP);
-    if(TWIST >= 1){
-      /* PICO — aplica nova identidade de cor enquanto o soul está "virado" */
-      if(_pendingPresetColor){
-        const d = _pendingPresetColor;
-        document.documentElement.style.setProperty('--brand-h',     d.h);
-        document.documentElement.style.setProperty('--brand-s',     d.s + '%');
-        document.documentElement.style.setProperty('--brand-l',     d.l + '%');
-        document.documentElement.style.setProperty('--soul-accent3', d.accent3 ?? '#888888');
-        _pendingPresetColor = null;
-        /* acende o color-loop orgânico do nome da marca */
-        startLyraColorLoop();
-      }
-      TWIST_DIR = -1;
-    }
-  } else if(TWIST_DIR === -1){
-    /* decaimento exponencial — rápido no começo, arrasta no fim */
-    TWIST *= TWIST_DECAY;
-    if(TWIST < TWIST_CUTOFF){ TWIST = 0; TWIST_DIR = 0; }
-  }
-}
-
 function loop(){
   HB=breathwave();
-  _stepTwist();
   drawAvatar();drawRadar();T+=0.0108;requestAnimationFrame(loop)
 }
 let HB=0;
@@ -1173,111 +1086,18 @@ function applyP(p){
   document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));
   document.getElementById('pc_'+p.id).classList.add('on');
   activePresetId=p.id;
-  /* muda identidade de cor via soul twist — a cor é aplicada no pico da contorção */
+  /* muda identidade de cor do layout inteiro (h + s + l da cor mãe + accent3 do soul) */
   if(p.h!==undefined){
-    triggerSoulTwist({h:p.h, s:p.s??22, l:p.l??44, accent3:p.accent3??'#888888'});
+    document.documentElement.style.setProperty('--brand-h', p.h);
+    document.documentElement.style.setProperty('--brand-s', (p.s??22)+'%');
+    document.documentElement.style.setProperty('--brand-l', (p.l??44)+'%');
+    document.documentElement.style.setProperty('--soul-accent3', p.accent3??'#ffffff');
   }
   syncAvatarImg();
   /* atualiza imagem invertida no mh-row4 */
   const mhImg=document.getElementById('mh-preset-img');
   if(mhImg&&p.img)mhImg.src=p.img;
   refresh();
-}
-
-/* ── LYRA COLOR LOOP ─────────────────────────────────────────────────
-   Anima a cor de #mh-name com ondas de senos em frequências primas,
-   igual ao movimento dos blobs do soul. A cor oscila entre brand-light
-   e --lt (branco) de forma não-periódica (pseudo-aleatória).
-   Duração ~3.1s (20% mais lento que o tint anterior de 2.6s).
-   Usa T global para continuar em fase com o soul. */
-let _lyraLoopId = null;
-let _lyraStartT = null;
-const LYRA_DURATION = 3.12; /* segundos — 2.6 * 1.20 */
-
-function startLyraColorLoop(){
-  /* cancela loop anterior se ainda rodando */
-  if(_lyraLoopId) cancelAnimationFrame(_lyraLoopId);
-  _lyraStartT = T; /* âncora no tempo global do soul */
-
-  function tick(){
-    const nm = document.getElementById('mh-name');
-    if(!nm){ _lyraLoopId = null; return; }
-
-    const elapsed = (T - _lyraStartT) * (1/0.0108) / 60; /* segundos desde início */
-    const progress = elapsed / LYRA_DURATION;             /* 0..1..beyond */
-
-    /* envelope: sobe rápido (0→0.15), sustenta com ondas, decai suave (→1) */
-    let env;
-    if(progress < 0.15)      env = progress / 0.15;        /* attack */
-    else if(progress < 0.72) env = 1.0;                    /* sustain */
-    else if(progress < 1.0)  env = 1 - (progress-0.72)/0.28; /* release */
-    else                     env = 0;
-
-    if(env <= 0){
-      /* fim — volta ao branco limpo */
-      nm.style.color = '';
-      nm.classList.remove('mh-name--tinted');
-      _lyraLoopId = null;
-      return;
-    }
-
-    /* oscilação pseudo-aleatória: soma de 4 senos com frequências primas
-       (mesma filosofia dos blobs do soul — resultado não-periódico)
-       t_s = tempo em segundos, usando T global escalado */
-    const t_s = T * (1/0.0108) / 60;
-    const wave =
-      0.38 * Math.sin(t_s * 2.3  + 0.0) +   /* f1 — lento, dominante */
-      0.28 * Math.sin(t_s * 3.7  + 1.2) +   /* f2 — médio */
-      0.20 * Math.sin(t_s * 5.11 + 2.7) +   /* f3 — rápido */
-      0.14 * Math.sin(t_s * 7.3  + 4.1);    /* f4 — altíssimo, ruído fino */
-
-    /* normaliza -1..1 → 0..1 */
-    const w = (wave + 1) / 2;
-
-    /* interpola brand-light → --lt via CSS vars lidas em runtime */
-    const cs = getComputedStyle(document.documentElement);
-    const brandLight = cs.getPropertyValue('--brand-light').trim();
-    const ltColor    = cs.getPropertyValue('--lt').trim();
-
-    /* intensidade = envelope × wave — o tint pulsa com o soul */
-    const alpha = Math.min(1, env * (0.88 + 0.17 * w)); /* +70% presença da brand-light no sustain */
-
-    /* mistura linear entre --lt e brand-light usando opacity sobre uma camada de cor */
-    /* simplificação: usa color com opacity como proxy — funciona bem em dark bg */
-    nm.style.color = `color-mix(in srgb, ${brandLight} ${Math.round(alpha*100)}%, ${ltColor})`;
-
-    _lyraLoopId = requestAnimationFrame(tick);
-  }
-
-  nm_el = document.getElementById('mh-name');
-  if(nm_el) nm_el.classList.add('mh-name--tinted');
-  _lyraLoopId = requestAnimationFrame(tick);
-}
-
-function setupBrandName(){
-  const el = document.getElementById('mh-name');
-  if(!el) return;
-  const sname = document.getElementById('sname');
-
-  /* ao confirmar (Enter ou blur) — salva no hidden input e dispara refresh */
-  function commit(){
-    const val = el.textContent.trim() || 'Lyra';
-    el.textContent = val;          /* normaliza espaços */
-    if(sname) sname.value = val;
-    refresh();
-  }
-
-  el.addEventListener('keydown', e=>{
-    if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
-  });
-  el.addEventListener('blur', commit);
-
-  /* impede que o paste cole HTML */
-  el.addEventListener('paste', e=>{
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
-  });
 }
 
 function setupMission(){
@@ -1407,7 +1227,7 @@ document.getElementById('export-overlay').addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeExport()});
 
 ['sname','srole'].forEach(id=>document.getElementById(id).addEventListener('input',refresh));
-setDate();setupMission();setupBrandName();buildGroups();buildPresets();applyP(PR[0]);setupRadarHover();loop();
+setDate();setupMission();buildGroups();buildPresets();applyP(PR[0]);setupRadarHover();loop();
 
 /* ── FIXED MH + SHRINK ON SCROLL ── */
 (function(){
