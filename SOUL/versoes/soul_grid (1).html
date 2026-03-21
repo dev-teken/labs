@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soul Grid</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900&family=Courier+Prime:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:#000;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:48px 32px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);
+  gap:28px;
+  width:100%;
+  max-width:720px;
+}
+
+.cell{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+
+.wrap{
+  width:100%;
+  aspect-ratio:1;
+  position:relative;
+}
+
+canvas{
+  display:block;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+}
+
+.label{
+  font-family:'Courier Prime',monospace;
+  font-size:9px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  opacity:.28;
+  color:#fff;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="grid" id="grid"></div>
+
+<script>
+/* ── 6 paletas — cada uma com cor mãe (h,s,l) + accent3 ── */
+const SOULS = [
+  /* linha 1 */
+  {id:'a', h:205, s:22, l:48, a3:'#c4f5b7', speed:0.0042, phase:0.00, label:'névoa'},
+  {id:'b', h:18,  s:22, l:42, a3:'#bd7992', speed:0.0108, phase:1.30, label:'terra'},
+  {id:'c', h:150, s:18, l:40, a3:'#cd9e4a', speed:0.0210, phase:2.70, label:'bosque'},
+  /* linha 2 */
+  {id:'d', h:270, s:20, l:48, a3:'#c075b4', speed:0.0380, phase:4.10, label:'cosmos'},
+  {id:'e', h:38,  s:22, l:44, a3:'#808a56', speed:0.0620, phase:5.50, label:'areia'},
+  {id:'f', h:320, s:18, l:45, a3:'#7ec8c0', speed:0.1040, phase:0.80, label:'crepúsculo'},
+];
+
+/* tempo individual por soul */
+const T = {};
+SOULS.forEach(s => { T[s.id] = s.phase; });
+
+/* breathwave por soul — período ligeiramente diferente para desalinhar */
+const BREATH_PERIOD = {a:7800, b:8200, c:7400, d:8600, e:7100, f:9000};
+
+function breathwave(id){
+  const period = BREATH_PERIOD[id] || 8000;
+  const ph = (performance.now() % period) / period;
+  return 0.5 - 0.5 * Math.cos(ph * Math.PI * 2);
+}
+
+/* ── render — lógica idêntica ao av-mh do projeto persona_ai ── */
+function drawSoul(canvas, soul){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = W * .46;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle = '#030309'; ctx.fillRect(0,0,W,H);
+
+  const HB  = breathwave(soul.id);
+  const t   = T[soul.id];
+  const om  = 1 + 0.08 * HB;
+  const bh  = soul.h;
+  const bs  = soul.s;
+  const bsB = Math.min(bs * 2.8, 72);
+  const a3  = soul.a3;
+
+  /* ── blob com gradiente internamente espremido ────────────────────────
+     Cada blob tem 4 parâmetros de deformação que oscilam independentemente:
+       ang  — rotação do espaço (o gradiente "vira" no tempo)
+       rx   — escala horizontal (estica/comprime em X)
+       ry   — escala vertical   (estica/comprime em Y)
+       skew — cisalhamento diagonal (torce a elipse assimetricamente)
+     O truque: ctx.transform() distorce o espaço ANTES de criar o gradiente,
+     então o `createRadialGradient` simétrico fica elíptico/torcido no canvas.
+     Cada blob usa frequências primas únicas → nunca sincronizam entre si. */
+
+  function blobS(ox, oy, r, h, s, l, a,
+                 fa1,fa2,fa3, fp1,fp2,fp3,   /* freq e fase do ângulo */
+                 rx1,rx2,     rp1,rp2,        /* freq e fase de rx */
+                 ry1,ry2,     rp3,rp4,        /* freq e fase de ry */
+                 sk1,         sp1){            /* freq e fase do skew */
+    const pr  = r * (1 + 0.12*HB);
+    const pa  = a * (1 + 0.22*HB);
+    const sat = Math.min(s*1.3, 100);
+
+    /* deformações — todas oscilam em torno de valores neutros */
+    const ang  = (0.40*Math.sin(t*fa1+fp1) + 0.28*Math.sin(t*fa2+fp2) + 0.16*Math.sin(t*fa3+fp3));
+    const rxS  = 1 + 0.42*(0.55*Math.sin(t*rx1+rp1) + 0.45*Math.sin(t*rx2+rp2));  /* 0.58..1.42 */
+    const ryS  = 1 + 0.38*(0.50*Math.sin(t*ry1+rp3) + 0.50*Math.sin(t*ry2+rp4));  /* 0.62..1.38 */
+    const skew = 0.28*(Math.sin(t*sk1+sp1));                                         /* -0.28..0.28 */
+
+    ctx.save();
+    ctx.translate(cx+ox, cy+oy);
+    ctx.rotate(ang);
+    /* matriz de cisalhamento + escala: [rxS, skew, 0, ryS, 0, 0] */
+    ctx.transform(rxS, skew, 0, ryS, 0, 0);
+
+    const g = ctx.createRadialGradient(0,0,0, 0,0, pr);
+    g.addColorStop(0,    `hsla(${h},${sat}%,${l}%,${pa})`);
+    g.addColorStop(0.38, `hsla(${h},${sat}%,${l}%,${pa*.35})`);
+    g.addColorStop(0.72, `hsla(${h},${sat}%,${l}%,${pa*.08})`);
+    g.addColorStop(1,    `hsla(${h},${sat}%,${l}%,0)`);
+
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, pr, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function blobSHex(ox, oy, r, hex, a,
+                    fa1,fa2,fa3, fp1,fp2,fp3,
+                    rx1,rx2,     rp1,rp2,
+                    ry1,ry2,     rp3,rp4,
+                    sk1,         sp1){
+    const pr  = r * (1 + 0.10*HB);
+    const pa  = a * (1 + 0.18*HB);
+    const rv=parseInt(hex.slice(1,3),16), gv=parseInt(hex.slice(3,5),16), bv=parseInt(hex.slice(5,7),16);
+
+    const ang  = (0.38*Math.sin(t*fa1+fp1) + 0.30*Math.sin(t*fa2+fp2) + 0.14*Math.sin(t*fa3+fp3));
+    const rxS  = 1 + 0.46*(0.55*Math.sin(t*rx1+rp1) + 0.45*Math.sin(t*rx2+rp2));
+    const ryS  = 1 + 0.40*(0.50*Math.sin(t*ry1+rp3) + 0.50*Math.sin(t*ry2+rp4));
+    const skew = 0.32*(Math.sin(t*sk1+sp1));
+
+    ctx.save();
+    ctx.translate(cx+ox, cy+oy);
+    ctx.rotate(ang);
+    ctx.transform(rxS, skew, 0, ryS, 0, 0);
+
+    const g = ctx.createRadialGradient(0,0,0, 0,0, pr);
+    g.addColorStop(0,    `rgba(${rv},${gv},${bv},${pa})`);
+    g.addColorStop(0.40, `rgba(${rv},${gv},${bv},${pa*.28})`);
+    g.addColorStop(0.75, `rgba(${rv},${gv},${bv},${pa*.06})`);
+    g.addColorStop(1,    `rgba(${rv},${gv},${bv},0)`);
+
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, pr, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  /* ── 7 blobs, cada um com frequências primas únicas ──────────────── */
+  /*          ox                    oy                  r      h      s      l    a    ang-freqs        ang-phases    rx-freqs   rx-phases    ry-freqs   ry-phases  sk-f  sk-p */
+  blobS(Math.cos(t*.5)*R*.44*om, Math.sin(t*.40)*R*.40*om, R*.90, bh,    bsB,    52, .82,  0.31,0.53,0.89, 0.00,1.10,2.30,  0.47,0.79, 0.50,3.10,  0.41,0.71, 1.20,4.40,  0.37,0.70);
+  blobS(Math.cos(t*.7+2.1)*R*.42*om, Math.sin(t*.60+1.0)*R*.44*om, R*.78, bh+18, bsB*.92,58,.68,  0.43,0.71,1.13, 1.20,3.50,5.10,  0.59,0.97, 2.30,0.80,  0.53,0.89, 3.70,1.60,  0.61,2.40);
+  blobS(Math.cos(t*.9+4.2)*R*.46*om, Math.sin(t*.80+3.0)*R*.42*om, R*.65, bh-14, bsB*.88,62,.58,  0.57,0.97,1.57, 4.20,1.60,0.80,  0.73,1.19, 4.10,2.60,  0.67,1.09, 0.90,5.30,  0.79,4.10);
+  blobSHex(Math.cos(t*.38+3.1)*R*.48*om, Math.sin(t*.32+1.7)*R*.44*om, R*.62, a3, .58,  0.29,0.47,0.73, 3.10,5.40,1.20,  0.37,0.61, 1.40,4.70,  0.31,0.53, 2.80,0.40,  0.43,3.50);
+  blobSHex(Math.cos(t*.55+5.4)*R*.32*om, Math.sin(t*.48+4.2)*R*.30*om, R*.40, a3, .36,  0.67,1.09,1.79, 5.40,0.70,3.30,  0.83,1.37, 0.60,2.20,  0.79,1.31, 4.50,1.90,  0.53,1.20);
+  blobS(Math.cos(t*.6+1.5)*R*.34*om, Math.sin(t*1.00+2.5)*R*.34*om, R*.55, bh+35, bsB*.78,65,.46,  0.41,0.67,1.09, 1.50,3.80,0.60,  0.53,0.89, 3.20,5.10,  0.47,0.79, 1.60,2.70,  0.31,5.80);
+  blobS(Math.cos(t*1.1+0.8)*R*.30*om, Math.sin(t*.85+3.8)*R*.32*om, R*.42, bh-28, bsB*.84,68,.50,  0.83,1.37,2.21, 0.80,2.50,4.90,  1.03,1.67, 5.50,1.30,  0.97,1.61, 0.30,3.80,  0.71,2.90);
+
+  /* realce de luz — também com leve squeeze */
+  const lx  = cx + Math.cos(t*.45+1)*R*.32, ly = cy + Math.sin(t*.55+.5)*R*.28;
+  const sh  = ctx.createRadialGradient(lx,ly,0,lx,ly,R*.28);
+  sh.addColorStop(0, `hsla(${bh},52%,80%,0.24)`);
+  sh.addColorStop(.4,`hsla(${bh},38%,70%,0.08)`);
+  sh.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sh; ctx.fillRect(0,0,W,H);
+
+  const lx2 = cx + Math.cos(t*.6+3.2)*R*.25, ly2 = cy + Math.sin(t*.5+2.0)*R*.22;
+  const sh2 = ctx.createRadialGradient(lx2,ly2,0,lx2,ly2,R*.20);
+  sh2.addColorStop(0,`hsla(${bh+20},45%,75%,0.16)`);
+  sh2.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = sh2; ctx.fillRect(0,0,W,H);
+
+  /* vinheta */
+  const vg = ctx.createRadialGradient(cx,cy,R*.35,cx,cy,R);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(.7,'rgba(1,1,7,0.35)');
+  vg.addColorStop(1, 'rgba(1,1,9,0.75)');
+  ctx.fillStyle = vg; ctx.fillRect(0,0,W,H);
+
+  ctx.restore();
+}
+
+/* ── build DOM ── */
+function build(){
+  const grid = document.getElementById('grid');
+  SOULS.forEach(soul => {
+    const cell   = document.createElement('div'); cell.className = 'cell';
+    const wrap   = document.createElement('div'); wrap.className = 'wrap';
+    const canvas = document.createElement('canvas');
+    canvas.id     = 'c_' + soul.id;
+    canvas.width  = 220;
+    canvas.height = 220;
+    const lbl = document.createElement('div'); lbl.className = 'label';
+    lbl.textContent = soul.label;
+    wrap.appendChild(canvas);
+    cell.appendChild(wrap);
+    cell.appendChild(lbl);
+    grid.appendChild(cell);
+  });
+}
+
+/* ── loop — cada soul avança T no seu próprio ritmo ── */
+function loop(){
+  SOULS.forEach(soul => {
+    T[soul.id] += soul.speed;          /* velocidade própria de cada soul */
+    const canvas = document.getElementById('c_' + soul.id);
+    if(canvas) drawSoul(canvas, soul);
+  });
+  requestAnimationFrame(loop);
+}
+
+build();
+loop();
+</script>
+</body>
+</html>

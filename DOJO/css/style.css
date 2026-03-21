@@ -1,0 +1,140 @@
+/* ── DEBUG ── remove o outline quando não precisar mais */
+* {
+    outline: 0px solid limegreen; /* borda verde em todos os elementos para visualizar caixas */
+    margin: 0;                    /* zera margens padrão do browser */
+    padding: 0;                   /* zera paddings padrão do browser */
+    box-sizing: border-box;       /* padding e border incluídos na largura total do elemento */
+  }
+  
+  /* ── VARIÁVEIS GLOBAIS ── valores reutilizáveis em todo o CSS */
+  :root {
+    --gap-lateral: 80px;          /* espaçamento lateral padrão da página */
+    --cor-nav: #3B2F6E;           /* roxo escuro — navbar e footer */
+    --cor-hero: #F5F0E8;          /* bege claro — fundo dos cards */
+    --cor-titulo: #2D1B69;        /* roxo profundo — títulos */
+    --cor-texto: #6B5B8A;         /* roxo acinzentado — textos secundários */
+    --cor-botao: #5B4FCF;         /* azul roxo — botões */
+    --cor-botao-hover: #3D35A8;   /* azul roxo escuro — botão hover */
+  }
+
+  main {
+    flex: 1;
+  }
+  
+  /* ── CONTAINER ── define o espaçamento lateral padrão */
+  .container {
+    padding: 0 var(--gap-lateral); /* sem padding vertical, só lateral */
+  }
+  
+  /* ── CONTAINER DA NAV ── sobrescreve o container adicionando padding vertical */
+  nav.container {
+    padding: 36px var(--gap-lateral); /* 36px cima/baixo, lateral pelo container */
+  }
+  
+  /* ── BODY ── estilo base da página */
+  body {
+    font-family: sans-serif; /* fonte padrão sem serifa */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* ── NAVBAR ── barra de navegação principal */
+  nav {
+    display: flex;                  /* ativa flexbox */
+    justify-content: space-between; /* logo na esquerda, links na direita */
+    align-items: center;            /* alinha verticalmente no centro */
+    background: var(--cor-nav);     /* cor de fundo roxa */
+    color: white;                   /* cor do texto */
+  }
+  
+  /* logo da navbar */
+  .nav-logo {
+    font-size: 1.2rem;   /* tamanho do texto do logo */
+    font-weight: bold;   /* negrito */
+  }
+  
+  /* lista de links da navbar */
+  .nav-links {
+    list-style: none;    /* remove os bullets da lista */
+    display: flex;       /* links em linha */
+    align-items: center; /* alinha verticalmente */
+    gap: 20px;           /* espaço entre os links */
+  }
+  
+  /* links individuais */
+  .nav-links a {
+    color: white;           /* cor branca */
+    text-decoration: none;  /* remove sublinhado */
+    font-size: 0.95rem;     /* tamanho levemente menor que o padrão */
+  }
+  
+  /* estado hover dos links */
+  .nav-links a:hover {
+    text-decoration: underline; /* sublinhado ao passar o mouse */
+  }
+  
+  /* ── CARDS ── container de uma linha de cards */
+  .cards {
+    display: flex;       /* cards lado a lado */
+    gap: 24px;           /* espaço entre os cards */
+    padding-top: 20px;   /* respiro acima dos cards */
+    padding-bottom: 20px;/* respiro abaixo dos cards */
+  }
+  
+  /* espaço extra só na primeira seção de cards, abaixo da navbar */
+  .cards:first-of-type {
+    margin-top: 20px;
+  }
+  
+  /* card individual */
+  .card {
+    flex: 1;                      /* cada card ocupa espaço igual */
+    display: flex;                /* ativa flexbox interno */
+    flex-direction: column;       /* conteúdo empilhado verticalmente */
+    align-items: center;          /* centraliza horizontalmente */
+    text-align: center;           /* texto centralizado */
+    background: var(--cor-hero);  /* fundo bege */
+    padding: 40px 24px;           /* espaço interno */
+    border-radius: 8px;           /* bordas arredondadas */
+    gap: 16px;                    /* espaço entre título, texto e botão */
+  }
+  
+  /* estado hover do card */
+  .card:hover {
+    filter: brightness(0.9); /* escurece 10% ao passar o mouse */
+  }
+  
+  /* ── FOOTER ── rodapé da página */
+  footer {
+    display: flex;                  /* ativa flexbox */
+    justify-content: space-between; /* texto na esquerda, links na direita */
+    align-items: center;            /* alinha verticalmente no centro */
+    background: var(--cor-nav);     /* mesma cor da navbar */
+    color: white;                   /* texto branco */
+    margin-top: 40px;               /* espaço acima do footer */
+  }
+  
+  /* container do footer com padding vertical */
+  footer.container {
+    padding: 24px var(--gap-lateral); /* 24px cima/baixo, lateral pelo container */
+  }
+  
+  /* lista de links do footer */
+  .footer-links {
+    list-style: none; /* remove bullets */
+    display: flex;    /* links em linha */
+    gap: 20px;        /* espaço entre os links */
+  }
+  
+  /* links do footer */
+  .footer-links a {
+    color: white;          /* cor branca */
+    text-decoration: none; /* remove sublinhado */
+    font-size: 0.9rem;     /* levemente menor que o padrão */
+  }
+  
+  /* estado hover dos links do footer */
+  .footer-links a:hover {
+    text-decoration: underline; /* sublinhado ao passar o mouse */
+  }

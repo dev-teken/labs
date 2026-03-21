@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soul — cinco vidas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Courier+Prime:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:#000000;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:'Courier Prime',monospace;
+  padding:40px 20px;
+}
+
+.stage{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:32px;
+  width:100%;
+  max-width:900px;
+}
+
+.soul-unit{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+
+.soul-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:1;
+}
+
+canvas.soul{
+  display:block;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+}
+
+.soul-name{
+  font-family:'Playfair Display',serif;
+  font-size:13px;
+  font-weight:700;
+  font-style:italic;
+  letter-spacing:-.02em;
+  line-height:1.2;
+  text-align:center;
+}
+
+.soul-tag{
+  font-family:'Courier Prime',monospace;
+  font-size:9px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  text-align:center;
+  opacity:.35;
+}
+
+/* header */
+.header{
+  margin-bottom:52px;
+  text-align:center;
+}
+.header h1{
+  font-family:'Playfair Display',serif;
+  font-size:28px;
+  font-weight:900;
+  font-style:italic;
+  color:rgba(255,255,255,0.08);
+  letter-spacing:-.03em;
+}
+.header p{
+  font-size:11px;
+  color:rgba(255,255,255,0.18);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  margin-top:6px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>soul</h1>
+  <p>cinco vidas · cada uma sua</p>
+</div>
+
+<div class="stage" id="stage"></div>
+
+<script>
+/* ── DADOS DOS PRESETS ── extraídos do projeto persona_ai ─────────── */
+const SOULS = [
+  {id:'companion',  name:'O Companheiro',  tag:'Cálido · Paciente',     h:205, s:22, l:48, a3:'#c4f5b7', phaseOffset:0.0},
+  {id:'strategist', name:'O Estrategista', tag:'Direto · Decisivo',      h:18,  s:22, l:42, a3:'#bd7992', phaseOffset:1.3},
+  {id:'mentor',     name:'O Mentor',       tag:'Sábio · Estimulante',    h:150, s:18, l:40, a3:'#cd9e4a', phaseOffset:2.7},
+  {id:'creator',    name:'O Criador',      tag:'Imaginativo · Vivo',     h:270, s:20, l:48, a3:'#c075b4', phaseOffset:4.1},
+  {id:'executor',   name:'O Executor',     tag:'Preciso · Incansável',   h:38,  s:22, l:44, a3:'#808a56', phaseOffset:5.5},
+];
+
+/* ── ESTADO GLOBAL DO LOOP ── */
+let T = 0;  /* tempo global compartilhado, cada soul usa T + phaseOffset */
+
+/* breathwave individual por soul — cada um respira no seu tempo */
+function breathwave(offset){
+  const period = 8000;
+  const ph = ((performance.now() + offset * 1200) % period) / period;
+  return 0.5 - 0.5 * Math.cos(ph * Math.PI * 2);
+}
+
+/* ── RENDER DE UM SOUL ── mesma lógica do drawAvatarOnCanvas do projeto */
+function drawSoul(canvas, soul){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = W * .46;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
+
+  /* fundo escuro */
+  ctx.fillStyle = '#030309'; ctx.fillRect(0,0,W,H);
+
+  const HB  = breathwave(soul.phaseOffset);
+  const t   = T + soul.phaseOffset;
+  const om  = 1 + 0.08 * HB;
+  const bh  = soul.h;
+  const bs  = soul.s;
+  const bsBlob = Math.min(bs * 2.8, 72);
+  const a3  = soul.a3;
+
+  /* ── funções de movimento caótico ──────────────────────────────────
+     wander(t, f1,f2,f3, p1,p2,p3) soma 3 senos em frequências primas
+     para produzir movimento não-periódico. Cada eixo usa fases
+     diferentes → trajetória nunca se repete visivelmente.
+     stretch() deforma o raio elipticamente no tempo — o blob "respira"
+     de forma assimétrica, dando sensação de matéria viva e elástica. */
+  function wander(t, f1,f2,f3, p1,p2,p3){
+    return 0.50*Math.sin(t*f1+p1)
+         + 0.32*Math.sin(t*f2+p2)
+         + 0.18*Math.sin(t*f3+p3);
+  }
+
+  /* raio elíptico: estica em X e Y em ritmos diferentes → ovóide pulsante */
+  function blobE(ox,oy, rx,ry, h,s,l,a){
+    const pax = rx*(1+0.14*HB);
+    const pay = ry*(1+0.10*HB);
+    const pr  = Math.max(pax,pay);          /* raio dominante para o gradiente */
+    const pa  = a*(1+0.22*HB);
+    const sat = Math.min(s*1.3,100);
+    /* translação + escala elíptica via transform */
+    ctx.save();
+    ctx.translate(cx+ox, cy+oy);
+    ctx.scale(pax/pr, pay/pr);              /* deforma o espaço → elipse */
+    const g = ctx.createRadialGradient(0,0,0,0,0,pr);
+    g.addColorStop(0,    `hsla(${h},${sat}%,${l}%,${pa})`);
+    g.addColorStop(0.42, `hsla(${h},${sat}%,${l}%,${pa*.28})`);
+    g.addColorStop(1,    `hsla(${h},${sat}%,${l}%,0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0,0,pr,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function blobEHex(ox,oy, rx,ry, hex, a){
+    const pax = rx*(1+0.12*HB);
+    const pay = ry*(1+0.08*HB);
+    const pr  = Math.max(pax,pay);
+    const pa  = a*(1+0.18*HB);
+    const rv=parseInt(hex.slice(1,3),16),gv=parseInt(hex.slice(3,5),16),bv=parseInt(hex.slice(5,7),16);
+    ctx.save();
+    ctx.translate(cx+ox, cy+oy);
+    ctx.scale(pax/pr, pay/pr);
+    const g = ctx.createRadialGradient(0,0,0,0,0,pr);
+    g.addColorStop(0,   `rgba(${rv},${gv},${bv},${pa})`);
+    g.addColorStop(0.38,`rgba(${rv},${gv},${bv},${pa*.22})`);
+    g.addColorStop(1,   `rgba(${rv},${gv},${bv},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0,0,pr,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  /* ── posições caóticas — cada blob tem 3 frequências primas únicas ── */
+
+  /* blob 0 — cor mãe, dominante, órbita larga e lenta */
+  const b0x = wander(t, 0.47,0.83,1.37,  0.00,1.10,2.30) * R*.58*om;
+  const b0y = wander(t, 0.53,0.91,1.51,  3.14,0.70,4.20) * R*.52*om;
+  const b0rx= R*.88*(1+0.18*Math.sin(t*0.37+0.5));   /* estica horizontalmente */
+  const b0ry= R*.88*(1+0.22*Math.sin(t*0.29+2.1));   /* estica verticalmente */
+  blobE(b0x,b0y, b0rx,b0ry, bh, bsBlob, 52, .84);
+
+  /* blob 1 — análogo +18°, médio, fase desfasada */
+  const b1x = wander(t, 0.61,1.07,1.73,  1.20,3.50,5.10) * R*.50*om;
+  const b1y = wander(t, 0.71,1.19,1.97,  2.40,0.30,1.80) * R*.48*om;
+  const b1rx= R*.76*(1+0.24*Math.sin(t*0.53+1.3));
+  const b1ry= R*.76*(1+0.16*Math.sin(t*0.44+3.7));
+  blobE(b1x,b1y, b1rx,b1ry, bh+18, bsBlob*.92, 58, .70);
+
+  /* blob 2 — análogo -14°, mais rápido */
+  const b2x = wander(t, 0.79,1.31,2.11,  4.20,1.60,0.80) * R*.46*om;
+  const b2y = wander(t, 0.89,1.43,2.27,  0.90,4.80,2.60) * R*.44*om;
+  const b2rx= R*.65*(1+0.28*Math.sin(t*0.67+0.9));
+  const b2ry= R*.65*(1+0.20*Math.sin(t*0.59+4.4));
+  blobE(b2x,b2y, b2rx,b2ry, bh-14, bsBlob*.88, 62, .60);
+
+  /* blob 3 — accent3, fase muito oposta, elipse pronunciada */
+  const b3x = wander(t, 0.34,0.59,0.97,  3.10,5.40,1.20) * R*.56*om;
+  const b3y = wander(t, 0.38,0.67,1.09,  1.70,2.90,4.60) * R*.50*om;
+  const b3rx= R*.72*(1+0.32*Math.sin(t*0.41+2.8));  /* deformação forte */
+  const b3ry= R*.72*(1+0.26*Math.sin(t*0.35+0.4));
+  blobEHex(b3x,b3y, b3rx,b3ry, a3, .62);
+
+  /* blob 4 — accent3 menor, movimento ultra-caótico */
+  const b4x = wander(t, 0.97,1.61,2.59,  5.40,0.70,3.30) * R*.38*om;
+  const b4y = wander(t, 1.03,1.67,2.71,  2.20,4.10,1.50) * R*.36*om;
+  const b4rx= R*.44*(1+0.30*Math.sin(t*0.73+1.6));
+  const b4ry= R*.44*(1+0.36*Math.sin(t*0.61+5.1));
+  blobEHex(b4x,b4y, b4rx,b4ry, a3, .40);
+
+  /* blob 5 — complementar +35°, suave, ancoragem de fundo */
+  const b5x = wander(t, 0.54,0.89,1.43,  1.50,3.80,0.60) * R*.40*om;
+  const b5y = wander(t, 0.58,0.97,1.57,  4.70,1.20,2.90) * R*.38*om;
+  const b5rx= R*.60*(1+0.20*Math.sin(t*0.45+3.2));
+  const b5ry= R*.60*(1+0.14*Math.sin(t*0.38+1.8));
+  blobE(b5x,b5y, b5rx,b5ry, bh+35, bsBlob*.78, 65, .48);
+
+  /* blob 6 — análogo -28°, pequeno, agitado */
+  const b6x = wander(t, 1.13,1.87,3.01,  0.80,2.50,4.90) * R*.34*om;
+  const b6y = wander(t, 1.19,1.97,3.17,  3.60,0.40,2.10) * R*.32*om;
+  const b6rx= R*.46*(1+0.26*Math.sin(t*0.81+0.7));
+  const b6ry= R*.46*(1+0.34*Math.sin(t*0.69+3.9));
+  blobE(b6x,b6y, b6rx,b6ry, bh-28, bsBlob*.84, 68, .52);
+
+  /* ── realce de luz — também errático ── */
+  const lx  = cx + wander(t, 0.45,0.73,1.19, 1.0,2.4,3.8)*R*.38;
+  const ly  = cy + wander(t, 0.51,0.83,1.31, 0.5,3.1,5.2)*R*.32;
+  const sh  = ctx.createRadialGradient(lx,ly,0,lx,ly,R*.30);
+  sh.addColorStop(0, `hsla(${bh},52%,80%,0.24)`);
+  sh.addColorStop(.4,`hsla(${bh},38%,70%,0.08)`);
+  sh.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sh; ctx.fillRect(0,0,W,H);
+
+  const lx2 = cx + wander(t, 0.63,1.03,1.67, 3.2,0.8,4.4)*R*.28;
+  const ly2 = cy + wander(t, 0.57,0.93,1.51, 2.0,4.6,1.3)*R*.24;
+  const sh2 = ctx.createRadialGradient(lx2,ly2,0,lx2,ly2,R*.20);
+  sh2.addColorStop(0,`hsla(${bh+20},45%,75%,0.16)`);
+  sh2.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = sh2; ctx.fillRect(0,0,W,H);
+
+  /* ── vinheta ── */
+  const vg = ctx.createRadialGradient(cx,cy,R*.35,cx,cy,R);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(.7,'rgba(1,1,7,0.35)');
+  vg.addColorStop(1, 'rgba(1,1,9,0.75)');
+  ctx.fillStyle = vg; ctx.fillRect(0,0,W,H);
+
+  ctx.restore();
+}
+
+/* ── BUILD DO DOM ── */
+function buildStage(){
+  const stage = document.getElementById('stage');
+
+  SOULS.forEach(soul => {
+    /* cor do texto derivada da cor mãe */
+    const textColor = `hsl(${soul.h}, ${Math.min(soul.s*2.2,55)}%, 72%)`;
+    const tagColor  = `hsla(${soul.h}, ${Math.min(soul.s*1.5,40)}%, 60%, 0.4)`;
+
+    const unit = document.createElement('div');
+    unit.className = 'soul-unit';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'soul-wrap';
+
+    /* canvas com resolução 2× para telas retina */
+    const canvas = document.createElement('canvas');
+    canvas.className = 'soul';
+    canvas.id = 'soul_' + soul.id;
+    canvas.width  = 220;
+    canvas.height = 220;
+    wrap.appendChild(canvas);
+
+    const name = document.createElement('div');
+    name.className = 'soul-name';
+    name.textContent = soul.name;
+    name.style.color = textColor;
+
+    const tag = document.createElement('div');
+    tag.className = 'soul-tag';
+    tag.textContent = soul.tag;
+    tag.style.color = tagColor;
+
+    unit.appendChild(wrap);
+    unit.appendChild(name);
+    unit.appendChild(tag);
+    stage.appendChild(unit);
+  });
+}
+
+/* ── LOOP PRINCIPAL ── */
+function loop(){
+  SOULS.forEach(soul => {
+    const canvas = document.getElementById('soul_' + soul.id);
+    if(canvas) drawSoul(canvas, soul);
+  });
+  T += 0.0108;
+  requestAnimationFrame(loop);
+}
+
+buildStage();
+loop();
+</script>
+</body>
+</html>

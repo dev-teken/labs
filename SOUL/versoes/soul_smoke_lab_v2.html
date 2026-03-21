@@ -1,0 +1,274 @@
+
+<canvas id="sg" style="display:block;width:100%;border-radius:8px 8px 0 0;background:#000"></canvas>
+<div id="panel" style="background:#0a0a0f;border-radius:0 0 8px 8px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;"></div>
+
+<script>
+const C=document.getElementById('sg');
+const ctx=C.getContext('2d');
+const panel=document.getElementById('panel');
+
+function resize(){const w=C.parentElement.offsetWidth||720;C.width=w;C.height=Math.round(w*0.68);}
+resize();
+
+const PARAMS={
+  turbulence:  {label:'turbulência',    desc:'veias e filamentos internos',        value:1,  min:0, max:3,  step:0.5},
+  density:     {label:'densidade',      desc:'opacidade e espessura do puff',      value:1,  min:0, max:2,  step:0.5},
+  drift:       {label:'deriva vertical',desc:'smoke sobe ou afunda',               value:0,  min:-1,max:1,  step:0.5},
+  halo:        {label:'halo interno',   desc:'iluminação por dentro',              value:1,  min:0, max:2,  step:0.5},
+  dissipation: {label:'dissipação',     desc:'quão rápido a borda some',           value:1,  min:0, max:2,  step:0.5},
+  centrifugal: {label:'centrífugo',     desc:'pulso expande as órbitas para fora', value:1,  min:0, max:3,  step:0.5},
+};
+
+function buildPanel(){
+  panel.innerHTML='';
+  Object.entries(PARAMS).forEach(([key,p])=>{
+    const wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;gap:5px;';
+    const top=document.createElement('div');
+    top.style.cssText='display:flex;justify-content:space-between;align-items:baseline;';
+    const lbl=document.createElement('span');
+    lbl.style.cssText='font-family:monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.55);';
+    lbl.textContent=p.label;
+    const val=document.createElement('span');
+    val.id='val_'+key;
+    val.style.cssText='font-family:monospace;font-size:10px;color:rgba(255,255,255,0.32);';
+    val.textContent=p.value.toFixed(1);
+    top.appendChild(lbl);top.appendChild(val);
+    const steps=[];
+    for(let v=p.min;v<=p.max+0.001;v+=p.step)steps.push(Math.round(v*10)/10);
+    const btns=document.createElement('div');
+    btns.style.cssText='display:flex;gap:4px;';
+    steps.forEach(v=>{
+      const b=document.createElement('button');
+      const active=Math.abs(v-p.value)<0.001;
+      b.style.cssText=`flex:1;height:28px;border:none;cursor:pointer;border-radius:3px;font-family:monospace;font-size:9px;letter-spacing:.05em;transition:background .15s,color .15s;background:${active?'rgba(255,255,255,0.18)':'rgba(255,255,255,0.05)'};color:${active?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.28)'};`;
+      b.textContent=v===p.min?'—':v===p.max?'+++':v.toFixed(1).replace('0.','.');
+      b.addEventListener('click',()=>{PARAMS[key].value=v;buildPanel();});
+      btns.appendChild(b);
+    });
+    const desc=document.createElement('span');
+    desc.style.cssText='font-family:monospace;font-size:9px;color:rgba(255,255,255,0.18);letter-spacing:.06em;';
+    desc.textContent=p.desc;
+    wrap.appendChild(top);wrap.appendChild(btns);wrap.appendChild(desc);
+    panel.appendChild(wrap);
+  });
+}
+buildPanel();
+
+const SOULS=[
+  {id:'a',h:205,s:22,l:48,a3:[196,245,183],speed:0.0042,phase:0.00,label:'névoa',   bperiod:7800},
+  {id:'b',h:18, s:22,l:42,a3:[189,121,146],speed:0.0108,phase:1.30,label:'terra',   bperiod:8200},
+  {id:'c',h:150,s:18,l:40,a3:[205,158, 74],speed:0.0210,phase:2.70,label:'bosque',  bperiod:7400},
+  {id:'d',h:270,s:20,l:48,a3:[192,117,180],speed:0.0380,phase:4.10,label:'cosmos',  bperiod:8600},
+  {id:'e',h:38, s:22,l:44,a3:[128,138, 86],speed:0.0620,phase:5.50,label:'areia',   bperiod:7100},
+  {id:'f',h:320,s:18,l:45,a3:[126,200,192],speed:0.1040,phase:0.80,label:'crepúsculo',bperiod:9000},
+];
+const T={};
+SOULS.forEach(s=>{T[s.id]=s.phase;});
+
+function n2(t,f,p){
+  return 0.42*Math.sin(t*f+p)
+       + 0.28*Math.sin(t*f*1.618+p*1.3)
+       + 0.18*Math.sin(t*f*2.618+p*2.1)
+       + 0.12*Math.sin(t*f*4.236+p*3.4);
+}
+function hsl2rgb(h,s,l){
+  s/=100;l/=100;
+  const a=s*Math.min(l,1-l);
+  const f=(n,k=(n+h/30)%12)=>l-a*Math.max(Math.min(k-3,9-k,1),-1);
+  return [Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)];
+}
+
+/* breathwave — idêntico ao soul_grid.html original */
+function breathwave(soul){
+  const ph=(performance.now()%soul.bperiod)/soul.bperiod;
+  return 0.5-0.5*Math.cos(ph*Math.PI*2);
+}
+
+/* heartbeat para smoke */
+const BASE_SPEED=0.0108,BASE_BPM=62;
+function heartbeat(soul){
+  const bpm=BASE_BPM*(soul.speed/BASE_SPEED);
+  const period=60000/bpm;
+  const ph=(performance.now()%period)/period;
+  const g=(x,mu,sig)=>Math.exp(-0.5*((x-mu)/sig)**2);
+  return Math.max(0,g(ph,0.10,0.045)+g(ph,0.22,0.055)*0.58);
+}
+
+function drawSmoke(oc,soul,W,H){
+  const pr=PARAMS;
+  const cx=W/2,cy=H/2,R=W*0.46;
+  const t=T[soul.id];
+  const HB=heartbeat(soul);
+  const BW=breathwave(soul); /* 0..1, período longo — mesmo do original */
+
+  /* ── CENTRÍFUGO ──────────────────────────────────────────────────────
+     No soul_grid.html: om = 1 + 0.08 * breathwave
+     Ele multiplica o raio orbital de cada blob — quando BW está no pico
+     todos os blobs se afastam do centro simultaneamente, criando a
+     sensação de "expansão para fora" / respiração centrífuga.
+     
+     Aqui: om escala com o parâmetro centrífugo.
+     — centrífugo 0   → om sempre 1.0 (órbitas fixas, sem expansão)
+     — centrífugo 1   → om = 1 + 0.08*BW  (idêntico ao original)
+     — centrífugo 2   → om = 1 + 0.16*BW  (expansão dupla)
+     — centrífugo 3   → om = 1 + 0.28*BW  (quase explode para fora)
+     
+     A chave é que om afeta POSIÇÃO (ox,oy), não tamanho do blob —
+     é um efeito orbital, não volumétrico. Diferente do density/halo
+     que afetam a aparência da névoa em si.                          */
+  const cfMul=pr.centrifugal.value;
+  const om=1+0.09*BW*cfMul;
+
+  oc.clearRect(0,0,W,H);
+  oc.save();
+  oc.beginPath();oc.arc(cx,cy,R,0,Math.PI*2);oc.clip();
+  oc.fillStyle='#020208';oc.fillRect(0,0,W,H);
+
+  const baseRGB=hsl2rgb(soul.h,Math.min(soul.s*2.8,72),52);
+  const a3=soul.a3;
+
+  /* posições orbitais — mesmas frequências do soul_grid.html,
+     agora moduladas por om (centrífugo) */
+  const PUFFS=[
+    {seed:1,ox:Math.cos(t*.50)*R*.44*om,      oy:Math.sin(t*.40)*R*.40*om,       col:baseRGB,alpha:0.72},
+    {seed:2,ox:Math.cos(t*.70+2.1)*R*.42*om,  oy:Math.sin(t*.60+1.0)*R*.44*om,   col:baseRGB,alpha:0.58},
+    {seed:3,ox:Math.cos(t*.90+4.2)*R*.46*om,  oy:Math.sin(t*.80+3.0)*R*.42*om,   col:a3,      alpha:0.52},
+    {seed:4,ox:Math.cos(t*.38+3.1)*R*.48*om,  oy:Math.sin(t*.32+1.7)*R*.44*om,   col:a3,      alpha:0.40},
+    {seed:5,ox:Math.cos(t*.55+5.4)*R*.32*om,  oy:Math.sin(t*.48+4.2)*R*.30*om,   col:baseRGB,alpha:0.46},
+    {seed:6,ox:Math.cos(t*.60+1.5)*R*.34*om,  oy:Math.sin(t*1.00+2.5)*R*.34*om,  col:baseRGB,alpha:0.42},
+    {seed:7,ox:Math.cos(t*1.10+0.8)*R*.30*om, oy:Math.sin(t*.85+3.8)*R*.32*om,   col:a3,      alpha:0.35},
+  ];
+
+  oc.globalCompositeOperation='screen';
+
+  PUFFS.forEach(p=>{
+    const s=p.seed;
+    const driftBias=pr.drift.value*0.18;
+    /* deriva vertical aplicada sobre a posição orbital */
+    const ox=p.ox;
+    const oy=p.oy - R*driftBias*(1+s*0.12);
+
+    const sx=1+0.38*n2(t,0.13,s*1.3);
+    const sy=1+0.32*n2(t,0.11,s*2.1);
+    const rot=n2(t,0.17,s*0.7)*0.9;
+    const pSize=R*(0.30+0.18*n2(t,0.23,s*1.1))*(1+0.12*HB);
+
+    const LAYERS=5;
+    for(let i=0;i<LAYERS;i++){
+      const fi=i/LAYERS;
+      const fdx=pSize*0.45*n2(t,0.31+i*0.07,s*0.9+i*1.1);
+      const fdy=pSize*0.38*n2(t,0.29+i*0.05,s*1.7+i*0.9);
+      const fr=pSize*(0.55-fi*0.25)*(1+0.15*n2(t,0.19,s+i));
+      const densityMul=pr.density.value;
+      const dissipExp=0.5+pr.dissipation.value*0.6;
+      const fa=p.alpha*densityMul*(1-Math.pow(fi,dissipExp)*0.72)*(1+0.22*HB);
+
+      oc.save();
+      oc.translate(cx+ox,cy+oy);
+      oc.rotate(rot);
+      oc.scale(sx*(1-fi*0.12),sy*(1-fi*0.08));
+
+      const g=oc.createRadialGradient(fdx,fdy,0,fdx,fdy,fr);
+      const [r,gv,b]=p.col;
+      const haloStr=pr.halo.value;
+      const rl=Math.min(r+Math.round(50*haloStr),255);
+      const gl=Math.min(gv+Math.round(50*haloStr),255);
+      const bl=Math.min(b+Math.round(50*haloStr),255);
+
+      g.addColorStop(0,   `rgba(${r},${gv},${b},${Math.min(fa,0.95)})`);
+      g.addColorStop(0.18,`rgba(${rl},${gl},${bl},${fa*0.55*Math.min(haloStr,1.5)})`);
+      g.addColorStop(0.45,`rgba(${r},${gv},${b},${fa*0.28})`);
+      g.addColorStop(0.72,`rgba(${r},${gv},${b},${fa*0.08})`);
+      g.addColorStop(1,   `rgba(${r},${gv},${b},0)`);
+
+      oc.fillStyle=g;
+      oc.beginPath();oc.arc(fdx,fdy,fr,0,Math.PI*2);oc.fill();
+      oc.restore();
+    }
+  });
+
+  /* turbulência */
+  const turbMul=PARAMS.turbulence.value;
+  if(turbMul>0){
+    const nVeins=Math.round(4+turbMul*4);
+    for(let k=0;k<nVeins;k++){
+      const ka=k*(Math.PI*2/nVeins)+t*0.03;
+      const kn=n2(t,0.07+k*0.03,k*2.3);
+      const tx1=cx+R*0.7*Math.cos(ka)*kn;
+      const ty1=cy+R*0.7*Math.sin(ka)*kn;
+      const vr=R*(0.08+0.08*turbMul)*(0.6+0.4*Math.abs(kn));
+      const [r,gv,b]=baseRGB;
+      const vg=oc.createRadialGradient(tx1,ty1,0,tx1,ty1,vr);
+      vg.addColorStop(0,  `rgba(${r},${gv},${b},${0.14*turbMul*(1+HB*0.3)})`);
+      vg.addColorStop(0.4,`rgba(${r},${gv},${b},0.04)`);
+      vg.addColorStop(1,  `rgba(${r},${gv},${b},0)`);
+      oc.fillStyle=vg;
+      oc.beginPath();oc.arc(tx1,ty1,vr,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  /* realce de luz */
+  oc.globalCompositeOperation='screen';
+  const lx=cx+Math.cos(t*.45+1)*R*.32,ly=cy+Math.sin(t*.55+.5)*R*.28;
+  const sh=oc.createRadialGradient(lx,ly,0,lx,ly,R*.28);
+  const [r,gv,b]=hsl2rgb(soul.h,48,82);
+  sh.addColorStop(0,  `rgba(${r},${gv},${b},${0.22+BW*0.08+HB*0.06})`);
+  sh.addColorStop(0.5,`rgba(${r},${gv},${b},0.06)`);
+  sh.addColorStop(1,  'rgba(0,0,0,0)');
+  oc.fillStyle=sh;oc.fillRect(0,0,W,H);
+
+  /* vinheta */
+  oc.globalCompositeOperation='source-over';
+  const vg2=oc.createRadialGradient(cx,cy,R*0.30,cx,cy,R);
+  vg2.addColorStop(0,'rgba(0,0,0,0)');
+  vg2.addColorStop(0.65,'rgba(1,1,7,0.50)');
+  vg2.addColorStop(1,'rgba(1,1,9,0.94)');
+  oc.fillStyle=vg2;oc.fillRect(0,0,W,H);
+  oc.restore();
+}
+
+function layout(){
+  const W=C.width,H=C.height;
+  const cols=3,rows=2,gap=Math.round(W*0.026);
+  const cellW=Math.floor((W-gap*(cols+1))/cols);
+  const cellH=Math.floor((H-gap*(rows+1))/rows);
+  const cells=[];
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    cells.push({x:gap+c*(cellW+gap),y:gap+r*(cellH+gap),w:cellW,h:cellH});
+  }
+  return cells;
+}
+
+const OFF=document.createElement('canvas');
+const octx=OFF.getContext('2d');
+
+function loop(){
+  const W=C.width,H=C.height;
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  const cells=layout();
+  SOULS.forEach((soul,i)=>{
+    T[soul.id]+=soul.speed;
+    const cell=cells[i];
+    OFF.width=cell.w;OFF.height=cell.h;
+    drawSmoke(octx,soul,cell.w,cell.h);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cell.x+cell.w/2,cell.y+cell.h/2,cell.w*0.46,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.04)';
+    ctx.lineWidth=1;ctx.stroke();
+    ctx.clip();
+    ctx.drawImage(OFF,cell.x,cell.y);
+    ctx.restore();
+    ctx.save();
+    ctx.font=`${Math.round(cell.w*0.052)}px monospace`;
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.24)';
+    ctx.fillText(soul.label.toUpperCase(),cell.x+cell.w/2,cell.y+cell.h+Math.round(cell.h*0.10));
+    ctx.restore();
+  });
+  requestAnimationFrame(loop);
+}
+loop();
+window.addEventListener('resize',()=>{resize();});
+</script>

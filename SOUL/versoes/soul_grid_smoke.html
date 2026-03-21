@@ -1,0 +1,249 @@
+
+<canvas id="sg" style="display:block;width:100%;border-radius:12px;background:#000"></canvas>
+<script>
+const C = document.getElementById('sg');
+const ctx = C.getContext('2d');
+
+function resize(){
+  const w = C.parentElement.offsetWidth||720;
+  C.width = w; C.height = Math.round(w*0.72);
+}
+resize();
+
+const SOULS = [
+  {id:'a',h:205,s:22,l:48,a3:[196,245,183], speed:0.0042,phase:0.00,label:'névoa'},
+  {id:'b',h:18, s:22,l:42,a3:[189,121,146],speed:0.0108,phase:1.30,label:'terra'},
+  {id:'c',h:150,s:18,l:40,a3:[205,158, 74],speed:0.0210,phase:2.70,label:'bosque'},
+  {id:'d',h:270,s:20,l:48,a3:[192,117,180],speed:0.0380,phase:4.10,label:'cosmos'},
+  {id:'e',h:38, s:22,l:44,a3:[128,138, 86],speed:0.0620,phase:5.50,label:'areia'},
+  {id:'f',h:320,s:18,l:45,a3:[ 126,200,192],speed:0.1040,phase:0.80,label:'crepúsculo'},
+];
+
+const T = {};
+SOULS.forEach(s=>{ T[s.id]=s.phase; });
+
+/* simplex-like noise via senos harmônicos */
+function n2(t,f,p){
+  return 0.42*Math.sin(t*f+p)
+       + 0.28*Math.sin(t*f*1.618+p*1.3)
+       + 0.18*Math.sin(t*f*2.618+p*2.1)
+       + 0.12*Math.sin(t*f*4.236+p*3.4);
+}
+
+function hsl2rgb(h,s,l){
+  s/=100; l/=100;
+  const a=s*Math.min(l,1-l);
+  const f=(n,k=(n+h/30)%12)=>l-a*Math.max(Math.min(k-3,9-k,1),-1);
+  return [Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)];
+}
+
+/* heartbeat */
+const BASE_SPEED=0.0108, BASE_BPM=62;
+function heartbeat(soul){
+  const bpm=BASE_BPM*(soul.speed/BASE_SPEED);
+  const period=60000/bpm;
+  const ph=(performance.now()%period)/period;
+  const gauss=(x,mu,sig)=>Math.exp(-0.5*((x-mu)/sig)**2);
+  return Math.max(0,gauss(ph,0.10,0.045)+gauss(ph,0.22,0.055)*0.58);
+}
+
+/* desenha uma célula smoke */
+function drawSmoke(offCtx, soul, W, H){
+  const cx=W/2, cy=H/2, R=W*0.46;
+  const t=T[soul.id];
+  const HB=heartbeat(soul);
+
+  offCtx.clearRect(0,0,W,H);
+  offCtx.save();
+  offCtx.beginPath(); offCtx.arc(cx,cy,R,0,Math.PI*2); offCtx.clip();
+  offCtx.fillStyle='#020208'; offCtx.fillRect(0,0,W,H);
+
+  const baseRGB=hsl2rgb(soul.h, Math.min(soul.s*2.8,72), 52);
+  const a3=soul.a3;
+
+  /* 
+   * SMOKE ENGINE
+   * Para cada "puff" de fumaça:
+   * — posição deriva lentamente via noise
+   * — forma é uma elipse deformada (scaleX/scaleY com noise)
+   * — internamente tem N "filamentos": linhas de densidade
+   *   construídas com gradientes radiais empilhados em Screen
+   * — cada filamento tem posição, raio e opacidade próprios
+   * — o conjunto cria a ilusão de volume e turbulência
+   */
+
+  const PUFFS = [
+    {seed:1.0, rx:0.37,ry:0.31, fa:0.29,fb:0.47,pa:3.1,pb:5.4, amp:0.52, col:baseRGB, alpha:0.72},
+    {seed:2.0, rx:0.53,ry:0.47, fa:0.53,fb:0.89,pa:1.2,pb:3.5, amp:0.48, col:baseRGB, alpha:0.58},
+    {seed:3.0, rx:0.71,ry:0.67, fa:0.71,fb:1.19,pa:4.2,pb:1.6, amp:0.46, col:a3,       alpha:0.52},
+    {seed:4.0, rx:0.43,ry:0.41, fa:0.43,fb:0.71,pa:5.4,pb:0.7, amp:0.40, col:a3,       alpha:0.40},
+    {seed:5.0, rx:0.59,ry:0.61, fa:0.59,fb:0.97,pa:1.5,pb:3.8, amp:0.44, col:baseRGB, alpha:0.46},
+    {seed:6.0, rx:0.83,ry:0.79, fa:0.83,fb:1.37,pa:0.8,pb:2.5, amp:0.38, col:baseRGB, alpha:0.42},
+    {seed:7.0, rx:0.29,ry:0.31, fa:0.29,fb:0.47,pa:1.7,pb:2.9, amp:0.36, col:a3,       alpha:0.35},
+  ];
+
+  offCtx.globalCompositeOperation='screen';
+
+  PUFFS.forEach(p=>{
+    const s=p.seed;
+    /* posição do centro do puff */
+    const ox = R*(0.52*Math.sin(t*p.fa+p.pa)+0.38*Math.sin(t*p.fb+p.pb))*0.68;
+    const oy = R*(0.52*Math.sin(t*p.ry+p.pa+1.1)+0.38*Math.sin(t*p.rx+p.pb+0.7))*0.60;
+
+    /* escala do puff — elipse deformada */
+    const sx = 1 + 0.38*n2(t,0.13,s*1.3);
+    const sy = 1 + 0.32*n2(t,0.11,s*2.1);
+    const rot= n2(t,0.17,s*0.7)*0.9;
+
+    /* tamanho base do puff — oscila com heartbeat */
+    const pr = R*(0.30 + 0.18*n2(t,0.23,s*1.1)) * (1+0.12*HB);
+
+    /* --- filamentos internos: 5 camadas por puff --- */
+    const LAYERS=5;
+    for(let i=0;i<LAYERS;i++){
+      const fi=i/LAYERS;
+      /* cada filamento deriva dentro do puff */
+      const fdx=pr*0.45*n2(t,0.31+i*0.07,s*0.9+i*1.1);
+      const fdy=pr*0.38*n2(t,0.29+i*0.05,s*1.7+i*0.9);
+      /* raio do filamento — maior no centro, menor nas bordas */
+      const fr=pr*(0.55-fi*0.25)*(1+0.15*n2(t,0.19,s+i));
+      /* opacidade — cai suavemente para as camadas externas */
+      const fa=p.alpha*(1-fi*0.55)*(1+0.22*HB);
+
+      offCtx.save();
+      offCtx.translate(cx+ox, cy+oy);
+      offCtx.rotate(rot);
+      offCtx.scale(sx*(1-fi*0.12), sy*(1-fi*0.08));
+
+      /* gradiente radial do filamento — 4 stops para simular densidade */
+      const g=offCtx.createRadialGradient(fdx,fdy,0, fdx,fdy,fr);
+      const [r,g_,b]=p.col;
+      /* stop 0: núcleo quente e denso */
+      g.addColorStop(0,   `rgba(${r},${g_},${b},${Math.min(fa,0.95)})`);
+      /* stop 0.18: halo interno — levemente mais claro (fumaça iluminada) */
+      const rl=Math.min(r+40,255),gl_=Math.min(g_+40,255),bl=Math.min(b+40,255);
+      g.addColorStop(0.18,`rgba(${rl},${gl_},${bl},${fa*0.62})`);
+      /* stop 0.45: transição suave */
+      g.addColorStop(0.45,`rgba(${r},${g_},${b},${fa*0.28})`);
+      /* stop 0.72: borda difusa */
+      g.addColorStop(0.72,`rgba(${r},${g_},${b},${fa*0.08})`);
+      /* stop 1.0: transparente */
+      g.addColorStop(1,   `rgba(${r},${g_},${b},0)`);
+
+      offCtx.fillStyle=g;
+      offCtx.beginPath();
+      offCtx.arc(fdx,fdy,fr,0,Math.PI*2);
+      offCtx.fill();
+      offCtx.restore();
+    }
+  });
+
+  /* 
+   * TURBULÊNCIA — filamentos finos que cruzam a célula
+   * simulam as "veias" do smoke quando iluminado
+   */
+  offCtx.globalCompositeOperation='screen';
+  for(let k=0;k<6;k++){
+    const ka=k*1.047+t*0.03;
+    const kn=n2(t,0.07+k*0.03,soul.seed_off||0+k*2.3);
+    const tx1=cx+R*0.7*Math.cos(ka)*kn;
+    const ty1=cy+R*0.7*Math.sin(ka)*kn;
+    const tx2=cx+R*0.5*Math.cos(ka+0.8)*n2(t,0.11+k*0.02,k+1.4);
+    const ty2=cy+R*0.5*Math.sin(ka+0.8)*n2(t,0.09+k*0.02,k+2.1);
+    const vr=R*0.14*(0.6+0.4*Math.abs(kn));
+    const [r,g_,b]=baseRGB;
+    const vg=offCtx.createRadialGradient(tx1,ty1,0,tx1,ty1,vr);
+    vg.addColorStop(0,  `rgba(${r},${g_},${b},${0.18*(1+HB*0.3)})`);
+    vg.addColorStop(0.4,`rgba(${r},${g_},${b},0.06)`);
+    vg.addColorStop(1,  `rgba(${r},${g_},${b},0)`);
+    offCtx.fillStyle=vg;
+    offCtx.beginPath(); offCtx.arc(tx1,ty1,vr,0,Math.PI*2); offCtx.fill();
+  }
+
+  /* realce de luz flutuante */
+  offCtx.globalCompositeOperation='screen';
+  const lx=cx+n2(t,0.37,1.0)*R*0.35, ly=cy+n2(t,0.43,0.5)*R*0.30;
+  const sh=offCtx.createRadialGradient(lx,ly,0,lx,ly,R*0.30);
+  const [r,g_,b]=hsl2rgb(soul.h,48,82);
+  sh.addColorStop(0,  `rgba(${r},${g_},${b},${0.20+HB*0.10})`);
+  sh.addColorStop(0.5,`rgba(${r},${g_},${b},0.06)`);
+  sh.addColorStop(1,  'rgba(0,0,0,0)');
+  offCtx.fillStyle=sh; offCtx.fillRect(0,0,W,H);
+
+  /* vinheta */
+  offCtx.globalCompositeOperation='source-over';
+  const vg2=offCtx.createRadialGradient(cx,cy,R*0.30,cx,cy,R);
+  vg2.addColorStop(0,'rgba(0,0,0,0)');
+  vg2.addColorStop(0.65,'rgba(1,1,7,0.50)');
+  vg2.addColorStop(1,'rgba(1,1,9,0.94)');
+  offCtx.fillStyle=vg2; offCtx.fillRect(0,0,W,H);
+
+  offCtx.restore();
+}
+
+/* layout em grid 3×2 */
+function layout(){
+  const W=C.width, H=C.height;
+  const cols=3,rows=2;
+  const gap=Math.round(W*0.028);
+  const cellW=Math.floor((W-gap*(cols+1))/cols);
+  const cellH=Math.floor((H-gap*(rows+1))/rows);
+  const cells=[];
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    cells.push({
+      x:gap+c*(cellW+gap),
+      y:gap+r*(cellH+gap),
+      w:cellW, h:cellH
+    });
+  }
+  return cells;
+}
+
+/* offscreen canvas compartilhado */
+const OFF=document.createElement('canvas');
+const octx=OFF.getContext('2d');
+
+function loop(){
+  const W=C.width, H=C.height;
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  const cells=layout();
+
+  SOULS.forEach((soul,i)=>{
+    T[soul.id]+=soul.speed;
+    const cell=cells[i];
+    OFF.width=cell.w; OFF.height=cell.h;
+    drawSmoke(octx,soul,cell.w,cell.h);
+
+    /* borda sutil */
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cell.x+cell.w/2,cell.y+cell.h/2,cell.w*0.46,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.04)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+    ctx.restore();
+
+    /* célula com clip circular */
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cell.x+cell.w/2,cell.y+cell.h/2,cell.w*0.46,0,Math.PI*2);
+    ctx.clip();
+    ctx.drawImage(OFF,cell.x,cell.y);
+    ctx.restore();
+
+    /* label */
+    ctx.save();
+    ctx.font=`${Math.round(cell.w*0.055)}px monospace`;
+    ctx.letterSpacing='0.16em';
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.26)';
+    ctx.fillText(soul.label.toUpperCase(), cell.x+cell.w/2, cell.y+cell.h+Math.round(cell.h*0.10));
+    ctx.restore();
+  });
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+window.addEventListener('resize',()=>{ resize(); });
+</script>

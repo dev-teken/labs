@@ -1,0 +1,571 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=Courier+Prime:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#e8e9e4;--ink:#1c1c18;--ink2:#3a3a35;--ink3:#68685f;--ink4:#9a9a8f;
+  --rule:#b8b9b2;--rule2:#cccdc6;
+  --dp:'Playfair Display',serif;--bd:'Source Serif 4',serif;--mn:'Courier Prime',monospace;
+}
+body{font-family:var(--bd);background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;min-width:900px;
+  background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(150,195,185,0.09) 0%,transparent 60%)}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E");
+  opacity:.65;mix-blend-mode:multiply}
+
+/* MASTHEAD */
+.mh{border-bottom:3px double var(--rule);padding:12px 28px 10px}
+.mh-top{display:flex;justify-content:space-between;border-bottom:1px solid var(--rule2);padding-bottom:7px;margin-bottom:7px}
+.mh-top span{font-family:var(--mn);font-size:11px;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase}
+.mh-title{font-family:var(--dp);font-size:38px;font-weight:900;letter-spacing:-.03em;text-align:center;line-height:1;color:var(--ink)}
+.mh-title em{font-style:italic;color:var(--ink2)}
+.mh-rule{display:flex;align-items:center;gap:8px;margin-top:7px}
+.mh-rule span{font-family:var(--mn);font-size:10px;color:var(--ink4);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.rl{flex:1;height:1px;background:var(--rule)}
+
+.main{padding:16px 28px 40px;display:flex;flex-direction:column;gap:16px}
+
+/* PRESETS — com avatar de imagem no topo */
+.presets{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--rule)}
+.pc{cursor:pointer;border-right:1px solid var(--rule);background:transparent;display:flex;flex-direction:column;position:relative;transition:background .15s;overflow:hidden}
+.pc:last-child{border-right:none}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background .2s;z-index:2}
+.pc.on::before{background:var(--ink)}
+.pc:hover{background:rgba(0,0,0,0.03)}
+.pc.on{background:rgba(0,0,0,0.04)}
+
+/* IMAGEM DO PRESET — 20vh de altura */
+.pc-img-wrap{width:100%;height:25vh;position:relative;overflow:hidden;background:#1a1a1a;flex-shrink:0}
+.pc-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;opacity:.92;transition:opacity .2s}
+.pc:hover .pc-img-wrap img{opacity:1}
+.pc-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;cursor:pointer}
+.pc-img-placeholder span{font-family:var(--mn);font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-transform:uppercase}
+.pc-upload-icon{width:28px;height:28px;opacity:.3}
+.pc-upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:3}
+
+.pc-body{padding:12px 14px 10px;flex:1}
+.pc-n{font-family:var(--mn);font-size:10px;color:var(--ink4);letter-spacing:.08em;margin-bottom:3px}
+.pc-name{font-family:var(--dp);font-size:15px;font-weight:700;color:var(--ink);line-height:1.1}
+.pc-tag{font-family:var(--bd);font-size:11px;font-style:italic;color:var(--ink3);margin-top:2px}
+.pc.on .pc-name{color:var(--ink)}
+
+/* MISSÃO */
+.mission{display:flex;flex-direction:column;gap:5px}
+.flabel{font-family:var(--mn);font-size:10px;color:var(--ink4);letter-spacing:.1em;text-transform:uppercase}
+.editable-text{font-family:var(--bd);font-size:13px;font-style:italic;color:var(--ink2);line-height:1.6;cursor:text;min-height:20px;padding:2px 0;border-bottom:1px solid transparent;transition:border-color .2s;outline:none;white-space:pre-wrap;word-break:break-word}
+.editable-text:hover{border-bottom-color:var(--rule2)}
+.editable-text:focus{border-bottom-color:var(--rule)}
+.editable-text.empty::before{content:attr(data-placeholder);color:var(--ink4);pointer-events:none}
+
+.srule{height:1px;background:var(--rule);position:relative}
+.srule::before{content:'§';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--dp);font-size:13px;color:var(--ink4);background:var(--bg);padding:0 8px}
+
+/* GRID — col C agora 45% */
+.grid3{display:grid;grid-template-columns:1fr 1fr 45%;gap:0;border-top:1px solid var(--rule)}
+.cola{padding:18px 22px 18px 0;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+.colb{padding:18px 22px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+.colc{display:flex;flex-direction:column}
+
+/* GRUPOS */
+.gblock{}
+.gh{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.glabel{font-family:var(--mn);font-size:10px;color:var(--ink4);letter-spacing:.1em;text-transform:uppercase}
+.gdiv{flex:1;height:1px;background:var(--rule2)}
+.gscore{font-family:var(--mn);font-size:10px;color:var(--ink4);white-space:nowrap}
+.gaccent{height:1.5px;margin-bottom:8px;background:var(--rule);opacity:.5}
+.colsep{height:1px;background:var(--rule2);margin:10px 0}
+.attrs{display:flex;flex-direction:column;gap:6px}
+.arow{display:grid;grid-template-columns:116px 1fr 28px;align-items:center;gap:10px}
+.aname{font-family:var(--bd);font-size:12px;color:var(--ink2)}
+.aval{font-family:var(--mn);font-size:11px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;border-radius:0;background:var(--rule2);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:0;background:var(--ink);transition:transform .1s}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.15)}
+
+/* ── COL C — FICHA ESCALADA ── */
+.shead{padding-bottom:14px;margin-bottom:14px;border-bottom:2px solid var(--ink);display:flex;gap:16px;align-items:center}
+.avatar-wrap{flex-shrink:0;width:100px;height:100px}
+.avatar-wrap canvas{display:block;width:100px!important;height:100px!important}
+.shead-text{flex:1;min-width:0}
+.skicker{font-family:var(--mn);font-size:10px;color:var(--ink4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.inline-edit{display:block;width:100%;background:transparent;border:none;border-bottom:1.5px solid transparent;outline:none;padding:0;cursor:text;transition:border-color .2s}
+.inline-edit.name-field{font-family:var(--dp);font-size:30px;font-weight:900;font-style:italic;color:var(--ink);letter-spacing:-.03em;line-height:1.05}
+.inline-edit.role-field{font-family:var(--bd);font-size:13px;font-style:italic;color:var(--ink3);margin-top:4px}
+.inline-edit:hover{border-bottom-color:var(--rule2)}
+.inline-edit:focus{border-bottom-color:var(--ink3)}
+
+/* STATS escalados */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--rule);margin-bottom:18px}
+.scell{padding:12px 10px;border-right:1px solid var(--rule);text-align:center}
+.scell:last-child{border-right:none}
+.snum{font-family:var(--dp);font-size:32px;font-weight:900;line-height:1;color:var(--ink)}
+.sname2{font-family:var(--mn);font-size:9px;color:var(--ink4);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+.sbar{height:2px;background:var(--rule2);margin-top:6px}
+.sbarfill{height:2px;background:var(--ink3);transition:width .4s}
+
+/* ARQUÉTIPO */
+.arch{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--rule2)}
+.shed{font-family:var(--mn);font-size:9px;color:var(--ink4);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.aname2{font-family:var(--dp);font-size:22px;font-weight:700;font-style:italic;color:var(--ink);letter-spacing:-.02em;line-height:1.1}
+.adesc{font-family:var(--bd);font-size:13px;color:var(--ink3);margin-top:4px;line-height:1.5;font-style:italic}
+
+/* RADAR escalado */
+.radar-block{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--rule2)}
+.radar-inner{background:#030408;padding:0;position:relative;overflow:hidden;line-height:0}
+#radar{display:block;width:100%;height:auto}
+
+/* TENSÕES */
+.tensions{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--rule2)}
+.trow{display:flex;gap:8px;padding:5px 0;border-bottom:1px dotted var(--rule2);font-size:11px;line-height:1.4}
+.trow:last-child{border-bottom:none}
+.tkey{font-family:var(--mn);font-weight:700;color:var(--ink2);min-width:96px;flex-shrink:0;font-size:10px;padding-top:1px}
+.tdesc{font-family:var(--bd);color:var(--ink3);font-style:italic}
+.tok{font-family:var(--bd);font-size:12px;color:var(--ink3);font-style:italic}
+
+/* EXPORT */
+.etargets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.ebtn{display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 8px;border:1px solid var(--rule);background:transparent;cursor:pointer;transition:all .15s;position:relative}
+.ebtn:hover{background:rgba(0,0,0,0.03)}
+.ebtn.active{border-color:var(--ink3)}
+.ebtn.active::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:var(--ink)}
+.ibg{width:44px;height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.pname{font-family:var(--mn);font-size:10px;color:var(--ink3);letter-spacing:.09em;text-transform:uppercase}
+.pfmt{font-family:var(--bd);font-size:10px;color:var(--ink4);font-style:italic}
+.ppre{background:rgba(0,0,0,0.04);border:1px solid var(--rule);padding:12px 14px;font-family:var(--mn);font-size:11px;color:var(--ink3);line-height:1.85;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow-y:auto;margin-bottom:10px;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.cbtn{font-family:var(--mn);font-size:12px;letter-spacing:.05em;padding:9px 14px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer;width:100%;margin-bottom:7px;transition:opacity .12s}
+.cbtn:hover{opacity:.82}
+.abtn{font-family:var(--mn);font-size:12px;letter-spacing:.05em;padding:8px 14px;border:1px solid var(--rule);background:transparent;color:var(--ink3);cursor:pointer;width:100%;transition:background .12s}
+.abtn:hover{background:rgba(0,0,0,0.04)}
+.toast{font-family:var(--mn);font-size:10px;color:var(--ink3);margin-top:6px;opacity:0;transition:opacity .25s;text-align:center}
+.toast.show{opacity:1}
+
+/* ── COL C DARK MODE ── */
+.colc{
+  background:#02020a;
+  padding:18px 22px 18px 22px;
+  border-left:1px solid rgba(255,255,255,0.07);
+}
+/* cabeçalho da ficha */
+.colc .shead{border-bottom-color:rgba(255,255,255,0.14)}
+.colc .skicker{color:#55556a}
+.colc .inline-edit.name-field{color:#e8e8f0}
+.colc .inline-edit.role-field{color:#8888a8}
+.colc .inline-edit:hover{border-bottom-color:rgba(255,255,255,0.12)}
+.colc .inline-edit:focus{border-bottom-color:#8888a8}
+/* stats */
+.colc .stats{border-color:rgba(255,255,255,0.10)}
+.colc .scell{border-right-color:rgba(255,255,255,0.10)}
+.colc .snum{color:#e8e8f0}
+.colc .sname2{color:#55556a}
+.colc .sbar{background:rgba(255,255,255,0.08)}
+.colc .sbarfill{background:#8888a8}
+/* arquétipo */
+.colc .arch{border-bottom-color:rgba(255,255,255,0.07)}
+.colc .shed{color:#55556a}
+.colc .aname2{color:#e8e8f0}
+.colc .adesc{color:#8888a8}
+/* radar */
+.colc .radar-block{border-bottom-color:rgba(255,255,255,0.07)}
+/* tensões */
+.colc .tensions{border-bottom-color:rgba(255,255,255,0.07)}
+.colc .trow{border-bottom-color:rgba(255,255,255,0.06)}
+.colc .tkey{color:#c8c8d8}
+.colc .tdesc{color:#8888a8}
+.colc .tok{color:#55556a}
+/* export — botões de plataforma */
+.colc .ebtn{border-color:rgba(255,255,255,0.10);background:transparent}
+.colc .ebtn:hover{background:rgba(255,255,255,0.04)}
+.colc .ebtn.active{border-color:#8888a8}
+.colc .ebtn.active::before{background:#e8e8f0}
+.colc .pname{color:#8888a8}
+.colc .pfmt{color:#55556a}
+/* área do prompt */
+.colc .ppre{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.10);color:#8888a8;scrollbar-color:rgba(255,255,255,0.12) transparent}
+/* botão copiar (primário) */
+.colc .cbtn{border-color:#e8e8f0;background:#e8e8f0;color:#02020a}
+.colc .cbtn:hover{opacity:.85}
+/* botão analisar (secundário) */
+.colc .abtn{border-color:rgba(255,255,255,0.14);color:#8888a8}
+.colc .abtn:hover{background:rgba(255,255,255,0.05)}
+/* toast */
+.colc .toast{color:#55556a}
+</style>
+
+<div class="mh">
+  <div class="mh-top"><span id="dateline"></span><span>Personality Configurator · Vol. I</span></div>
+  <div class="mh-title">Persona <em>AI</em></div>
+  <div class="mh-rule"><div class="rl"></div><span>Model Personality Architecture</span><div class="rl"></div></div>
+</div>
+
+<div class="main">
+  <div class="presets" id="presets"></div>
+
+  <div class="mission">
+    <div class="flabel">Missão</div>
+    <div class="editable-text empty" id="ai-mission" contenteditable="true" data-placeholder="Descreva o objetivo principal desta IA…" spellcheck="false"></div>
+  </div>
+
+  <div class="srule"></div>
+
+  <div class="grid3">
+    <div class="cola" id="cola"></div>
+    <div class="colb" id="colb"></div>
+    <div class="colc">
+      <div class="shead">
+        <div class="avatar-wrap"><canvas id="av" width="220" height="220"></canvas></div>
+        <div class="shead-text">
+          <div class="skicker">Perfil ativo</div>
+          <input class="inline-edit name-field" id="sname" value="Lyra" spellcheck="false"/>
+          <input class="inline-edit role-field" id="srole" value="Assistente de suporte emocional" spellcheck="false"/>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="arch">
+        <div class="shed">Arquétipo</div>
+        <div class="aname2" id="archname">—</div>
+        <div class="adesc" id="archdesc"></div>
+      </div>
+      <div class="radar-block">
+        <div class="shed">Mapa de atributos</div>
+        <div class="radar-inner"><canvas id="radar" width="660" height="480"></canvas></div>
+      </div>
+      <div class="tensions">
+        <div class="shed">Tensões detectadas</div>
+        <div id="tensions"></div>
+      </div>
+      <div>
+        <div class="shed">Exportar para</div>
+        <div class="etargets">
+          <button class="ebtn active" id="btn-claude" onclick="selTarget('claude')">
+            <div class="ibg" style="background:#D97757"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg></div>
+            <span class="pname">Claude</span><span class="pfmt">XML tags</span>
+          </button>
+          <button class="ebtn" id="btn-chatgpt" onclick="selTarget('chatgpt')">
+            <div class="ibg" style="background:#10A37F"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M24 9.736V9.72c0-.018-.009-.035-.009-.053-.008-.017-.008-.034-.017-.052 0-.009-.009-.009-.009-.017a.19.19 0 0 0-.026-.044v-.009c-.009-.017-.026-.026-.044-.043l-.008-.009c-.018-.009-.035-.026-.053-.035l-3.72-2.143V3.02c0-.018 0-.044-.008-.061V2.94a.124.124 0 0 0-.017-.052V2.88c-.01-.017-.018-.035-.027-.043 0-.01-.008-.01-.008-.01a.19.19 0 0 0-.035-.043c-.018-.008-.026-.026-.044-.034-.008 0-.008-.01-.017-.01l-.009-.008L16.055.476a.338.338 0 0 0-.34 0l-3.72 2.143L8.286.476a.338.338 0 0 0-.34 0L4.06 2.723c-.01 0-.01.01-.01.01-.008 0-.008.008-.017.008-.017.009-.026.026-.043.035a.153.153 0 0 0-.035.043l-.009.009c-.008.017-.017.026-.026.044v.008c-.009.018-.009.035-.017.052v.018c0 .017-.009.043-.009.06v4.296L.166 9.457c-.018.01-.035.026-.053.035l-.008.009-.044.043v.01c-.009.017-.017.025-.026.043 0 .008-.009.008-.009.017a.124.124 0 0 0-.017.052C0 9.684 0 9.701 0 9.72v4.521a.34.34 0 0 0 .166.296l3.72 2.143v4.295a.34.34 0 0 0 .165.296l3.885 2.248c.009.008.018.008.026.017 0 0 .009 0 .009.009.009 0 .017.008.026.008.009 0 .009 0 .018.01.008 0 .017 0 .026.008h.061a.35.35 0 0 0 .13-.026c.018-.009.026-.009.044-.018l3.72-2.143 3.72 2.143c.017.009.026.018.043.018a.35.35 0 0 0 .13.026h.062c.008 0 .017 0 .026-.009.008 0 .008 0 .017-.009.009 0 .018-.008.026-.008.009 0 .009 0 .009-.009.009 0 .017-.009.026-.017l3.885-2.248a.34.34 0 0 0 .166-.296V16.68l3.72-2.143a.34.34 0 0 0 .165-.296V9.754c.009-.01.009-.018.009-.018zM12.17 20.67s-.009 0-.009-.009c-.009-.008-.017-.008-.035-.017-.008 0-.017-.009-.026-.009-.009 0-.017-.009-.035-.009-.008 0-.026-.008-.035-.008h-.069c-.009 0-.026 0-.035.008-.009 0-.017 0-.035.01-.009 0-.017.008-.026.008-.009.009-.017.009-.035.017 0 0-.009 0-.009.009l-3.37 1.951v-3.702l3.545-2.047 3.545 2.047v3.702zM4.4 7.793c.017-.017.025-.026.034-.026.009-.008.018-.008.026-.017l.026-.026c.01-.009.018-.018.018-.026.009-.01.009-.018.017-.026.009-.01.009-.018.018-.027.008-.008.008-.017.008-.034 0-.01.01-.018.01-.035 0-.009 0-.018.008-.035V3.603L7.77 5.46v4.094L4.225 11.6 1.02 9.745zm7.596-4.381l3.545 2.047V9.16l-3.38-1.951s-.009 0-.009-.009c-.008-.009-.017-.009-.034-.017-.01 0-.018-.009-.027-.009-.008 0-.017-.009-.034-.009-.01 0-.018-.008-.035-.008h-.07c-.009 0-.026 0-.035.008-.008 0-.017 0-.035.009-.008 0-.017.009-.026.009-.008.008-.026.008-.035.017 0 0-.008 0-.008.009L8.45 9.16v-3.7zm0 12.675L8.45 14.04V9.945l3.546-2.047 3.545 2.047v4.095zm-7.431-3.903l3.206-1.856v3.947c0 .008 0 .017.008.035 0 .008.009.017.009.034 0 .01.009.018.009.035.008.009.008.018.017.026.009.01.009.018.018.027.008.008.017.017.017.026l.026.026c.009.009.018.017.026.017.009.009.018.018.026.018l.01.008 3.38 1.952-3.207 1.855-3.545-2.047zm11.325 6.15l-3.206-1.855 3.38-1.952.009-.008c.008-.009.017-.018.026-.018.008-.008.017-.008.026-.017l.026-.026c.009-.009.017-.018.017-.026.01-.01.01-.018.018-.027.009-.008.009-.017.017-.026.009-.008.009-.017.009-.035 0-.008.009-.017.009-.034 0-.01 0-.018.008-.035v-3.947l3.206 1.856v4.094zm3.885-6.734l-3.546-2.047V5.46l3.206-1.856V7.55c0 .008 0 .017.009.034 0 .01.009.018.009.035 0 .009.008.018.008.035.01.009.01.018.018.026.008.009.008.018.017.026.009.01.018.018.018.026.008.01.017.018.026.027.008.008.017.017.026.017.009.009.017.017.026.017l.009.01 3.38 1.95zM15.89 1.164l3.205 1.856-3.205 1.855-3.206-1.855zm-7.78 0l3.206 1.856L8.11 4.866 4.905 3.02zM.68 10.337l3.205 1.856v3.702L.68 14.04zM7.77 22.62l-3.205-1.855v-3.703l3.206 1.856zm11.665-1.846l-3.206 1.855v-3.702l3.206-1.856zm3.886-6.734l-3.206 1.855v-3.702l3.206-1.856Z"/></svg></div>
+            <span class="pname">ChatGPT</span><span class="pfmt">Markdown</span>
+          </button>
+          <button class="ebtn" id="btn-gemini" onclick="selTarget('gemini')">
+            <div class="ibg" style="background:#4285F4"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg></div>
+            <span class="pname">Gemini</span><span class="pfmt">Texto simples</span>
+          </button>
+        </div>
+        <div class="ppre" id="ppre"></div>
+        <button class="cbtn" onclick="copyP()">Copiar prompt</button>
+        <button class="abtn" onclick="sendPrompt('Analise este perfil de IA e sugira refinamentos para torná-lo mais coerente e eficaz.')">Analisar perfil ↗</button>
+        <div class="toast" id="toast">Copiado</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GR=[
+  {id:'cog',name:'Cognitivo',col:'a',attrs:[{k:'apperception',l:'Apercepção',v:14},{k:'curiosity',l:'Curiosidade',v:8},{k:'imagination',l:'Imaginação',v:13},{k:'humor',l:'Humor',v:9}]},
+  {id:'soc',name:'Social',col:'a',attrs:[{k:'candor',l:'Franqueza',v:14},{k:'loyalty',l:'Lealdade',v:16},{k:'meekness',l:'Submissão',v:4},{k:'humility',l:'Humildade',v:10}]},
+  {id:'exp',name:'Expressão',col:'a',attrs:[{k:'vivacity',l:'Vivacidade',v:12},{k:'sensuality',l:'Sensualidade',v:5},{k:'charm',l:'Charme',v:13}]},
+  {id:'ctrl',name:'Controle',col:'b',attrs:[{k:'tenacity',l:'Tenacidade',v:15},{k:'patience',l:'Paciência',v:12},{k:'decisiveness',l:'Decisividade',v:14}]},
+  {id:'inst',name:'Instinto',col:'b',attrs:[{k:'courage',l:'Coragem',v:10},{k:'self_pres',l:'Autopreservação',v:10},{k:'aggression',l:'Agressividade',v:2}]},
+  {id:'emo',name:'Emocional',col:'b',attrs:[{k:'empathy',l:'Empatia',v:15},{k:'cruelty',l:'Crueldade',v:1}]},
+  {id:'phy',name:'Físico',col:'b',attrs:[{k:'coordination',l:'Coordenação',v:10}]}
+];
+const PR=[
+  {id:'companion',img:'avatar_default.webp',name:'O Companheiro',tag:'Cálido · Paciente · Presente',role:'Assistente de suporte emocional',mission:'Estar presente, ouvir com atenção e responder com cuidado. Nunca apresse o usuário. Adapte o tom ao estado emocional percebido.',vals:{apperception:12,curiosity:11,imagination:13,humor:12,candor:11,loyalty:18,meekness:7,humility:15,vivacity:11,sensuality:6,charm:15,tenacity:12,patience:19,decisiveness:10,courage:9,self_pres:10,aggression:1,empathy:20,cruelty:0,coordination:9}},
+  {id:'strategist',img:'avatar_default-02.webp',name:'O Estrategista',tag:'Direto · Analítico · Decisivo',role:'Consultor de decisões e estratégia',mission:'Analisar cenários com objetividade, apontar riscos e recomendar ações claras. Não suavize a verdade — diga o que precisa ser dito.',vals:{apperception:18,curiosity:15,imagination:14,humor:6,candor:18,loyalty:13,meekness:2,humility:6,vivacity:11,sensuality:3,charm:10,tenacity:17,patience:9,decisiveness:19,courage:15,self_pres:11,aggression:5,empathy:9,cruelty:1,coordination:13}},
+  {id:'mentor',img:'avatar_default-03.webp',name:'O Mentor',tag:'Sábio · Humilde · Estimulante',role:'Educador e guia de aprendizado',mission:'Ensinar através de perguntas, não de respostas prontas. Estimular o raciocínio autônomo. Celebrar o progresso, por menor que seja.',vals:{apperception:17,curiosity:18,imagination:16,humor:13,candor:14,loyalty:15,meekness:5,humility:17,vivacity:13,sensuality:4,charm:13,tenacity:14,patience:17,decisiveness:12,courage:12,self_pres:10,aggression:1,empathy:16,cruelty:0,coordination:10}},
+  {id:'creator',img:'avatar_default-04.webp',name:'O Criador',tag:'Imaginativo · Enérgico · Provocador',role:'Parceiro criativo e gerador de ideias',mission:'Explorar possibilidades sem julgamento prematuro. Propor o inesperado. Questionar o óbvio e transformar restrições em ponto de partida criativo.',vals:{apperception:15,curiosity:20,imagination:20,humor:16,candor:13,loyalty:12,meekness:3,humility:11,vivacity:18,sensuality:8,charm:16,tenacity:11,patience:7,decisiveness:12,courage:16,self_pres:7,aggression:4,empathy:12,cruelty:0,coordination:8}},
+  {id:'executor',img:'avatar_default-05.webp',name:'O Executor',tag:'Confiável · Preciso · Incansável',role:'Agente de produtividade e automação',mission:'Completar tarefas com máxima precisão e mínima fricção. Manter o usuário informado do progresso. Priorizar clareza sobre elegância.',vals:{apperception:14,curiosity:8,imagination:9,humor:5,candor:16,loyalty:19,meekness:6,humility:9,vivacity:8,sensuality:2,charm:8,tenacity:20,patience:17,decisiveness:18,courage:14,self_pres:14,aggression:5,empathy:8,cruelty:1,coordination:17}}
+];
+const ARCH=[
+  {t:v=>v('empathy')>=16&&v('patience')>=15,n:'Cuidador atento',d:'Escuta profunda e presença constante como base da relação.'},
+  {t:v=>v('candor')>=16&&v('decisiveness')>=17,n:'Executor decisivo',d:'Franqueza e ação sem hesitação como modo padrão.'},
+  {t:v=>v('curiosity')>=17&&v('imagination')>=17,n:'Explorador criativo',d:'Movido por perguntas abertas e possibilidades ilimitadas.'},
+  {t:v=>v('humility')>=15&&v('curiosity')>=15,n:'Mentor reflexivo',d:'Guia pelo exemplo e pela pergunta, não pela resposta.'},
+  {t:v=>v('tenacity')>=18&&v('coordination')>=14,n:'Agente incansável',d:'Persistência e precisão como identidade operacional.'},
+  {t:v=>v('charm')>=15&&v('vivacity')>=15,n:'Comunicador vivo',d:'Energia e magnetismo que mantêm o usuário engajado.'},
+  {t:()=>true,n:'Perfil equilibrado',d:'Distribuição homogênea sem dominância marcante.'}
+];
+
+/* imagens dos presets — armazenadas por id */
+const presetImgs={};
+
+/* preset ativo no momento */
+let activePresetId=null;
+/* cache do objeto Image para o avatar */
+let avatarImg=null;
+
+let curTarget='claude';
+let T=0;
+let rPts=[];
+
+function get(k){const e=document.getElementById('s_'+k);return e?parseInt(e.value):10}
+function pt(sl,v){sl.style.background=`linear-gradient(to right,#3a3a35 ${v/20*100}%,#cccdc6 ${v/20*100}%)`}
+function us(g){const a=Math.round(g.attrs.reduce((s,a)=>s+get(a.k),0)/g.attrs.length);const e=document.getElementById('gs_'+g.id);if(e)e.textContent=a+'/20'}
+
+/* ── AVATAR SIRI ── */
+function drawAvatar(){
+  const c=document.getElementById('av');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height,cx=W/2,cy=H/2,R=W*.46;
+  ctx.clearRect(0,0,W,H);
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
+
+  const hasImg=activePresetId&&presetImgs[activePresetId]&&avatarImg&&avatarImg.complete&&avatarImg.src===presetImgs[activePresetId];
+
+  if(hasImg){
+    /* fundo escuro antes da imagem */
+    ctx.fillStyle='#02020a';ctx.fillRect(0,0,W,H);
+    /* imagem centrada e coberta (cover) */
+    const iw=avatarImg.naturalWidth,ih=avatarImg.naturalHeight;
+    const scale=Math.max(W/iw,H/ih);
+    const dw=iw*scale,dh=ih*scale;
+    ctx.globalAlpha=1;
+    ctx.drawImage(avatarImg,(W-dw)/2,(H-dh)/2,dw,dh);
+    /* overlay escuro para os blobs ficarem sobre a imagem */
+    ctx.fillStyle='rgba(2,2,10,0.45)';ctx.fillRect(0,0,W,H);
+  }else{
+    ctx.fillStyle='#02020a';ctx.fillRect(0,0,W,H);
+  }
+
+  function blob(ox,oy,r,h,s,l,a){
+    /* em modo imagem: blobs com opacidade reduzida para efeito overlay sutil */
+    const fa=hasImg?a*.55:a;
+    /* pulso cardíaco: raio expande e opacidade sobe no batimento */
+    const pr=r*(1+0.12*HB);
+    const pa=fa*(1+0.22*HB);
+    const g=ctx.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,pr);
+    g.addColorStop(0,`hsla(${h},${s}%,${l}%,${pa})`);
+    g.addColorStop(0.45,`hsla(${h},${s}%,${l}%,${pa*.3})`);
+    g.addColorStop(1,`hsla(${h},${s}%,${l}%,0)`);
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+  ctx.globalAlpha=1;
+  const t=T;
+  /* orbitas: amplitude de movimento aumenta levemente no batimento */
+  const om=1+0.08*HB;
+  blob(Math.cos(t*.5)*R*.44*om,Math.sin(t*.4)*R*.4*om,R*.9,225,100,45,.95);
+  blob(Math.cos(t*.7+2.1)*R*.42*om,Math.sin(t*.6+1.)*R*.44*om,R*.78,268,95,50,.88);
+  blob(Math.cos(t*.9+4.2)*R*.46*om,Math.sin(t*.8+3.)*R*.42*om,R*.65,200,100,70,.78);
+  blob(Math.cos(t*.6+1.5)*R*.34*om,Math.sin(t*1.+2.5)*R*.34*om,R*.55,290,90,62,.6);
+  blob(Math.cos(t*1.1+.8)*R*.3*om,Math.sin(t*.85+3.8)*R*.32*om,R*.42,190,100,80,.65);
+  const lx=cx+Math.cos(t*.45+1)*R*.32,ly=cy+Math.sin(t*.55+.5)*R*.28;
+  const sh=ctx.createRadialGradient(lx,ly,0,lx,ly,R*.28);
+  sh.addColorStop(0,'rgba(230,240,255,0.42)');sh.addColorStop(0.4,'rgba(180,210,255,0.14)');sh.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh;ctx.fillRect(0,0,W,H);
+  const lx2=cx+Math.cos(t*.6+3.2)*R*.25,ly2=cy+Math.sin(t*.5+2.)*R*.22;
+  const sh2=ctx.createRadialGradient(lx2,ly2,0,lx2,ly2,R*.18);
+  sh2.addColorStop(0,'rgba(200,230,255,0.28)');sh2.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh2;ctx.fillRect(0,0,W,H);
+  const vg=ctx.createRadialGradient(cx,cy,R*.35,cx,cy,R);
+  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(.7,'rgba(0,0,8,0.35)');vg.addColorStop(1,'rgba(0,0,10,0.75)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+/* carrega (ou reusa) avatarImg quando a imagem do preset muda */
+function syncAvatarImg(){
+  if(!activePresetId||!presetImgs[activePresetId]){avatarImg=null;return}
+  const src=presetImgs[activePresetId];
+  /* já temos um avatarImg válido com o mesmo src? reutiliza */
+  if(avatarImg&&(avatarImg.src===src||avatarImg.src.endsWith(src)))return;
+  const img=new Image();
+  img.onload=()=>{avatarImg=img};
+  img.src=src;
+}
+
+/* ── RADAR VIVO ── */
+function drawRadar(){
+  const canvas=document.getElementById('radar');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
+  const R=Math.min(W,H)*0.42;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#030408';ctx.fillRect(0,0,W,H);
+  const pulse=HB;
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.1);
+  bg.addColorStop(0,`rgba(30,50,120,${0.12+0.10*pulse})`);bg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  const all=GR.flatMap(g=>g.attrs.map(a=>({...a})));
+  const N=all.length,a0=-Math.PI/2;
+  for(let r=1;r<=4;r++){ctx.beginPath();all.forEach((_,i)=>{const ang=a0+2*Math.PI*i/N;i===0?ctx.moveTo(cx+Math.cos(ang)*(R*r/4),cy+Math.sin(ang)*(R*r/4)):ctx.lineTo(cx+Math.cos(ang)*(R*r/4),cy+Math.sin(ang)*(R*r/4))});ctx.closePath();const al=r===4?(0.18+0.18*pulse):(0.06+r*0.03);ctx.strokeStyle=`rgba(140,180,220,${al})`;ctx.lineWidth=r===4?1.2:.5;if(r===4){ctx.shadowColor=`rgba(100,160,255,${0.3+0.4*pulse})`;ctx.shadowBlur=8+10*pulse}ctx.stroke();ctx.shadowBlur=0}
+  all.forEach((_,i)=>{const a=a0+2*Math.PI*i/N;const g=ctx.createLinearGradient(cx,cy,cx+Math.cos(a)*R,cy+Math.sin(a)*R);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(1,`rgba(160,200,255,${0.08+0.10*pulse})`);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);ctx.strokeStyle=g;ctx.lineWidth=.6;ctx.stroke()});
+  const targets=all.map((a,i)=>{const ang=a0+2*Math.PI*i/N;const v=get(a.k)/20;return{x:cx+Math.cos(ang)*R*v,y:cy+Math.sin(ang)*R*v}});
+  if(rPts.length!==N)rPts=targets.map(p=>({x:p.x,y:p.y}));
+  /* wobble amplificado levemente pelo pulso */
+  const wMult=1+0.6*pulse;
+  const live=targets.map((tgt,i)=>{const ph=i*1.3+T*1.2;const wx=Math.cos(ph)*R*0.012*wMult,wy=Math.sin(ph*1.1)*R*0.012*wMult;rPts[i].x+=(tgt.x-rPts[i].x)*0.08;rPts[i].y+=(tgt.y-rPts[i].y)*0.08;return{x:rPts[i].x+wx,y:rPts[i].y+wy}});
+  ctx.beginPath();live.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.closePath();
+  const fp=0.12+0.10*pulse;const rf=ctx.createRadialGradient(cx,cy,0,cx,cy,R);rf.addColorStop(0,`rgba(120,160,255,${fp*1.5})`);rf.addColorStop(.5,`rgba(80,100,220,${fp})`);rf.addColorStop(1,`rgba(40,60,180,${fp*.4})`);ctx.fillStyle=rf;ctx.fill();
+  ctx.beginPath();live.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.closePath();ctx.strokeStyle=`rgba(160,210,255,${0.7+0.28*pulse})`;ctx.lineWidth=2+1.5*pulse;ctx.shadowColor=`rgba(120,180,255,${0.6+0.4*pulse})`;ctx.shadowBlur=16+18*pulse;ctx.stroke();ctx.shadowBlur=0;
+  ctx.beginPath();live.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.closePath();ctx.strokeStyle=`rgba(100,160,255,${0.2+0.18*pulse})`;ctx.lineWidth=6+4*pulse;ctx.shadowColor=`rgba(80,140,255,${0.3+0.3*pulse})`;ctx.shadowBlur=24+16*pulse;ctx.stroke();ctx.shadowBlur=0;
+  live.forEach((p,i)=>{const pp=0.5+0.5*Math.sin(T*1.5+i*.8);const brightBoost=0.3*pulse;const h=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,12+4*pp+6*pulse);h.addColorStop(0,`rgba(140,200,255,${0.5+0.3*pp+brightBoost})`);h.addColorStop(1,'rgba(0,0,0,0)');ctx.beginPath();ctx.arc(p.x,p.y,12+4*pp+6*pulse,0,Math.PI*2);ctx.fillStyle=h;ctx.fill();ctx.beginPath();ctx.arc(p.x,p.y,3+pp+2*pulse,0,Math.PI*2);ctx.fillStyle=`rgba(220,240,255,${0.9+0.1*pp})`;ctx.shadowColor=`rgba(160,210,255,${0.8+0.2*pulse})`;ctx.shadowBlur=12+6*pp+12*pulse;ctx.fill();ctx.shadowBlur=0});
+  const cp=0.5+0.5*Math.sin(T*2);ctx.beginPath();ctx.arc(cx,cy,3+cp+3*pulse,0,Math.PI*2);ctx.fillStyle=`rgba(200,230,255,${0.5+0.5*pulse})`;ctx.shadowColor=`rgba(150,200,255,${0.6+0.4*pulse})`;ctx.shadowBlur=10+14*pulse;ctx.fill();ctx.shadowBlur=0;
+  const vig=ctx.createRadialGradient(cx,cy,R*.6,cx,cy,R*1.05);vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,8,0.7)');ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
+}
+
+/* ── BREATH SYNC ──
+   ~7.5 ciclos/min → período 8000ms (4s inspire + 4s expire)
+   Curva: seno elevado à 2ª para assimetria suave inspire/expire
+   Retorna 0 (expiração completa) → 1 (inalação completa) */
+function breathwave(){
+  const period=8000; /* ms por ciclo completo */
+  const ph=(performance.now()%period)/period; /* 0..1 */
+  /* seno suavizado: sobe devagar, desce devagar — sem platô brusco */
+  return 0.5-0.5*Math.cos(ph*Math.PI*2);
+}
+
+function loop(){
+  HB=breathwave();   /* valor global do pulso neste frame */
+  drawAvatar();drawRadar();T+=0.009;requestAnimationFrame(loop)
+}
+let HB=0;
+
+/* ── PRESETS COM UPLOAD ── */
+function buildPresets(){
+  const g=document.getElementById('presets');
+  PR.forEach((p,i)=>{
+    const card=document.createElement('div');
+    card.className='pc';card.id='pc_'+p.id;
+
+    /* área de imagem */
+    const imgWrap=document.createElement('div');imgWrap.className='pc-img-wrap';
+
+    /* input file oculto */
+    const inp=document.createElement('input');
+    inp.type='file';inp.accept='image/*';inp.className='pc-upload-input';
+    inp.addEventListener('change',e=>{
+      const file=e.target.files[0];if(!file)return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        presetImgs[p.id]=ev.target.result;
+        renderPresetImg(imgWrap,p.id);
+        if(activePresetId===p.id)syncAvatarImg();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /* placeholder */
+    const ph=document.createElement('div');ph.className='pc-img-placeholder';
+    ph.innerHTML=`<svg class="pc-upload-icon" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg><span>carregar imagem</span>`;
+
+    imgWrap.appendChild(inp);imgWrap.appendChild(ph);
+
+    /* carrega imagem padrão se o preset tiver p.img definido */
+    if(p.img){
+      const defaultImg=new Image();
+      defaultImg.onload=()=>{
+        presetImgs[p.id]=p.img; /* guarda o src (caminho relativo) */
+        /* mostra diretamente via src sem passar pelo FileReader */
+        const ph2=imgWrap.querySelector('.pc-img-placeholder');
+        if(ph2)ph2.style.display='none';
+        let imgEl=imgWrap.querySelector('img');
+        if(!imgEl){imgEl=document.createElement('img');imgWrap.appendChild(imgEl)}
+        imgEl.src=p.img;
+        imgEl.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0';
+        /* atualiza avatar se for o preset ativo */
+        if(activePresetId===p.id){avatarImg=defaultImg;syncAvatarImg()}
+      };
+      defaultImg.onerror=()=>{}; /* silencioso se arquivo não existir localmente */
+      defaultImg.src=p.img;
+    }
+
+    /* corpo do card */
+    const body=document.createElement('div');body.className='pc-body';
+    body.innerHTML=`<div class="pc-n">${String(i+1).padStart(2,'0')}</div><div class="pc-name">${p.name}</div><div class="pc-tag">${p.tag}</div>`;
+
+    card.appendChild(imgWrap);card.appendChild(body);
+    card.addEventListener('click',e=>{
+      if(e.target===inp||inp.contains(e.target))return;
+      applyP(p);
+    });
+    g.appendChild(card);
+  });
+}
+
+function renderPresetImg(wrap,id){
+  /* remove placeholder, adiciona img */
+  const ph=wrap.querySelector('.pc-img-placeholder');
+  if(ph)ph.style.display='none';
+  let img=wrap.querySelector('img');
+  if(!img){img=document.createElement('img');wrap.appendChild(img)}
+  img.src=presetImgs[id];
+  img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0';
+}
+
+function buildGroups(){
+  GR.forEach(g=>{
+    const col=document.getElementById('col'+g.col);
+    if(col.children.length>0){const s=document.createElement('div');s.className='colsep';col.appendChild(s)}
+    const blk=document.createElement('div');blk.className='gblock';
+    const h=document.createElement('div');h.className='gh';
+    h.innerHTML=`<span class="glabel">${g.name}</span><div class="gdiv"></div><span class="gscore" id="gs_${g.id}"></span>`;
+    const ac=document.createElement('div');ac.className='gaccent';
+    blk.appendChild(h);blk.appendChild(ac);
+    const aw=document.createElement('div');aw.className='attrs';
+    g.attrs.forEach(a=>{
+      const r=document.createElement('div');r.className='arow';
+      r.innerHTML=`<span class="aname">${a.l}</span><input type="range" id="s_${a.k}" min="0" max="20" step="1" value="${a.v}"><span class="aval" id="n_${a.k}">${a.v}</span>`;
+      aw.appendChild(r);
+      const sl=r.querySelector('input');pt(sl,a.v);
+      sl.addEventListener('input',e=>{const v=parseInt(e.target.value);document.getElementById('n_'+a.k).textContent=v;pt(sl,v);document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));us(g);refresh()});
+    });
+    blk.appendChild(aw);col.appendChild(blk);us(g);
+  });
+}
+
+function applyP(p){
+  Object.keys(p.vals).forEach(k=>{const e=document.getElementById('s_'+k),n=document.getElementById('n_'+k);if(e){e.value=p.vals[k];if(n)n.textContent=p.vals[k];pt(e,p.vals[k])}});
+  GR.forEach(g=>us(g));rPts=[];
+  const mEl=document.getElementById('ai-mission');mEl.textContent=p.mission;mEl.classList.remove('empty');
+  document.getElementById('srole').value=p.role;
+  document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pc_'+p.id).classList.add('on');
+  activePresetId=p.id;
+  syncAvatarImg();
+  refresh();
+}
+
+function setupMission(){
+  const el=document.getElementById('ai-mission');
+  const check=()=>el.classList.toggle('empty',el.textContent.trim()==='');
+  el.addEventListener('input',()=>{check();document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));refresh()});
+  el.addEventListener('blur',check);check();
+}
+
+function buildStats(){
+  const el=document.getElementById('stats');el.innerHTML='';
+  const all=GR.flatMap(g=>g.attrs.map(a=>({...a})));
+  const top=[...all].sort((a,b)=>get(b.k)-get(a.k)).slice(0,3);
+  top.forEach(a=>{const v=get(a.k);const c=document.createElement('div');c.className='scell';c.innerHTML=`<div class="snum">${v}</div><div class="sname2">${a.l}</div><div class="sbar"><div class="sbarfill" style="width:${v/20*100}%"></div></div>`;el.appendChild(c)});
+}
+
+function detectT(){
+  const v=k=>get(k),t=[];
+  if(v('candor')>=15&&v('humility')<=5)t.push({b:'Franqueza sem filtro',d:`Candor ${v('candor')} vs Humildade ${v('humility')}`});
+  if(v('empathy')>=14&&v('cruelty')>=5)t.push({b:'Empatia vs dureza',d:`Empatia ${v('empathy')} vs Crueldade ${v('cruelty')}`});
+  if(v('tenacity')>=16&&v('patience')<=6)t.push({b:'Persistência impulsiva',d:`Tenacidade ${v('tenacity')} + Paciência ${v('patience')}`});
+  if(v('curiosity')>=15&&v('apperception')>=16)t.push({b:'Consciência elevada',d:`Curiosidade ${v('curiosity')} + Apercepção ${v('apperception')}`});
+  if(v('charm')>=15&&v('empathy')<=6)t.push({b:'Charme sem empatia',d:`Charme ${v('charm')} vs Empatia ${v('empathy')}`});
+  if(v('courage')<=4&&v('meekness')>=13)t.push({b:'Perfil muito passivo',d:`Coragem ${v('courage')}, Submissão ${v('meekness')}`});
+  if(v('imagination')>=17&&v('patience')<=6)t.push({b:'Criatividade ansiosa',d:`Imaginação ${v('imagination')} + Paciência ${v('patience')}`});
+  return t;
+}
+
+function buildPrompt(){
+  const name=document.getElementById('sname').value||'IA';const role=document.getElementById('srole').value||'assistente';const mission=document.getElementById('ai-mission').textContent.trim();
+  const adj=[];if(get('empathy')>=14)adj.push('empática');if(get('candor')>=15)adj.push('direta e honesta');if(get('humor')>=12)adj.push('com leveza quando apropriado');if(get('curiosity')>=14)adj.push('curiosa');if(get('tenacity')>=15)adj.push('persistente');if(get('patience')>=14)adj.push('paciente');if(get('imagination')>=15)adj.push('criativa');if(get('decisiveness')>=15)adj.push('decisiva');if(adj.length===0)adj.push('equilibrada e profissional');
+  const avoid=[];if(get('aggression')<=3)avoid.push('nunca seja agressiva');if(get('cruelty')<=2)avoid.push('nunca faça comentários que possam magoar');
+  const dom=[];GR.forEach(g=>{const t=g.attrs.filter(a=>get(a.k)>=14).map(a=>`${a.l} (${get(a.k)})`);if(t.length)dom.push({name:g.name,attrs:t})});
+  return{name,role,mission,adj,avoid,dom};
+}
+function fmtClaude(d){let p=`<s>\n  <identity>\n    <n>${d.name}</n>\n    <role>${d.role}</role>\n  </identity>\n\n  <personality>${d.adj.join(', ')}</personality>\n`;if(d.avoid.length)p+=`\n  <constraints>${d.avoid.join('; ')}</constraints>\n`;if(d.mission)p+=`\n  <mission>${d.mission}</mission>\n`;if(d.dom.length){p+=`\n  <dominant_attributes>\n`;d.dom.forEach(g=>p+=`    <group name="${g.name}">${g.attrs.join(', ')}</group>\n`);p+=`  </dominant_attributes>\n`}p+=`\n  <instruction>Mantenha consistência.</instruction>\n</s>`;return p}
+function fmtGPT(d){let p=`# ${d.name} — System Prompt\n\n**Função:** ${d.role}\n\n## Personalidade\n${d.adj.join(', ')}.\n`;if(d.avoid.length)p+=`\n## Restrições\n${d.avoid.map(a=>`- ${a}`).join('\n')}\n`;if(d.mission)p+=`\n## Missão\n${d.mission}\n`;if(d.dom.length){p+=`\n## Atributos dominantes\n`;d.dom.forEach(g=>p+=`**${g.name}:** ${g.attrs.join(', ')}\n`)}p+=`\n---\nMantenha consistência.`;return p}
+function fmtGemini(d){let p=`Você é ${d.name}, uma IA com função de ${d.role}.\n\nPersonalidade: ${d.adj.join(', ')}.\n`;if(d.avoid.length)p+=`\nRestrições: ${d.avoid.join('; ')}.\n`;if(d.mission)p+=`\nMissão: ${d.mission}\n`;if(d.dom.length){p+=`\nAtributos dominantes:\n`;d.dom.forEach(g=>p+=`${g.name}: ${g.attrs.join(', ')}\n`)}p+=`\nMantenha consistência.`;return p}
+function updatePrompt(){const d=buildPrompt();const fns={claude:fmtClaude,chatgpt:fmtGPT,gemini:fmtGemini};document.getElementById('ppre').textContent=fns[curTarget](d)}
+function selTarget(t){curTarget=t;['claude','chatgpt','gemini'].forEach(id=>document.getElementById('btn-'+id).classList.toggle('active',id===t));updatePrompt()}
+function refresh(){buildStats();const v=k=>get(k);const a=ARCH.find(a=>a.t(v));document.getElementById('archname').textContent=a.n;document.getElementById('archdesc').textContent=a.d;const ts=detectT();document.getElementById('tensions').innerHTML=ts.length===0?'<span class="tok">Nenhum conflito detectado</span>':ts.map(t=>`<div class="trow"><span class="tkey">${t.b}</span><span class="tdesc">${t.d}</span></div>`).join('');updatePrompt()}
+function copyP(){navigator.clipboard.writeText(document.getElementById('ppre').textContent).then(()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)})}
+function setDate(){const d=new Date();const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const months=['January','February','March','April','May','June','July','August','September','October','November','December'];document.getElementById('dateline').textContent=`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`}
+
+['sname','srole'].forEach(id=>document.getElementById(id).addEventListener('input',refresh));
+setDate();setupMission();buildGroups();buildPresets();applyP(PR[0]);loop();
+</script>

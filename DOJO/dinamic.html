@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dojo — Flex Playground</title>
+  <link rel="stylesheet" href="style_din.css">
+</head>
+<body>
+
+  <div class="painel">
+
+    <div class="grupo">
+      <span class="grupo-titulo">container</span>
+
+      <div class="controle">
+        <label>flex-direction</label>
+        <select onchange="setContainer('flexDirection', this.value)">
+          <option value="row">row</option>
+          <option value="row-reverse">row-reverse</option>
+          <option value="column">column</option>
+          <option value="column-reverse">column-reverse</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>justify-content</label>
+        <select onchange="setContainer('justifyContent', this.value)">
+          <option value="flex-start">flex-start</option>
+          <option value="flex-end">flex-end</option>
+          <option value="center">center</option>
+          <option value="space-between">space-between</option>
+          <option value="space-around">space-around</option>
+          <option value="space-evenly">space-evenly</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>align-items</label>
+        <select onchange="setContainer('alignItems', this.value)">
+          <option value="stretch">stretch</option>
+          <option value="flex-start">flex-start</option>
+          <option value="flex-end">flex-end</option>
+          <option value="center">center</option>
+          <option value="baseline">baseline</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>align-content</label>
+        <select onchange="setContainer('alignContent', this.value)">
+          <option value="normal">normal</option>
+          <option value="flex-start">flex-start</option>
+          <option value="flex-end">flex-end</option>
+          <option value="center">center</option>
+          <option value="space-between">space-between</option>
+          <option value="space-around">space-around</option>
+          <option value="stretch">stretch</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>flex-wrap</label>
+        <select onchange="setContainer('flexWrap', this.value)">
+          <option value="nowrap">nowrap</option>
+          <option value="wrap">wrap</option>
+          <option value="wrap-reverse">wrap-reverse</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>gap</label>
+        <select onchange="setContainer('gap', this.value)">
+          <option value="0px">0px</option>
+          <option value="8px">8px</option>
+          <option value="16px" selected>16px</option>
+          <option value="32px">32px</option>
+          <option value="48px">48px</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="grupo">
+      <span class="grupo-titulo">card selecionado</span>
+
+      <div class="controle">
+        <label>selecionar card</label>
+        <select onchange="selecionarCard(this.value)">
+          <option value="0">card 1</option>
+          <option value="1">card 2</option>
+          <option value="2">card 3</option>
+          <option value="3">card 4</option>
+          <option value="4">card 5</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>flex-grow</label>
+        <select onchange="setFilho('flexGrow', this.value)">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>flex-shrink</label>
+        <select onchange="setFilho('flexShrink', this.value)">
+          <option value="1">1 (padrão)</option>
+          <option value="0">0</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>flex-basis</label>
+        <select onchange="setFilho('flexBasis', this.value)">
+          <option value="auto">auto</option>
+          <option value="80px">80px</option>
+          <option value="120px">120px</option>
+          <option value="200px">200px</option>
+          <option value="300px">300px</option>
+          <option value="0">0</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>align-self</label>
+        <select onchange="setFilho('alignSelf', this.value)">
+          <option value="auto">auto</option>
+          <option value="flex-start">flex-start</option>
+          <option value="flex-end">flex-end</option>
+          <option value="center">center</option>
+          <option value="stretch">stretch</option>
+          <option value="baseline">baseline</option>
+        </select>
+      </div>
+
+      <div class="controle">
+        <label>order</label>
+        <select onchange="setFilho('order', this.value)">
+          <option value="0">0 (padrão)</option>
+          <option value="-2">-2</option>
+          <option value="-1">-1</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="preview">
+    <div class="demo" id="demo">
+      <div class="card" data-index="0">card 1</div>
+      <div class="card" data-index="1">card 2</div>
+      <div class="card" data-index="2">card 3</div>
+      <div class="card" data-index="3">card 4</div>
+      <div class="card" data-index="4">card 5</div>
+    </div>
+  </div>
+
+  <code class="codigo" id="codigo-container"></code>
+  <code class="codigo" id="codigo-filho"></code>
+
+  <script>
+    var cardAtual = 0;
+
+    var estadoFilhos = [
+      { flexGrow: '0', flexShrink: '1', flexBasis: 'auto', alignSelf: 'auto', order: '0' },
+      { flexGrow: '0', flexShrink: '1', flexBasis: 'auto', alignSelf: 'auto', order: '0' },
+      { flexGrow: '0', flexShrink: '1', flexBasis: 'auto', alignSelf: 'auto', order: '0' },
+      { flexGrow: '0', flexShrink: '1', flexBasis: 'auto', alignSelf: 'auto', order: '0' },
+      { flexGrow: '0', flexShrink: '1', flexBasis: 'auto', alignSelf: 'auto', order: '0' },
+    ];
+
+    function selecionarCard(index) {
+      cardAtual = parseInt(index);
+      document.querySelectorAll('.card').forEach(function(c) {
+        c.classList.remove('ativo');
+      });
+      document.querySelectorAll('.card')[cardAtual].classList.add('ativo');
+      atualizarSelectsFilho();
+      atualizarCodigoFilho();
+    }
+
+    function atualizarSelectsFilho() {
+      var estado = estadoFilhos[cardAtual];
+      var selects = document.querySelectorAll('.grupo:nth-child(2) select');
+      selects[1].value = estado.flexGrow;
+      selects[2].value = estado.flexShrink;
+      selects[3].value = estado.flexBasis;
+      selects[4].value = estado.alignSelf;
+      selects[5].value = estado.order;
+    }
+
+    function setContainer(prop, val) {
+      document.getElementById('demo').style[prop] = val;
+      atualizarCodigoContainer();
+    }
+
+    function setFilho(prop, val) {
+      var cards = document.querySelectorAll('.card');
+      cards[cardAtual].style[prop] = val;
+      estadoFilhos[cardAtual][prop] = val;
+      atualizarCodigoFilho();
+    }
+
+    function atualizarCodigoContainer() {
+      var d = document.getElementById('demo').style;
+      document.getElementById('codigo-container').textContent =
+        '.demo {\n'
+        + '  display: flex;\n'
+        + '  flex-direction: ' + (d.flexDirection || 'row') + ';\n'
+        + '  justify-content: ' + (d.justifyContent || 'flex-start') + ';\n'
+        + '  align-items: ' + (d.alignItems || 'stretch') + ';\n'
+        + '  align-content: ' + (d.alignContent || 'normal') + ';\n'
+        + '  flex-wrap: ' + (d.flexWrap || 'nowrap') + ';\n'
+        + '  gap: ' + (d.gap || '16px') + ';\n'
+        + '}';
+    }
+
+    function atualizarCodigoFilho() {
+      var e = estadoFilhos[cardAtual];
+      document.getElementById('codigo-filho').textContent =
+        '.card:nth-child(' + (cardAtual + 1) + ') {\n'
+        + '  flex-grow: ' + e.flexGrow + ';\n'
+        + '  flex-shrink: ' + e.flexShrink + ';\n'
+        + '  flex-basis: ' + e.flexBasis + ';\n'
+        + '  align-self: ' + e.alignSelf + ';\n'
+        + '  order: ' + e.order + ';\n'
+        + '}';
+    }
+
+    document.querySelectorAll('.card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        var index = parseInt(this.getAttribute('data-index'));
+        document.querySelector('.grupo:nth-child(2) select').value = index;
+        selecionarCard(index);
+      });
+    });
+
+    selecionarCard(0);
+    atualizarCodigoContainer();
+  </script>
+
+</body>
+</html>

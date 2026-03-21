@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grelio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e12;
+    --surface: #15161c;
+    --surface2: #1c1d27;
+    --surface3: #23253380;
+    --border: #2a2c3a;
+    --border2: #353749;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43d9ad;
+    --accent4: #f5a623;
+    --text: #e8e9f0;
+    --text2: #9091a4;
+    --text3: #5c5e73;
+    --col-todo: #6c63ff;
+    --col-doing: #f5a623;
+    --col-review: #43d9ad;
+    --col-done: #3ecf8e;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    position: relative;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .board-tabs {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .board-tabs::-webkit-scrollbar { display: none; }
+
+  .board-tab {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .board-tab:hover { color: var(--text); background: var(--surface2); }
+  .board-tab.active { color: var(--text); background: var(--surface2); border-color: var(--border2); }
+  .board-tab .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #7c74ff; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-danger { background: #ff4757; color: #fff; }
+  .btn-danger:hover { background: #ff6b81; }
+
+  .icon-btn {
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    color: var(--text2); cursor: pointer;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 16px;
+  }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+
+  /* ── LAYOUT ── */
+  .app-body {
+    height: calc(100vh - 52px);
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.3s;
+  }
+  .sidebar.collapsed { width: 52px; }
+
+  .sidebar-section {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 4px 4px 8px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.2s;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: var(--surface2); color: var(--accent); }
+  .sidebar-icon { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
+
+  /* QUIZ WIDGET in sidebar */
+  .quiz-widget {
+    margin: 8px;
+    background: linear-gradient(135deg, #1a1b2e, #12131f);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quiz-widget:hover { border-color: var(--accent); }
+  .quiz-widget-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .quiz-widget-q {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+  .quiz-xp {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .xp-bar { flex: 1; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .xp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.5s ease; }
+  .xp-label { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  /* ── BOARD AREA ── */
+  .board-area {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  /* ── COLUMNS ── */
+  .column {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 92px);
+    transition: border-color 0.2s;
+  }
+  .column.drag-over {
+    border-color: var(--accent);
+    background: #1a1b2e;
+  }
+
+  .col-header {
+    padding: 14px 14px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .col-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .col-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    flex: 1;
+    letter-spacing: 0.3px;
+  }
+  .col-count {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    background: var(--surface2);
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .col-cards {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .col-footer {
+    padding: 8px 10px;
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+  }
+  .add-card-btn {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text3);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+  .add-card-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.05); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    cursor: grab;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .card.dragging { opacity: 0.4; transform: rotate(2deg); }
+  .card.drag-placeholder { border: 2px dashed var(--accent); background: rgba(108,99,255,0.05); min-height: 60px; }
+
+  /* Card accent stripe */
+  .card-stripe {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .tag-ux { background: rgba(108,99,255,0.2); color: #a89fff; }
+  .tag-dev { background: rgba(67,217,173,0.15); color: #43d9ad; }
+  .tag-marketing { background: rgba(255,101,132,0.15); color: #ff6584; }
+  .tag-study { background: rgba(245,166,35,0.15); color: #f5a623; }
+  .tag-english { background: rgba(62,207,142,0.15); color: #3ecf8e; }
+
+  .card-title {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  /* Card visual zone — imagem usada como CONTEXTO, não decoração */
+  .card-visual {
+    margin: 0 -12px;
+    margin-top: -4px;
+    margin-bottom: 10px;
+    height: 80px;
+    background: var(--surface);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-visual img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
+  .card-visual-label {
+    position: absolute;
+    bottom: 6px; left: 8px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+    font-family: 'DM Mono', monospace;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Progress bar */
+  .card-progress {
+    margin-bottom: 8px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+  .card-meta-item.due-soon { color: var(--accent4); }
+  .card-meta-item.overdue { color: var(--accent2); }
+
+  /* Add column button */
+  .add-column-btn {
+    width: 240px;
+    flex-shrink: 0;
+    height: 52px;
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text3);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .add-column-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.05); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.hidden { display: none; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 660px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.25s ease;
+    scrollbar-width: thin;
+  }
+
+  .modal-header {
+    padding: 20px 24px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .modal-type-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .modal-title-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    line-height: 1.3;
+  }
+  .modal-title-input::placeholder { color: var(--text3); }
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text3);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { color: var(--text); background: var(--surface2); }
+
+  .modal-body { padding: 16px 24px 24px; }
+
+  .modal-section {
+    margin-bottom: 20px;
+  }
+  .modal-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--text3); }
+
+  textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+  /* Template picker */
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .template-card {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    text-align: center;
+  }
+  .template-card:hover { border-color: var(--accent); }
+  .template-card.selected { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+  .template-icon { font-size: 22px; margin-bottom: 6px; }
+  .template-name { font-size: 11px; font-weight: 600; color: var(--text2); }
+
+  /* Checklist */
+  .checklist-items { display: flex; flex-direction: column; gap: 6px; }
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    group: true;
+  }
+  .checklist-item.dismissed { opacity: 0.4; }
+  .checklist-item input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 15px; height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .checklist-item-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .checklist-item-text.done { text-decoration: line-through; color: var(--text3); }
+  .dismiss-btn {
+    background: transparent;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0;
+  }
+  .checklist-item:hover .dismiss-btn { opacity: 1; }
+  .dismiss-btn:hover { color: var(--accent2); background: rgba(255,101,132,0.1); }
+
+  .add-item-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .add-item-row input {
+    flex: 1;
+  }
+
+  /* Tags selector */
+  .tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag-option {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tag-option.selected { border-color: currentColor; }
+
+  /* Color picker for column */
+  .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .color-swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+
+  /* ── QUIZ MODAL ── */
+  .quiz-modal { max-width: 520px; }
+  .quiz-question {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .quiz-code {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #a89fff;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-option {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.2s;
+    font-family: 'DM Mono', monospace;
+  }
+  .quiz-option:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-option.correct { border-color: var(--accent3); background: rgba(67,217,173,0.1); color: var(--accent3); }
+  .quiz-option.wrong { border-color: var(--accent2); background: rgba(255,101,132,0.1); color: var(--accent2); }
+  .quiz-explanation {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent3);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    display: none;
+  }
+  .quiz-explanation.show { display: block; }
+
+  .quiz-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .quiz-counter { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); }
+  .quiz-bar { flex: 1; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .quiz-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 4px; transition: width 0.4s; }
+
+  /* ── BOARD CREATION ── */
+  .new-board-modal { max-width: 420px; }
+
+  /* ── TOAST ── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+    max-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+  /* ── EMPTY STATE ── */
+  .empty-board {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    text-align: center;
+    gap: 12px;
+    padding: 40px;
+  }
+  .empty-board-icon { font-size: 48px; }
+  .empty-board h3 { font-family: 'Syne', sans-serif; font-size: 20px; color: var(--text2); }
+  .empty-board p { font-size: 13px; line-height: 1.6; max-width: 300px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+  /* Mobile adjust */
+  @media (max-width: 600px) {
+    .sidebar { display: none; }
+    .column { width: 85vw; }
+  }
+
+  /* Inline edit active */
+  [contenteditable="true"]:focus { outline: none; }
+
+  .learn-path {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .learn-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    font-size: 12px;
+  }
+  .learn-step.current { border-color: var(--accent4); color: var(--accent4); }
+  .learn-step.done { border-color: var(--accent3); color: var(--accent3); }
+  .learn-step .step-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .learn-step-label { flex: 1; }
+  .learn-step-status { font-family: 'DM Mono', monospace; font-size: 10px; }
+
+  .date-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    outline: none;
+    cursor: pointer;
+  }
+  .date-input:focus { border-color: var(--accent); }
+
+  /* Image upload area */
+  .image-upload-area {
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    position: relative;
+  }
+  .image-upload-area:hover { border-color: var(--accent); color: var(--accent); }
+  .image-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .image-preview {
+    position: relative;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    height: 100px;
+    margin-top: 8px;
+  }
+  .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .image-preview-label {
+    position: absolute;
+    bottom: 6px; left: 8px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.6);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .flex { display: flex; }
+  .gap-8 { gap: 8px; }
+  .mt-8 { margin-top: 8px; }
+  .select-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 100%;
+    cursor: pointer;
+  }
+  .select-input:focus { border-color: var(--accent); }
+
+  /* study card special */
+  .card-learn-steps {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .card-learn-mini {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .card-learn-mini .mini-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); }
+  .card-learn-mini.current-step { color: var(--accent4); }
+  .card-learn-mini.current-step .mini-dot { background: var(--accent4); }
+  .card-learn-mini.done-step { color: var(--accent3); text-decoration: line-through; opacity: 0.5; }
+  .card-learn-mini.done-step .mini-dot { background: var(--accent3); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo" onclick="showView('boards')">Grelio</div>
+  <div class="board-tabs" id="boardTabs"></div>
+  <div class="topbar-actions">
+    <button class="icon-btn" onclick="openQuizModal()" title="Quiz rápido">🎯</button>
+    <button class="icon-btn" onclick="exportData()" title="Exportar dados">💾</button>
+    <button class="btn btn-primary" onclick="openNewBoardModal()">+ Quadro</button>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navegação</div>
+      <div class="sidebar-item active" onclick="showView('board')">
+        <span class="sidebar-icon">🗂️</span>
+        <span>Quadro</span>
+      </div>
+      <div class="sidebar-item" onclick="openQuizModal()">
+        <span class="sidebar-icon">🧠</span>
+        <span>Quiz</span>
+      </div>
+    </div>
+
+    <!-- QUIZ WIDGET -->
+    <div class="quiz-widget" onclick="openQuizModal()">
+      <div class="quiz-widget-title">⚡ Aprendizado</div>
+      <div class="quiz-widget-q" id="sidebarQuizPreview">Clique para um quiz rápido de HTML/CSS</div>
+      <div class="quiz-xp">
+        <div class="xp-bar"><div class="xp-fill" id="xpBarFill" style="width:0%"></div></div>
+        <div class="xp-label" id="xpLabel">0 XP</div>
+      </div>
+    </div>
+
+    <!-- LEARN PATH -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Trilha</div>
+      <div class="learn-path">
+        <div class="learn-step current">
+          <div class="step-dot"></div>
+          <div class="learn-step-label">HTML / CSS</div>
+          <div class="learn-step-status">atual</div>
+        </div>
+        <div class="learn-step">
+          <div class="step-dot"></div>
+          <div class="learn-step-label">CSS avançado</div>
+          <div class="learn-step-status">—</div>
+        </div>
+        <div class="learn-step">
+          <div class="step-dot"></div>
+          <div class="learn-step-label">JS básico</div>
+          <div class="learn-step-status">—</div>
+        </div>
+        <div class="learn-step">
+          <div class="step-dot"></div>
+          <div class="learn-step-label">JavaScript</div>
+          <div class="learn-step-status">—</div>
+        </div>
+        <div class="learn-step">
+          <div class="step-dot"></div>
+          <div class="learn-step-label">React JS</div>
+          <div class="learn-step-status">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARD AREA -->
+  <div class="board-area" id="boardArea">
+    <div class="empty-board" id="emptyState">
+      <div class="empty-board-icon">🗂️</div>
+      <h3>Nenhum quadro ainda</h3>
+      <p>Crie seu primeiro quadro clicando em <strong>+ Quadro</strong> lá em cima.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL: NOVO CARD -->
+<div class="modal-overlay hidden" id="cardModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-type-badge" id="cardTypeBadge">UX</span>
+      <input class="modal-title-input" id="cardTitleInput" placeholder="Título do card...">
+      <button class="modal-close" onclick="closeModal('cardModal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- TEMPLATE SELECTOR -->
+      <div class="modal-section">
+        <div class="modal-section-title">📐 Tipo de projeto</div>
+        <div class="template-grid">
+          <div class="template-card selected" data-template="ux" onclick="selectTemplate('ux')">
+            <div class="template-icon">🎨</div>
+            <div class="template-name">UX / Interface</div>
+          </div>
+          <div class="template-card" data-template="marketing" onclick="selectTemplate('marketing')">
+            <div class="template-icon">📣</div>
+            <div class="template-name">Marketing</div>
+          </div>
+          <div class="template-card" data-template="dev" onclick="selectTemplate('dev')">
+            <div class="template-icon">💻</div>
+            <div class="template-name">Dev / Site</div>
+          </div>
+          <div class="template-card" data-template="study_code" onclick="selectTemplate('study_code')">
+            <div class="template-icon">🧑‍💻</div>
+            <div class="template-name">Estudo: Código</div>
+          </div>
+          <div class="template-card" data-template="study_lang" onclick="selectTemplate('study_lang')">
+            <div class="template-icon">🌎</div>
+            <div class="template-name">Estudo: Idioma</div>
+          </div>
+          <div class="template-card" data-template="free" onclick="selectTemplate('free')">
+            <div class="template-icon">🆓</div>
+            <div class="template-name">Livre</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAGS -->
+      <div class="modal-section">
+        <div class="modal-section-title">🏷️ Etiquetas</div>
+        <div class="tags-row" id="tagsRow"></div>
+      </div>
+
+      <!-- DATA ENTREGA -->
+      <div class="modal-section">
+        <div class="modal-section-title">📅 Data de entrega</div>
+        <input type="date" class="date-input" id="cardDueDate">
+      </div>
+
+      <!-- IMAGEM DE CONTEXTO -->
+      <div class="modal-section">
+        <div class="modal-section-title">🖼️ Imagem de contexto <span style="font-size:10px;color:var(--text3);font-weight:400;font-family:'DM Mono',monospace;">(referência visual do projeto)</span></div>
+        <div class="image-upload-area" id="imageUploadArea">
+          <input type="file" accept="image/*" id="imageFileInput" onchange="handleImageUpload(event)">
+          <div id="imageUploadPlaceholder">📎 Arraste ou clique para adicionar referência visual</div>
+          <div class="image-preview" id="imagePreview" style="display:none">
+            <img id="imagePreviewImg" src="" alt="">
+            <div class="image-preview-label" id="imagePreviewLabel">referência</div>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <input class="form-input" id="imageLabelInput" placeholder="Legenda da imagem (ex: wireframe tela inicial)">
+        </div>
+      </div>
+
+      <!-- DESCRIÇÃO -->
+      <div class="modal-section">
+        <div class="modal-section-title">📝 Descrição</div>
+        <textarea class="form-input" id="cardDescription" placeholder="Contexto, objetivo, referências..."></textarea>
+      </div>
+
+      <!-- CHECKLIST DINÂMICA POR TEMPLATE -->
+      <div class="modal-section" id="checklistSection">
+        <div class="modal-section-title">✅ Checklist</div>
+        <div class="checklist-items" id="checklistItems"></div>
+        <div class="add-item-row">
+          <input class="form-input" id="newChecklistItem" placeholder="+ Nova tarefa..." onkeydown="if(event.key==='Enter') addChecklistItem()">
+          <button class="btn btn-ghost btn-sm" onclick="addChecklistItem()">Adicionar</button>
+        </div>
+      </div>
+
+      <!-- ESTUDO: TRILHA (only visible for study_code) -->
+      <div class="modal-section" id="learnPathSection" style="display:none">
+        <div class="modal-section-title">📚 Progresso de Estudo</div>
+        <div id="learnPathItems"></div>
+      </div>
+
+      <!-- COLUNA DESTINO -->
+      <div class="modal-section">
+        <div class="modal-section-title">📍 Coluna</div>
+        <select class="select-input" id="cardColumnSelect"></select>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-ghost" onclick="closeModal('cardModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveCard()">Salvar card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO QUADRO -->
+<div class="modal-overlay hidden" id="newBoardModal">
+  <div class="modal new-board-modal">
+    <div class="modal-header">
+      <input class="modal-title-input" id="boardNameInput" placeholder="Nome do quadro...">
+      <button class="modal-close" onclick="closeModal('newBoardModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">🎨 Cor do quadro</div>
+        <div class="color-swatches" id="boardColorSwatches"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-ghost" onclick="closeModal('newBoardModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="createBoard()">Criar quadro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVA COLUNA -->
+<div class="modal-overlay hidden" id="newColumnModal">
+  <div class="modal new-board-modal">
+    <div class="modal-header">
+      <input class="modal-title-input" id="columnNameInput" placeholder="Nome da coluna...">
+      <button class="modal-close" onclick="closeModal('newColumnModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">🎨 Cor da coluna</div>
+        <div class="color-swatches" id="colColorSwatches"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-ghost" onclick="closeModal('newColumnModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="createColumn()">Criar coluna</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: QUIZ -->
+<div class="modal-overlay hidden" id="quizModal">
+  <div class="modal quiz-modal">
+    <div class="modal-header" style="padding-bottom:16px">
+      <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">🧠 Quiz de Aprendizado</span>
+      <button class="modal-close" onclick="closeModal('quizModal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding-top:0">
+      <div class="quiz-progress-row">
+        <span class="quiz-counter" id="quizCounter">1 / 10</span>
+        <div class="quiz-bar"><div class="quiz-bar-fill" id="quizBarFill" style="width:10%"></div></div>
+        <span class="quiz-counter" id="quizScore">0 pts</span>
+      </div>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <pre class="quiz-code" id="quizCode" style="display:none"></pre>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-explanation" id="quizExplanation"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-primary" id="quizNextBtn" onclick="nextQuiz()" style="display:none">Próxima →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VER/EDITAR CARD -->
+<div class="modal-overlay hidden" id="viewCardModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-type-badge" id="viewCardBadge">UX</span>
+      <span style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;flex:1" id="viewCardTitle"></span>
+      <button class="modal-close" onclick="closeModal('viewCardModal')">✕</button>
+    </div>
+    <div class="modal-body" id="viewCardBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const STORAGE_KEY = 'grelio_data';
+
+let state = {
+  boards: [],
+  activeBoardId: null,
+  xp: 0,
+  quizIndex: 0
+};
+
+// ═══════════════════════════════════════
+// QUIZ DATA — edite em lessons.json
+// ═══════════════════════════════════════
+const QUIZ = [
+  {
+    q: "Qual propriedade CSS faz um elemento crescer para ocupar o espaço restante no flexbox?",
+    code: null,
+    options: ["flex-grow: 1", "flex: auto", "width: 100%", "align-self: stretch"],
+    answer: 0,
+    explain: "flex-grow: 1 faz o elemento crescer proporcionalmente ao espaço disponível no container flex."
+  },
+  {
+    q: "O que esse código HTML representa?",
+    code: `<header>\n  <nav>\n    <a href=\"/\">Home</a>\n  </nav>\n</header>`,
+    options: ["Um link dentro de uma navegação dentro do cabeçalho", "Um botão de menu", "Um rodapé com links", "Uma lista de navegação"],
+    answer: 0,
+    explain: "É HTML semântico: header define o cabeçalho, nav a área de navegação, e o <a> é um link."
+  },
+  {
+    q: "Qual a diferença entre 'class' e 'id' no HTML?",
+    code: null,
+    options: [
+      "id é único por página, class pode ser reutilizada",
+      "class é única, id pode repetir",
+      "Não há diferença",
+      "id só funciona com JavaScript"
+    ],
+    answer: 0,
+    explain: "id deve ser único por página (selecionado com #no-css). class pode ser aplicada a múltiplos elementos (selecionada com .no-css)."
+  },
+  {
+    q: "O que faz o 'position: absolute' no CSS?",
+    code: null,
+    options: [
+      "Posiciona o elemento relativo ao ancestral posicionado mais próximo",
+      "Fixa o elemento na tela",
+      "Remove o elemento do fluxo relativo ao body",
+      "Posiciona relativo a si mesmo"
+    ],
+    answer: 0,
+    explain: "position: absolute retira o elemento do fluxo normal e o posiciona em relação ao pai com position diferente de static."
+  },
+  {
+    q: "Qual valor de display transforma um elemento em container flex?",
+    code: `display: ???;`,
+    options: ["flex", "grid", "block", "inline-flex"],
+    answer: 0,
+    explain: "display: flex cria um flex container. Os filhos diretos se tornam flex items automaticamente."
+  },
+  {
+    q: "No CSS, qual seletor aplica estilo APENAS ao segundo <p> de uma div?",
+    code: `div p:nth-child(2) { color: red; }`,
+    options: [
+      "Correto — aplica ao segundo filho p",
+      "Errado — nth-child não funciona assim",
+      "Aplica ao segundo filho de qualquer tipo",
+      "Aplica a todos os p da div"
+    ],
+    answer: 0,
+    explain: "p:nth-child(2) seleciona o segundo filho, desde que ele seja um <p>. É uma das formas mais precisas de selecionar elementos."
+  },
+  {
+    q: "O que é o 'box model' no CSS?",
+    code: null,
+    options: [
+      "Conteúdo + Padding + Border + Margin",
+      "Apenas largura e altura",
+      "Padding + Border",
+      "Margin + Conteúdo"
+    ],
+    answer: 0,
+    explain: "Todo elemento HTML é uma 'caixa' composta por: conteúdo > padding > border > margin. Isso define o espaço total que o elemento ocupa."
+  },
+  {
+    q: "Qual propriedade CSS impede que textos longos quebrem para a próxima linha?",
+    code: null,
+    options: ["white-space: nowrap", "overflow: hidden", "text-overflow: clip", "word-break: keep-all"],
+    answer: 0,
+    explain: "white-space: nowrap mantém o texto em uma única linha. Combine com overflow: hidden e text-overflow: ellipsis para efeito completo."
+  },
+  {
+    q: "Em HTML, qual tag é semanticamente correta para um artigo independente?",
+    code: null,
+    options: ["<article>", "<section>", "<div>", "<main>"],
+    answer: 0,
+    explain: "<article> representa um conteúdo independente e reutilizável, como um post de blog ou notícia. <section> agrupa temas relacionados."
+  },
+  {
+    q: "O que faz o 'z-index' no CSS?",
+    code: null,
+    options: [
+      "Controla a ordem de empilhamento dos elementos",
+      "Define a profundidade 3D",
+      "Controla a opacidade",
+      "Define a ordem no flex"
+    ],
+    answer: 0,
+    explain: "z-index define qual elemento fica 'na frente' quando há sobreposição. Funciona apenas em elementos com position diferente de static."
+  }
+];
+
+// ═══════════════════════════════════════
+// TEMPLATES
+// ═══════════════════════════════════════
+const TEMPLATES = {
+  ux: {
+    name: "UX / Interface",
+    color: "#6c63ff",
+    tag: "ux",
+    badge: "UX",
+    items: [
+      "Definir objetivo da tela",
+      "Wireframe de baixa fidelidade",
+      "Wireframe de alta fidelidade",
+      "Protótipo interativo",
+      "Testes com usuários",
+      "Ajustes pós-teste",
+      "Handoff para dev"
+    ]
+  },
+  marketing: {
+    name: "Marketing Digital",
+    color: "#ff6584",
+    tag: "marketing",
+    badge: "MKT",
+    items: [
+      "Briefing da campanha",
+      "Criar conta de anúncio",
+      "Configurar Pixel",
+      "Definir público-alvo",
+      "Criar criativos",
+      "Subir campanha",
+      "Monitorar resultados"
+    ]
+  },
+  dev: {
+    name: "Dev / Site",
+    color: "#43d9ad",
+    tag: "dev",
+    badge: "DEV",
+    items: [
+      "Definir estrutura de pastas",
+      "Montar HTML base",
+      "Estilizar com CSS",
+      "Responsividade mobile",
+      "Teste cross-browser",
+      "Otimizar performance",
+      "Deploy"
+    ]
+  },
+  study_code: {
+    name: "Estudo: Código",
+    color: "#f5a623",
+    tag: "study",
+    badge: "STUDY",
+    items: [
+      "Ler conteúdo / assistir aula",
+      "Anotar conceitos-chave",
+      "Fazer exercício prático",
+      "Revisar com quiz",
+      "Aplicar em mini-projeto"
+    ]
+  },
+  study_lang: {
+    name: "Estudo: Idioma",
+    color: "#3ecf8e",
+    tag: "english",
+    badge: "LANG",
+    items: [
+      "Vocabulary: 10 palavras novas",
+      "Gramática do dia",
+      "Ouvir podcast / série",
+      "Escrever parágrafo",
+      "Revisão do dia"
+    ]
+  },
+  free: {
+    name: "Livre",
+    color: "#9091a4",
+    tag: null,
+    badge: "MISC",
+    items: []
+  }
+};
+
+const COLORS = [
+  "#6c63ff","#ff6584","#43d9ad","#f5a623","#3ecf8e",
+  "#4fc3f7","#ef5350","#ab47bc","#26a69a","#ec407a"
+];
+
+// ═══════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadState() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { state = { ...state, ...JSON.parse(saved) }; } catch(e) {}
+  }
+}
+
+// EXPORT JSON
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'grelio_data.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('💾 Dados exportados!');
+}
+
+// ═══════════════════════════════════════
+// BOARD MANAGEMENT
+// ═══════════════════════════════════════
+let selectedBoardColor = COLORS[0];
+
+function openNewBoardModal() {
+  selectedBoardColor = COLORS[0];
+  document.getElementById('boardNameInput').value = '';
+  renderColorSwatches('boardColorSwatches', 'selectedBoardColor');
+  openModal('newBoardModal');
+}
+
+function createBoard() {
+  const name = document.getElementById('boardNameInput').value.trim();
+  if (!name) { toast('⚠️ Dê um nome ao quadro'); return; }
+
+  const board = {
+    id: uid(),
+    name,
+    color: selectedBoardColor,
+    columns: [
+      { id: uid(), name: 'A Fazer', color: '#6c63ff', cards: [] },
+      { id: uid(), name: 'Fazendo', color: '#f5a623', cards: [] },
+      { id: uid(), name: 'Feito', color: '#3ecf8e', cards: [] }
+    ]
+  };
+  state.boards.push(board);
+  state.activeBoardId = board.id;
+  saveState();
+  closeModal('newBoardModal');
+  render();
+  toast(`🗂️ Quadro "${name}" criado!`);
+}
+
+// ═══════════════════════════════════════
+// COLUMN MANAGEMENT
+// ═══════════════════════════════════════
+let selectedColColor = COLORS[0];
+
+function openNewColumnModal() {
+  selectedColColor = COLORS[0];
+  document.getElementById('columnNameInput').value = '';
+  renderColorSwatches('colColorSwatches', 'selectedColColor');
+  openModal('newColumnModal');
+}
+
+function createColumn() {
+  const name = document.getElementById('columnNameInput').value.trim();
+  if (!name) { toast('⚠️ Dê um nome à coluna'); return; }
+  const board = getActiveBoard();
+  if (!board) return;
+  board.columns.push({ id: uid(), name, color: selectedColColor, cards: [] });
+  saveState();
+  closeModal('newColumnModal');
+  render();
+  toast(`✅ Coluna "${name}" criada!`);
+}
+
+function deleteColumn(colId) {
+  const board = getActiveBoard();
+  if (!board) return;
+  if (!confirm('Deletar esta coluna e todos os cards dela?')) return;
+  board.columns = board.columns.filter(c => c.id !== colId);
+  saveState();
+  render();
+}
+
+// ═══════════════════════════════════════
+// CARD MANAGEMENT
+// ═══════════════════════════════════════
+let currentTemplate = 'ux';
+let editingCardId = null;
+let editingColId = null;
+let currentImageData = null;
+let currentImageLabel = '';
+
+function openCardModal(colId, cardId = null) {
+  editingColId = colId;
+  editingCardId = cardId;
+  currentImageData = null;
+  currentImageLabel = '';
+
+  // Reset image
+  document.getElementById('imagePreview').style.display = 'none';
+  document.getElementById('imageUploadPlaceholder').style.display = '';
+  document.getElementById('imagePreviewImg').src = '';
+  document.getElementById('imageLabelInput').value = '';
+
+  if (cardId) {
+    // Editing existing
+    const card = findCard(cardId);
+    if (!card) return;
+    document.getElementById('cardTitleInput').value = card.title;
+    document.getElementById('cardDescription').value = card.description || '';
+    document.getElementById('cardDueDate').value = card.dueDate || '';
+    selectTemplate(card.template || 'free', card.checklist || []);
+    if (card.imageData) {
+      currentImageData = card.imageData;
+      currentImageLabel = card.imageLabel || '';
+      document.getElementById('imagePreviewImg').src = card.imageData;
+      document.getElementById('imagePreviewLabel').textContent = currentImageLabel || 'referência';
+      document.getElementById('imagePreview').style.display = '';
+      document.getElementById('imageUploadPlaceholder').style.display = 'none';
+      document.getElementById('imageLabelInput').value = currentImageLabel;
+    }
+    // Set selected tags
+    setTimeout(() => {
+      document.querySelectorAll('.tag-option').forEach(el => {
+        el.classList.toggle('selected', (card.tags || []).includes(el.dataset.tag));
+      });
+    }, 50);
+  } else {
+    document.getElementById('cardTitleInput').value = '';
+    document.getElementById('cardDescription').value = '';
+    document.getElementById('cardDueDate').value = '';
+    selectTemplate('ux');
+  }
+
+  // Populate column selector
+  const board = getActiveBoard();
+  const sel = document.getElementById('cardColumnSelect');
+  sel.innerHTML = board.columns.map(c =>
+    `<option value="${c.id}" ${c.id === colId ? 'selected' : ''}>${c.name}</option>`
+  ).join('');
+
+  openModal('cardModal');
+}
+
+function selectTemplate(tpl, existingItems = null) {
+  currentTemplate = tpl;
+  document.querySelectorAll('.template-card').forEach(el => {
+    el.classList.toggle('selected', el.dataset.template === tpl);
+  });
+
+  const tmpl = TEMPLATES[tpl];
+  const badge = document.getElementById('cardTypeBadge');
+  badge.textContent = tmpl.badge;
+  badge.style.background = tmpl.color + '33';
+  badge.style.color = tmpl.color;
+
+  // Render checklist
+  const items = existingItems !== null ? existingItems : tmpl.items.map(t => ({ text: t, done: false, dismissCount: 0 }));
+  renderChecklist(items);
+
+  // Learn path
+  const lps = document.getElementById('learnPathSection');
+  const lpi = document.getElementById('learnPathItems');
+  if (tpl === 'study_code') {
+    lps.style.display = '';
+    lpi.innerHTML = `
+      <div class="learn-path">
+        ${['HTML / CSS', 'CSS avançado', 'JS básico', 'JavaScript', 'React JS'].map((s, i) => `
+          <div class="learn-step ${i === 0 ? 'current' : ''}">
+            <div class="step-dot"></div>
+            <div class="learn-step-label">${s}</div>
+            <div class="learn-step-status">${i === 0 ? 'atual' : '—'}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    lps.style.display = 'none';
+  }
+
+  // Tags
+  renderTagsRow(tpl);
+}
+
+function renderTagsRow(tpl) {
+  const allTags = [
+    { key: 'ux', label: 'UX', cls: 'tag-ux' },
+    { key: 'dev', label: 'Dev', cls: 'tag-dev' },
+    { key: 'marketing', label: 'MKT', cls: 'tag-marketing' },
+    { key: 'study', label: 'Estudo', cls: 'tag-study' },
+    { key: 'english', label: 'Inglês', cls: 'tag-english' }
+  ];
+  const tmpl = TEMPLATES[tpl];
+  const row = document.getElementById('tagsRow');
+  row.innerHTML = allTags.map(t => `
+    <span class="card-tag tag-option ${t.cls} ${t.key === tmpl.tag ? 'selected' : ''}"
+      data-tag="${t.key}" onclick="toggleTag(this)">
+      ${t.label}
+    </span>
+  `).join('');
+}
+
+function toggleTag(el) {
+  el.classList.toggle('selected');
+}
+
+function renderChecklist(items) {
+  const container = document.getElementById('checklistItems');
+  container.innerHTML = '';
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'checklist-item' + (item.done ? '' : '');
+    div.innerHTML = `
+      <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleChecklistItem(${i})">
+      <input class="checklist-item-text ${item.done ? 'done' : ''}" value="${escHtml(item.text)}" data-idx="${i}"
+        onchange="updateChecklistText(${i}, this.value)">
+      <button class="dismiss-btn" onclick="dismissChecklistItem(${i})" title="Ignorar (${item.dismissCount||0}x)">✕</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function getChecklistItems() {
+  const items = [];
+  document.querySelectorAll('#checklistItems .checklist-item').forEach(div => {
+    const cb = div.querySelector('input[type="checkbox"]');
+    const txt = div.querySelector('input.checklist-item-text');
+    const dismissCount = parseInt(txt.dataset.dismissCount || 0);
+    items.push({ text: txt.value, done: cb.checked, dismissCount });
+  });
+  return items;
+}
+
+function toggleChecklistItem(idx) {
+  // handled at save time
+}
+
+function updateChecklistText(idx, val) {}
+
+function dismissChecklistItem(idx) {
+  const items = getChecklistItems();
+  items[idx].dismissCount = (items[idx].dismissCount || 0) + 1;
+  if (items[idx].dismissCount >= 10) {
+    toast('🗑️ Item removido — apareceu demais como desnecessário!');
+    items.splice(idx, 1);
+  } else {
+    items.splice(idx, 1);
+    toast(`👋 Item ignorado (${items[idx] ? '' : 'removido'} — ignorado ${items[idx]?.dismissCount || ''}x)`);
+  }
+  renderChecklist(items);
+}
+
+function addChecklistItem() {
+  const input = document.getElementById('newChecklistItem');
+  const text = input.value.trim();
+  if (!text) return;
+  const items = getChecklistItems();
+  items.push({ text, done: false, dismissCount: 0 });
+  renderChecklist(items);
+  input.value = '';
+  input.focus();
+}
+
+function getSelectedTags() {
+  return Array.from(document.querySelectorAll('.tag-option.selected')).map(el => el.dataset.tag);
+}
+
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentImageData = e.target.result;
+    document.getElementById('imagePreviewImg').src = currentImageData;
+    document.getElementById('imagePreview').style.display = '';
+    document.getElementById('imageUploadPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveCard() {
+  const title = document.getElementById('cardTitleInput').value.trim();
+  if (!title) { toast('⚠️ Adicione um título'); return; }
+
+  const imageLabel = document.getElementById('imageLabelInput').value.trim();
+  const card = {
+    id: editingCardId || uid(),
+    title,
+    description: document.getElementById('cardDescription').value,
+    dueDate: document.getElementById('cardDueDate').value,
+    template: currentTemplate,
+    tags: getSelectedTags(),
+    checklist: getChecklistItems(),
+    imageData: currentImageData,
+    imageLabel,
+    createdAt: editingCardId ? undefined : new Date().toISOString()
+  };
+
+  const board = getActiveBoard();
+  const targetColId = document.getElementById('cardColumnSelect').value;
+
+  if (editingCardId) {
+    // Remove from old col
+    board.columns.forEach(col => {
+      col.cards = col.cards.filter(c => c.id !== editingCardId);
+    });
+  }
+
+  const targetCol = board.columns.find(c => c.id === targetColId);
+  if (targetCol) targetCol.cards.push(card);
+
+  saveState();
+  closeModal('cardModal');
+  render();
+  toast('✅ Card salvo!');
+}
+
+function deleteCard(cardId) {
+  if (!confirm('Deletar este card?')) return;
+  const board = getActiveBoard();
+  board.columns.forEach(col => { col.cards = col.cards.filter(c => c.id !== cardId); });
+  saveState(); render(); closeModal('viewCardModal');
+}
+
+function openViewCard(cardId, colId) {
+  const card = findCard(cardId);
+  if (!card) return;
+  const tmpl = TEMPLATES[card.template] || TEMPLATES.free;
+  const badge = document.getElementById('viewCardBadge');
+  badge.textContent = tmpl.badge;
+  badge.style.background = tmpl.color + '33';
+  badge.style.color = tmpl.color;
+  document.getElementById('viewCardTitle').textContent = card.title;
+
+  const done = card.checklist ? card.checklist.filter(i => i.done).length : 0;
+  const total = card.checklist ? card.checklist.length : 0;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+
+  let checklistHtml = '';
+  if (card.checklist && card.checklist.length) {
+    checklistHtml = `
+      <div class="modal-section">
+        <div class="modal-section-title">✅ Checklist — ${done}/${total}</div>
+        <div class="progress-bar" style="margin-bottom:10px"><div class="progress-fill" style="width:${pct}%;background:${tmpl.color}"></div></div>
+        <div class="checklist-items">
+          ${card.checklist.map((item, i) => `
+            <div class="checklist-item">
+              <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCardItem('${cardId}', ${i}, this.checked)">
+              <span class="${item.done ? 'checklist-item-text done' : 'checklist-item-text'}">${escHtml(item.text)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  let imageHtml = '';
+  if (card.imageData) {
+    imageHtml = `
+      <div class="modal-section">
+        <div class="modal-section-title">🖼️ Referência Visual</div>
+        <div class="image-preview" style="height:140px">
+          <img src="${card.imageData}" alt="">
+          <div class="image-preview-label">${escHtml(card.imageLabel || 'referência')}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  let descHtml = '';
+  if (card.description) {
+    descHtml = `
+      <div class="modal-section">
+        <div class="modal-section-title">📝 Descrição</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">${escHtml(card.description)}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById('viewCardBody').innerHTML = `
+    ${imageHtml}
+    ${descHtml}
+    ${checklistHtml}
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-ghost btn-sm" onclick="openCardModal('${colId}','${cardId}');closeModal('viewCardModal')">✏️ Editar</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteCard('${cardId}')">🗑️ Deletar</button>
+    </div>
+  `;
+
+  openModal('viewCardModal');
+}
+
+function toggleCardItem(cardId, itemIdx, checked) {
+  const card = findCard(cardId);
+  if (!card || !card.checklist[itemIdx]) return;
+  card.checklist[itemIdx].done = checked;
+  saveState();
+  render();
+}
+
+// ═══════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════
+let dragCardId = null;
+let dragColId = null;
+
+function setupDrag(cardEl, cardId, colId) {
+  cardEl.draggable = true;
+  cardEl.addEventListener('dragstart', e => {
+    dragCardId = cardId;
+    dragColId = colId;
+    cardEl.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  cardEl.addEventListener('dragend', () => {
+    dragCardId = null; dragColId = null;
+    cardEl.classList.remove('dragging');
+    document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+  });
+}
+
+function setupDropZone(colEl, colId) {
+  colEl.addEventListener('dragover', e => {
+    e.preventDefault();
+    colEl.classList.add('drag-over');
+  });
+  colEl.addEventListener('dragleave', () => colEl.classList.remove('drag-over'));
+  colEl.addEventListener('drop', e => {
+    e.preventDefault();
+    colEl.classList.remove('drag-over');
+    if (!dragCardId || dragColId === colId) return;
+    const board = getActiveBoard();
+    let movedCard;
+    board.columns.forEach(col => {
+      const idx = col.cards.findIndex(c => c.id === dragCardId);
+      if (idx !== -1) { movedCard = col.cards.splice(idx, 1)[0]; }
+    });
+    if (movedCard) {
+      const targetCol = board.columns.find(c => c.id === colId);
+      if (targetCol) targetCol.cards.push(movedCard);
+    }
+    saveState(); render();
+    toast(`↪️ Card movido!`);
+  });
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render() {
+  renderBoardTabs();
+  renderBoard();
+  updateXP();
+}
+
+function renderBoardTabs() {
+  const container = document.getElementById('boardTabs');
+  container.innerHTML = state.boards.map(b => `
+    <div class="board-tab ${b.id === state.activeBoardId ? 'active' : ''}" onclick="setActiveBoard('${b.id}')">
+      <span class="dot" style="background:${b.color}"></span>
+      ${escHtml(b.name)}
+    </div>
+  `).join('');
+}
+
+function renderBoard() {
+  const area = document.getElementById('boardArea');
+  const empty = document.getElementById('emptyState');
+  const board = getActiveBoard();
+
+  if (!board) {
+    empty.style.display = 'flex';
+    area.innerHTML = '';
+    area.appendChild(empty);
+    return;
+  }
+  empty.style.display = 'none';
+
+  const cols = board.columns.map(col => renderColumn(col)).join('');
+  area.innerHTML = cols + `
+    <button class="add-column-btn" onclick="openNewColumnModal()">
+      <span>＋</span> Nova coluna
+    </button>
+  `;
+
+  // Setup drop zones
+  board.columns.forEach(col => {
+    const el = document.getElementById('col-' + col.id);
+    if (el) setupDropZone(el, col.id);
+  });
+
+  // Setup drags
+  board.columns.forEach(col => {
+    col.cards.forEach(card => {
+      const el = document.getElementById('card-' + card.id);
+      if (el) setupDrag(el, card.id, col.id);
+    });
+  });
+}
+
+function renderColumn(col) {
+  const cards = col.cards.map(card => renderCard(card, col)).join('');
+  return `
+    <div class="column" id="col-${col.id}">
+      <div class="col-header">
+        <div class="col-dot" style="background:${col.color}"></div>
+        <div class="col-title">${escHtml(col.name)}</div>
+        <span class="col-count">${col.cards.length}</span>
+        <button class="icon-btn" onclick="deleteColumn('${col.id}')" title="Deletar coluna" style="font-size:12px">✕</button>
+      </div>
+      <div class="col-cards">
+        ${cards}
+      </div>
+      <div class="col-footer">
+        <button class="add-card-btn" onclick="openCardModal('${col.id}')">
+          <span>＋</span> Adicionar card
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCard(card, col) {
+  const tmpl = TEMPLATES[card.template] || TEMPLATES.free;
+  const done = card.checklist ? card.checklist.filter(i => i.done).length : 0;
+  const total = card.checklist ? card.checklist.length : 0;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+
+  const tagsHtml = (card.tags || []).map(t => {
+    const tagMap = { ux: 'tag-ux', dev: 'tag-dev', marketing: 'tag-marketing', study: 'tag-study', english: 'tag-english' };
+    return `<span class="card-tag ${tagMap[t] || ''}">${t}</span>`;
+  }).join('');
+
+  const dueHtml = card.dueDate ? (() => {
+    const diff = (new Date(card.dueDate) - new Date()) / 86400000;
+    const cls = diff < 0 ? 'overdue' : diff < 3 ? 'due-soon' : '';
+    const label = diff < 0 ? '⚠ ' + card.dueDate : '⏰ ' + card.dueDate;
+    return `<span class="card-meta-item ${cls}">${label}</span>`;
+  })() : '';
+
+  const progressHtml = total > 0 ? `
+    <div class="card-progress">
+      <div class="progress-header">
+        <span>Checklist</span>
+        <span>${done}/${total}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${pct}%;background:${tmpl.color}"></div>
+      </div>
+    </div>
+  ` : '';
+
+  const imageHtml = card.imageData ? `
+    <div class="card-visual">
+      <img src="${card.imageData}" alt="">
+      <div class="card-visual-label">${escHtml(card.imageLabel || 'referência')}</div>
+    </div>
+  ` : '';
+
+  return `
+    <div class="card" id="card-${card.id}" onclick="openViewCard('${card.id}','${col.id}')">
+      <div class="card-stripe" style="background:${tmpl.color}"></div>
+      ${tagsHtml ? `<div class="card-tags">${tagsHtml}</div>` : ''}
+      ${imageHtml}
+      <div class="card-title">${escHtml(card.title)}</div>
+      ${progressHtml}
+      <div class="card-meta">${dueHtml}</div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════
+let quizCurrentIdx = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+function openQuizModal() {
+  quizCurrentIdx = 0;
+  quizScore = 0;
+  renderQuiz();
+  openModal('quizModal');
+}
+
+function renderQuiz() {
+  const q = QUIZ[quizCurrentIdx];
+  quizAnswered = false;
+  document.getElementById('quizQuestion').textContent = q.q;
+
+  const codeEl = document.getElementById('quizCode');
+  if (q.code) { codeEl.textContent = q.code; codeEl.style.display = ''; }
+  else { codeEl.style.display = 'none'; }
+
+  document.getElementById('quizOptions').innerHTML = q.options.map((opt, i) => `
+    <div class="quiz-option" onclick="answerQuiz(${i})">${opt}</div>
+  `).join('');
+
+  document.getElementById('quizExplanation').className = 'quiz-explanation';
+  document.getElementById('quizExplanation').textContent = '';
+  document.getElementById('quizNextBtn').style.display = 'none';
+  document.getElementById('quizCounter').textContent = `${quizCurrentIdx + 1} / ${QUIZ.length}`;
+  document.getElementById('quizBarFill').style.width = `${(quizCurrentIdx / QUIZ.length) * 100}%`;
+  document.getElementById('quizScore').textContent = quizScore + ' pts';
+}
+
+function answerQuiz(idx) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = QUIZ[quizCurrentIdx];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach((el, i) => {
+    if (i === q.answer) el.classList.add('correct');
+    else if (i === idx && idx !== q.answer) el.classList.add('wrong');
+  });
+  if (idx === q.answer) {
+    quizScore += 10;
+    state.xp = (state.xp || 0) + 10;
+    saveState(); updateXP();
+    toast('🎉 +10 XP!');
+  }
+  const expEl = document.getElementById('quizExplanation');
+  expEl.textContent = q.explain;
+  expEl.classList.add('show');
+  document.getElementById('quizNextBtn').style.display = '';
+  document.getElementById('quizScore').textContent = quizScore + ' pts';
+}
+
+function nextQuiz() {
+  quizCurrentIdx++;
+  if (quizCurrentIdx >= QUIZ.length) {
+    document.getElementById('quizQuestion').textContent = `🏆 Fim! Você fez ${quizScore} pontos!`;
+    document.getElementById('quizCode').style.display = 'none';
+    document.getElementById('quizOptions').innerHTML = '';
+    document.getElementById('quizExplanation').className = 'quiz-explanation';
+    document.getElementById('quizNextBtn').style.display = 'none';
+    document.getElementById('quizBarFill').style.width = '100%';
+    return;
+  }
+  renderQuiz();
+}
+
+function updateXP() {
+  const xp = state.xp || 0;
+  const maxXP = 500;
+  document.getElementById('xpBarFill').style.width = Math.min(100, (xp / maxXP) * 100) + '%';
+  document.getElementById('xpLabel').textContent = xp + ' XP';
+  document.getElementById('sidebarQuizPreview').textContent =
+    QUIZ[quizCurrentIdx % QUIZ.length].q.substring(0, 60) + '...';
+}
+
+// ═══════════════════════════════════════
+// COLOR SWATCHES
+// ═══════════════════════════════════════
+function renderColorSwatches(containerId, varName) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = COLORS.map(c => `
+    <div class="color-swatch ${window[varName] === c ? 'selected' : ''}"
+      style="background:${c}" onclick="pickColor('${c}','${containerId}','${varName}')"></div>
+  `).join('');
+}
+
+function pickColor(color, containerId, varName) {
+  window[varName] = color;
+  renderColorSwatches(containerId, varName);
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getActiveBoard() {
+  return state.boards.find(b => b.id === state.activeBoardId) || null;
+}
+
+function setActiveBoard(id) {
+  state.activeBoardId = id;
+  saveState(); render();
+}
+
+function findCard(cardId) {
+  const board = getActiveBoard();
+  if (!board) return null;
+  for (const col of board.columns) {
+    const card = col.cards.find(c => c.id === cardId);
+    if (card) return card;
+  }
+  return null;
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+function toast(msg) {
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function showView(v) {
+  // future: switch between views
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.add('hidden');
+  });
+});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+loadState();
+
+// Create default board if none
+if (state.boards.length === 0) {
+  const defaultBoard = {
+    id: uid(),
+    name: 'teken - atividades',
+    color: '#6c63ff',
+    columns: [
+      { id: uid(), name: 'A Fazer', color: '#6c63ff', cards: [] },
+      { id: uid(), name: 'Fazendo', color: '#f5a623', cards: [
+        {
+          id: uid(),
+          title: 'Fácil - Campanha',
+          description: 'Configurar acesso a redes e campanhas de marketing.',
+          dueDate: '2026-02-25',
+          template: 'marketing',
+          tags: ['marketing'],
+          checklist: [
+            { text: 'Criar conta de anúncio', done: false, dismissCount: 0 },
+            { text: 'Colocar Pixel', done: false, dismissCount: 0 },
+            { text: 'Alteração de Campanha Acelera Aí', done: true, dismissCount: 0 },
+            { text: 'Perfil Demográfico + estimativa', done: false, dismissCount: 0 }
+          ],
+          imageData: null,
+          imageLabel: '',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: uid(),
+          title: 'Predialtech - Site',
+          description: 'Desenvolvimento do site da Predialtech.',
+          template: 'dev',
+          tags: ['dev'],
+          checklist: Array.from({length: 11}, (_,i) => ({ text: `Tarefa ${i+1}`, done: i === 0, dismissCount: 0 })),
+          imageData: null, imageLabel: '', createdAt: new Date().toISOString()
+        }
+      ]},
+      { id: uid(), name: 'Feito', color: '#3ecf8e', cards: [] }
+    ]
+  };
+  state.boards.push(defaultBoard);
+  state.activeBoardId = defaultBoard.id;
+  saveState();
+}
+
+render();
+</script>
+</body>
+</html>
