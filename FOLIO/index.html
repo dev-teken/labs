@@ -659,9 +659,6 @@ nav {
 }
 .modal-esc.gone { opacity: 0; }
 
-/* ════════════════════════════════════════════
-   SCROLL REVEAL
-════════════════════════════════════════════ */
 .fade-up {
   opacity: 0; transform: translateY(18px);
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -862,14 +859,15 @@ nav {
          onclick="openModal('https://www.threads.net/@tutoprompt/post/DWIUO49CGrh','Soul Gradient — v5','https://www.threads.net/@tutoprompt/post/DWIUO49CGrh')"
          role="button" tabindex="0"
          aria-label="Ver preview Soul Gradient">
-      <!-- Mídia do Threads como capa -->
+      <!-- Screenshot gerado pelo Puppeteer no VPS — atualizado via /snap endpoint -->
       <img
         class="thumb-visual"
-        src="https://www.threads.com/@tutoprompt/post/DWIUO49CGrh/media?hl=pt-br"
-        alt="Soul Gradient — preview"
+        src="http://191.252.93.74/screenshots/soul-gradient.jpg"
+        alt="Soul Gradient — preview ao vivo"
         loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
       />
+      <!-- fallback SVG: só aparece se a imagem falhar -->
       <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
         <defs>
           <radialGradient id="g1" cx="30%" cy="50%" r="60%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#0a0a09" stop-opacity="0"/></radialGradient>
@@ -1198,7 +1196,6 @@ window.addEventListener('scroll', () => {
   nls.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
 }, { passive: true });
 
-/* ── Thumb keyboard a11y ──────────────────── */
 document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
   el.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
