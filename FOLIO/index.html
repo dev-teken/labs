@@ -1443,16 +1443,16 @@ body, nav, .lab-card, .card-body, .card-foot,
     </div>
   </div>
 
-  <!-- â”€â”€ 003 Trália â”€â”€ -->
+  <!-- â”€â”€ 003 Tralha â”€â”€ -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
          onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
          role="button" tabindex="0"
-         aria-label="Ver preview Trália">
+         aria-label="Ver preview Tralha">
       <img
         class="thumb-visual"
         src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/tralia.jpg"
-        alt="Trália ”” preview"
+        alt="Tralha ”” preview"
         loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
       />
@@ -1497,13 +1497,13 @@ body, nav, .lab-card, .card-body, .card-foot,
     </div>
     <div class="card-body" style="display:grid;grid-template-columns:1fr auto;align-items:center;padding:1.6rem 1.854rem 1.348rem;gap:2.2rem;">
       <div>
-        <h3 class="card-title">Trália <em>”” Sistema de Tarefas</em></h3>
+        <h3 class="card-title">Tralha <em>”” Sistema de Tarefas</em></h3>
         <p class="card-desc">Kanban com múltiplos temas visuais ”” dark, Cyberpunk 2077, aqua. Como o design visual muda a relação com a produtividade?</p>
       </div>
       <div style="display:flex;align-items:center;justify-content:center;padding-left:2.2rem;">
         <button class="btn-circle-preview"
           onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
-          aria-label="Abrir preview Trália">
+          aria-label="Abrir preview Tralha">
           <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 15L15 5M15 5H7M15 5V13"
               stroke="currentColor" stroke-width="1.2"
@@ -1571,7 +1571,7 @@ body, nav, .lab-card, .card-body, .card-foot,
 
       <div class="tl-event fade-up">
         <div class="tl-lbl">Expansão</div>
-        <div class="tl-title">Persona AI e Trália</div>
+        <div class="tl-title">Persona AI e Tralha</div>
         <p class="tl-desc">A questão deixou de ser técnica e virou de design: como a interface muda a relação com o conteúdo? Dois novos projetos, dois novos ângulos da mesma curiosidade.</p>
       </div>
 
@@ -1614,7 +1614,7 @@ body, nav, .lab-card, .card-body, .card-foot,
 <script>
 /* â”€â”€ Intensity slider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/* ── Soul cluster — ultra-leve (~20fps, canvas 120px, 2 blobs) ── */
+/* ── Soul cluster — pausa fora da viewport para não pesar o scroll ── */
 (function () {
   const SOULS = [{ id: 'soul-a', speed: 1.0, hb_speed: 1.4 }];
   const MIN_SPEED = 0.15;
@@ -1626,12 +1626,10 @@ body, nav, .lab-card, .card-body, .card-foot,
 
     const canvas = document.createElement('canvas');
     const ctx    = canvas.getContext('2d');
-    /* 120×120 — 55% menos pixels que 180×180 */
     const W = canvas.width  = 120;
     const H = canvas.height = 120;
     node.appendChild(canvas);
 
-    /* 2 blobs — -33% draws por frame vs 3 */
     const blobs = Array.from({ length: 2 }, (_, i) => ({
       x:  W * 0.3 + Math.random() * W * 0.4,
       y:  H * 0.3 + Math.random() * H * 0.4,
@@ -1644,18 +1642,17 @@ body, nav, .lab-card, .card-body, .card-foot,
     }));
 
     let frame = 0;
+    let rafId = null;
+    let visible = true;
 
     function tick() {
-      /* ~20fps — throttle cada 3 frames */
       frame++;
-      if (frame % 3 !== 0) { requestAnimationFrame(tick); return; }
+      if (frame % 3 !== 0) { rafId = requestAnimationFrame(tick); return; }
 
       const now = performance.now();
       const t   = now * 0.001;
       const hb  = 0.5 + 0.4 * Math.sin(t * cfg.hb_speed);
-
       ctx.clearRect(0, 0, W, H);
-
       const cx = W / 2, cy = H / 2, maxD2 = (W * 0.42) ** 2;
 
       blobs.forEach(b => {
@@ -1664,32 +1661,39 @@ body, nav, .lab-card, .card-body, .card-foot,
           b.vy += (Math.random() - 0.5) * cfg.speed * 1.5;
           b.nextJolt = now + 3000 + Math.random() * 5000;
         }
-
         b.x += b.vx + Math.sin(t * 0.7 + b.phase) * 0.5;
         b.y += b.vy + Math.sin(t * 0.55 + b.phase) * 0.5;
         b.vx = clamp(b.vx * 0.991);
         b.vy = clamp(b.vy * 0.991);
-
         const dx = b.x - cx, dy = b.y - cy, dist2 = dx*dx + dy*dy;
         if (dist2 > maxD2) {
           const dist = Math.sqrt(dist2), over = dist - Math.sqrt(maxD2);
           b.vx -= (dx/dist) * over * 0.02;
           b.vy -= (dy/dist) * over * 0.02;
         }
-
         const r = b.r * (1 + hb * 0.25);
         const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        g.addColorStop(0,   'rgba(140,115,165,0.85)');
-        g.addColorStop(1,   'rgba(0,0,0,0)');
+        g.addColorStop(0, 'rgba(140,115,165,0.85)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     }
-    tick();
+
+    /* pausa assim que o usuário scrollar qualquer pixel, retoma ao topo */
+    function syncScroll() {
+      const atTop = window.scrollY < 10;
+      if (atTop && !rafId)  { rafId = requestAnimationFrame(tick); }
+      if (!atTop && rafId)  { cancelAnimationFrame(rafId); rafId = null; }
+    }
+    window.addEventListener('scroll', syncScroll, { passive: true });
+    syncScroll();
+
+    rafId = requestAnimationFrame(tick);
   }
 
   SOULS.forEach(cfg => createSoul(cfg));
@@ -1808,20 +1812,18 @@ document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
   });
 });
 
-/* ── Mini soul hero — leve: canvas 700×200, 3 blobs, ~20fps ── */
+/* ── Mini soul hero — pausa fora da viewport ── */
 (function() {
   const node = document.getElementById('hero-mini-soul');
   if (!node) return;
 
   const canvas = document.createElement('canvas');
   const ctx    = canvas.getContext('2d');
-  /* 700×200 — 50% da área de 1400×400 */
   canvas.width  = 700;
   canvas.height = 200;
   node.appendChild(canvas);
   const W = canvas.width, H = canvas.height;
 
-  /* 3 blobs — -40% vs 5 */
   const BLOBS = [
     { h: 200, s: 75, l: 62 },
     { h: 148, s: 65, l: 55 },
@@ -1842,12 +1844,11 @@ document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
 
   const MIN_VX = 0.10;
   let frame = 0;
+  let rafId  = null;
 
   function tick() {
-    /* ~20fps */
     frame++;
-    if (frame % 3 !== 0) { requestAnimationFrame(tick); return; }
-
+    if (frame % 3 !== 0) { rafId = requestAnimationFrame(tick); return; }
     const now = performance.now();
     const t   = now * 0.0007;
     ctx.clearRect(0, 0, W, H);
@@ -1858,33 +1859,39 @@ document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
         b.vy += (Math.random() - 0.5) * 0.4;
         b.nextJolt = now + 2500 + Math.random() * 4000;
       }
-
       b.x += b.vx + Math.sin(t * 0.75 + b.phase) * 0.6;
       b.y += b.vy + Math.cos(t * 0.60 + b.phase) * 0.3;
       b.vx *= 0.993; b.vy *= 0.993;
       if (Math.abs(b.vx) < MIN_VX) b.vx = (b.vx >= 0 ? 1 : -1) * MIN_VX;
-
       const cx = W * 0.5, cy = H * 0.5;
       const dx = b.x - cx, dy = b.y - cy;
       if (Math.abs(dx) > W * 0.38) b.vx -= dx * 0.004;
       if (Math.abs(dy) > H * 0.30) b.vy -= dy * 0.012;
-
       const r = b.r * (1 + 0.15 * Math.sin(t * 1.4 + b.pulse));
       const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-      g.addColorStop(0,   `hsla(${b.col.h},${b.col.s}%,${b.col.l}%,1)`);
-      g.addColorStop(1,   'rgba(0,0,0,0)');
+      g.addColorStop(0, `hsla(${b.col.h},${b.col.s}%,${b.col.l}%,1)`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   }
-  tick();
+
+  /* pausa ao scrollar, retoma ao topo */
+  function syncScroll() {
+    const atTop = window.scrollY < 10;
+    if (atTop  && !rafId) rafId = requestAnimationFrame(tick);
+    if (!atTop && rafId)  { cancelAnimationFrame(rafId); rafId = null; }
+  }
+  window.addEventListener('scroll', syncScroll, { passive: true });
+  syncScroll();
+  rafId = requestAnimationFrame(tick);
 })();
 
-/* ── Mini soul nos botões — 100×100, 2 blobs, ~30fps ── */
+/* ── Mini soul nos botões — para ao scrollar ── */
 (function() {
   function createMiniSoul(btn) {
     const canvas = document.createElement('canvas');
@@ -1892,7 +1899,6 @@ document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
     canvas.width = canvas.height = 100;
     btn.insertBefore(canvas, btn.firstChild);
 
-    /* 2 blobs */
     const hues = [200, 260];
     const blobs = hues.map((h, i) => ({
       x: 44 + Math.random() * 12,
@@ -1905,13 +1911,13 @@ document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
     }));
 
     let frame = 0;
+    let rafId  = null;
+
     function tick() {
       frame++;
-      if (frame % 2 !== 0) { requestAnimationFrame(tick); return; }
-
+      if (frame % 2 !== 0) { rafId = requestAnimationFrame(tick); return; }
       const t = performance.now() * 0.0007;
       ctx.clearRect(0, 0, 100, 100);
-
       blobs.forEach((b, i) => {
         b.x += b.vx + Math.sin(t * 0.9 + i * 1.4) * 0.35;
         b.y += b.vy + Math.cos(t * 0.8 + i * 1.2) * 0.35;
@@ -1919,19 +1925,27 @@ document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
         const d = Math.sqrt(dx*dx + dy*dy);
         if (d > 38) { b.vx -= dx/d * 0.05; b.vy -= dy/d * 0.05; }
         b.vx *= 0.994; b.vy *= 0.994;
-
         const r = b.r * (1 + Math.sin(t*1.8 + b.pulse) * 0.10);
         const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        g.addColorStop(0,   `hsla(${b.h},75%,68%,1)`);
-        g.addColorStop(1,   'rgba(0,0,0,0)');
+        g.addColorStop(0, `hsla(${b.h},75%,68%,1)`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(b.x, b.y, r, 0, Math.PI*2);
         ctx.fill();
       });
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     }
-    tick();
+
+    /* pausa ao scrollar, retoma ao topo */
+    function syncScroll() {
+      const atTop = window.scrollY < 10;
+      if (atTop  && !rafId) rafId = requestAnimationFrame(tick);
+      if (!atTop && rafId)  { cancelAnimationFrame(rafId); rafId = null; }
+    }
+    window.addEventListener('scroll', syncScroll, { passive: true });
+    syncScroll();
+    rafId = requestAnimationFrame(tick);
   }
 
   document.querySelectorAll('.btn-circle-preview').forEach(createMiniSoul);
