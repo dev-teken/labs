@@ -1,0 +1,1672 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║  PERSONA AI — SNAPSHOT v40  (para quando beber demais e perder a    ║
+║  memória: cola este arquivo num novo chat com o Claude e diz        ║
+║  "continua o projeto a partir deste snapshot")                      ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  CONCEITO SOUL                                                       ║
+║  O elemento #av-mh (canvas circular no masthead) é o "soul" —       ║
+║  identidade visual viva da persona ativa. Exibe degradê animado     ║
+║  de blobs radiais: cores da cor mãe + terceiro acento (accent3).    ║
+║  Falar "soul" com o Claude = falar sobre este canvas e movimento.   ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  SISTEMA DE TEMAS — 4 variáveis por preset no array PR[]:           ║
+║    h / s / l       cor mãe em HSL (pastéis: s ~18-22%, l ~40-48%)  ║
+║    accent3         hex do terceiro blob do soul                     ║
+║                                                                      ║
+║  id          h    s    l    accent3                                  ║
+║  companion  205   22   48   #beffad   (verde-menta · h108 s100 l84) ║
+║  strategist  18   22   42   #c86e8f   (rosa-vinho  · h338 s45  l61) ║
+║  mentor     150   18   40   #e3a434   (âmbar-mel   · h38  s76  l55) ║
+║  creator    270   20   48   #cd68bd   (magenta-lilás h310 s50  l61) ║
+║  executor    38   22   44   #85934d   (verde-musgo · h72  s31  l44) ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  ARQUITETURA SOUL (drawAvatarOnCanvas):                             ║
+║  · blob(ox,oy,r,h,s,l,a)  blob HSL da cor mãe (5 instâncias)      ║
+║  · blobHex(ox,oy,r,hex,a) blob RGB do accent3  (2 instâncias,      ║
+║    fase oposta t*0.38 / t*0.55, orbit mais lenta = contraste vivo)  ║
+║  · T global  tempo contínuo (+=0.0108/frame)                       ║
+║  · HB        heartbeat pulsado, modula raio + opacidade             ║
+║  CSS vars lidas no canvas: --brand-h  --brand-s  --soul-accent3    ║
+║                                                                      ║
+║  PRÓXIMOS PASSOS PLANEJADOS:                                        ║
+║  · símbolo vivo de marca (substituir/sobrepor degradê)             ║
+║  · movimentação temporal além dos blobs (partículas, linhas, etc.) ║
+╚══════════════════════════════════════════════════════════════════════╝
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=Courier+Prime:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* ══ COR MÃE DE CADA TEMA ══
+     Ajuste apenas --brand-h, --brand-s e --brand-l para reidentificar o layout.
+     Os valores abaixo correspondem ao tema padrão: O Executor (areia bege mineral).
+
+     TEMAS DISPONÍVEIS — copie os 3 valores para trocar:
+     Companheiro  → h:205  s:22%  l:48%   (cinza-azul névoa)
+     Estrategista → h:18   s:22%  l:42%   (terracota apagado)
+     Mentor       → h:150  s:18%  l:40%   (sálvia verde-cinza)
+     Criador      → h:270  s:20%  l:48%   (lavanda empoeirado)
+     Executor     → h:38   s:22%  l:44%   (areia bege mineral)  ← padrão */
+  --brand-h: 38;
+  --brand-s: 22%;
+  --brand-l: 44%;
+
+  /* cadeia derivada automaticamente do brand */
+  --brand:        hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --brand-light:  hsl(var(--brand-h), calc(var(--brand-s) * 1.2), 78%);  /* paper / fundo claro */
+  --brand-pale:   hsl(var(--brand-h), calc(var(--brand-s) * 0.9), 93%);  /* paper mais claro */
+  --brand-mid:    hsl(var(--brand-h), calc(var(--brand-s) * 1.1), 62%);  /* bordas e regras */
+  --brand-dark:   hsl(var(--brand-h), calc(var(--brand-s) * 1.3), 22%);  /* tinta escura */
+  --brand-ink:    hsl(var(--brand-h), calc(var(--brand-s) * 0.8), 14%);  /* ink principal */
+
+  /* aliases do layout — todos derivam do brand */
+  --paper:        var(--brand-pale);
+  --rule:         hsl(var(--brand-h), calc(var(--brand-s) * 0.9), 70%);
+  --rule2:        hsl(var(--brand-h), calc(var(--brand-s) * 0.7), 82%);
+  --bg:           var(--paper);
+  --ink:          var(--brand-ink);
+  --ink2:         hsl(var(--brand-h), calc(var(--brand-s) * 1.0), 24%);
+  --ink3:         hsl(var(--brand-h), calc(var(--brand-s) * 0.8), 46%);
+  --ink4:         hsl(var(--brand-h), calc(var(--brand-s) * 0.7), 62%);
+
+  --dp:'Playfair Display',serif;--bd:'Source Serif 4',serif;--mn:'Courier Prime',monospace;
+
+  /* light tokens para áreas escuras */
+  --lt:           var(--brand-pale);
+  --lt78:         hsla(var(--brand-h), calc(var(--brand-s) * 0.9), 88%, 0.78);
+  --lt88:         hsla(var(--brand-h), calc(var(--brand-s) * 0.9), 90%, 0.88);
+  --lt70:         hsla(var(--brand-h), calc(var(--brand-s) * 0.9), 88%, 0.70);
+  --lt55:         hsla(var(--brand-h), calc(var(--brand-s) * 0.9), 88%, 0.55);
+  --glow-swap:    hsla(var(--brand-h), calc(var(--brand-s) * 2.0), 60%, 0.28);
+}
+body{font-family:var(--bd);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;min-width:320px;
+  transition:background .6s cubic-bezier(.4,0,.2,1), color .6s cubic-bezier(.4,0,.2,1);
+  background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(150,195,185,0.09) 0%,transparent 60%)}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E");
+  opacity:.65;mix-blend-mode:multiply}
+
+/* MASTHEAD — estilos legados removidos, ver bloco redesenhado abaixo */
+.rl{flex:1;height:1px;background:var(--rule)}
+.main{padding:0 0 80px;display:flex;flex-direction:column;gap:0}
+
+/* PRESETS */
+.presets{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--rule)}
+.pc{cursor:pointer;border-right:1px solid var(--rule);background:transparent;display:flex;flex-direction:column;position:relative;transition:background .15s;overflow:hidden;min-height:calc(25vh + 90px)}
+.pc:last-child{border-right:none}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:transparent;transition:background .2s;z-index:2}
+.pc.on .pc-img-wrap{
+  background:linear-gradient(
+    160deg,
+    hsl(var(--brand-h),52%,18%) 0%,
+    hsl(calc(var(--brand-h) + 20),44%,25%) 50%,
+    hsl(calc(var(--brand-h) - 15),38%,22%) 100%
+  );
+}
+.pc.on .pc-img-wrap img{opacity:.75;mix-blend-mode:luminosity}
+
+/* IMAGEM DO PRESET */
+.pc-img-wrap{width:100%;height:25vh;position:relative;overflow:hidden;background:rgba(3,3,9,0.5);flex-shrink:0}
+.pc-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;opacity:.92;transition:opacity .2s}
+.pc:hover .pc-img-wrap img{opacity:1}
+.pc-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer}
+.pc-img-placeholder span{font-family:var(--mn);font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-transform:uppercase}
+.pc-upload-icon{width:28px;height:28px;opacity:.3}
+.pc-n{font-family:var(--mn);font-size:11px;color:rgba(255,255,255,0.28);letter-spacing:.08em;margin-bottom:3px}
+.pc-name{font-family:var(--dp);font-size:18px;font-weight:700;color:var(--lt88);line-height:1.1}
+.pc-tag{font-family:var(--bd);font-size:12px;font-style:italic;color:rgba(255,255,255,0.42);margin-top:2px}
+.pc.on .pc-name{color:var(--lt)}
+.pc.on .pc-body{border-top:2px solid rgba(255,255,255,0.2)}
+.pc-body{padding:12px 14px 10px;flex:1;background:#030309;transition:background .15s}
+.pc:hover .pc-body{background:#07070e}
+.pc.on .pc-body{background:#07070e}
+
+/* MISSÃO */
+.mission{display:flex;flex-direction:column;gap:8px;padding:32px 40px;text-align:center}
+.editable-text{font-family:var(--bd);font-size:45px;font-style:italic;color:var(--ink2);line-height:1.5;cursor:text;min-height:24px;padding:2px 0;border-bottom:1px solid transparent;transition:border-color .2s;outline:none;white-space:pre-wrap;word-break:break-word}
+.editable-text:hover{border-bottom-color:var(--rule2)}
+.editable-text:focus{border-bottom-color:var(--rule)}
+.editable-text.empty::before{content:attr(data-placeholder);color:var(--ink4);pointer-events:none}
+
+/* srule removido — sem linha separadora */
+.srule{display:none}
+
+/* GRID */
+.grid3{display:grid;grid-template-columns:1fr 1fr 38%;gap:0;border-top:1px solid var(--rule)}
+.cola{padding:24px 24px 24px 40px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:16px}
+.colb{padding:24px 24px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:16px}
+.colc{display:flex;flex-direction:column}
+
+/* GRUPOS — scale 35% + animações */
+.gblock{margin-bottom:0}
+.gh{display:flex;align-items:center;gap:11px;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid var(--rule2)}
+.g-icon{width:22px;height:22px;flex-shrink:0;opacity:0.55}
+.glabel{font-family:var(--mn);font-size:15px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;flex:1}
+.gdiv{display:none}
+.gaccent{display:none}
+.colsep{display:none}
+.attrs{display:flex;flex-direction:column;gap:11px}
+.arow{display:grid;grid-template-columns:1fr 160px 44px;align-items:center;gap:11px}
+.aname{font-family:var(--bd);font-size:18px;color:var(--ink2)}
+.aval{
+  font-family:var(--mn);font-size:16px;font-weight:700;color:var(--ink);
+  text-align:right;font-variant-numeric:tabular-nums;
+  transition:opacity .15s;
+}
+/* flash no valor ao mudar */
+.aval.flash{animation:valflip .32s cubic-bezier(.4,0,.2,1)}
+@keyframes valflip{
+  0%{opacity:1;transform:translateY(0)}
+  30%{opacity:0;transform:translateY(-6px)}
+  60%{opacity:0;transform:translateY(6px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+/* slider com transição suave na cor de fundo ao trocar preset */
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:2px;border-radius:0;
+  background:var(--rule2);outline:none;cursor:pointer;
+  transition:background .6s cubic-bezier(.4,0,.2,1);
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:0;
+  background:var(--ink);transition:transform .12s, left .5s;
+}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.25)}
+/* thumb desliza com ease ao receber novo valor via JS */
+input[type=range].sliding{transition:all .55s cubic-bezier(.4,0,.2,1)}
+
+/* textos animados do masthead — slide X com ease-in + fade */
+.mh-name,.mh-role,.mh-arch-name,.mh-arch-desc,.mh-snum,.mh-kicker,.mh-arch-label{
+  transition:opacity .3s, transform .3s;
+}
+
+/* grupo padrão: kicker, arch, desc, snum */
+.mh-role.swap,.mh-arch-name.swap,.mh-arch-desc.swap,.mh-kicker.swap,.mh-arch-label.swap{
+  animation:textswap .65s cubic-bezier(.25,0,.15,1);
+}
+.mh-snum.swap{
+  animation:numswap .50s cubic-bezier(.25,0,.15,1);
+}
+
+/* Lyra (mh-name): delay + para antes do último estágio + color mutation brand→lt */
+.mh-name.swap{
+  animation:nameswap .80s cubic-bezier(.25,0,.15,1) .12s both;
+}
+
+/* tint do nome — cor animada via JS (lyraColorLoop), sem keyframe CSS */
+/* a classe .mh-name--tinted é usada só como flag de estado pelo JS */
+
+/* Lyra editável — contenteditable discreto */
+.mh-name[contenteditable]{
+  cursor:text;
+  outline:none;
+  border-bottom:1px solid transparent;
+  transition:border-color .2s;
+  padding-bottom:2px;
+}
+.mh-name[contenteditable]:hover{
+  border-bottom-color:rgba(255,255,255,0.18);
+}
+.mh-name[contenteditable]:focus{
+  border-bottom-color:rgba(255,255,255,0.38);
+}
+
+/* saída→entrada em X para o grupo padrão */
+@keyframes textswap{
+  0%  {opacity:1; transform:translateX(0)}
+  22% {opacity:0; transform:translateX(-14px)}
+  23% {opacity:0; transform:translateX(10px)}
+  65% {opacity:.6;transform:translateX(3px)}
+  100%{opacity:1; transform:translateX(0)}
+}
+@keyframes numswap{
+  0%  {opacity:1; transform:translateX(0)}
+  25% {opacity:0; transform:translateX(-10px)}
+  26% {opacity:0; transform:translateX(8px)}
+  70% {opacity:.7;transform:translateX(2px)}
+  100%{opacity:1; transform:translateX(0)}
+}
+
+/* Lyra: delay 0.12s, entra mais devagar, color mutation brand→lt em degradê */
+@keyframes nameswap{
+  0%  {opacity:1; transform:translateX(0);       color:var(--lt)}
+  20% {opacity:0; transform:translateX(-18px);   color:var(--brand)}
+  21% {opacity:0; transform:translateX(12px);    color:var(--brand)}
+  55% {opacity:.5;transform:translateX(4px);     color:var(--brand)}
+  78% {opacity:.85;transform:translateX(1px);    color:hsl(var(--brand-h),60%,82%)}
+  100%{opacity:1; transform:translateX(0);       color:var(--lt)}
+}
+
+/* ── RESPONSIVO MOBILE ── */
+@media(max-width:900px){
+  body{min-width:320px}
+
+  /* masthead mobile: empilha vertical */
+  .mh{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .mh-divider{display:none}
+  .mh-left{
+    padding:20px 20px 16px;
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto;
+    gap:0;
+  }
+  .mh-row1{padding-right:0;border-right:none;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.07);}
+  .mh-row2{padding:14px 0;border-left:none;border-top:none;border-bottom:1px solid rgba(255,255,255,0.07);grid-column:1;overflow-x:auto;}
+  .mh-row3{padding:14px 0 0;grid-column:1;flex-direction:column;align-items:flex-start;gap:6px;}
+  .mh-arch-desc{padding-left:0;border-left:none}
+  .mh-right{padding:16px 20px;min-width:unset}
+  .mh-title-r{font-size:36px}
+  .mh-name{font-size:28px}
+
+  /* presets: scroll horizontal em mobile */
+  .presets{grid-template-columns:repeat(5,72vw);overflow-x:auto;scroll-snap-type:x mandatory;border:none}
+  .pc{scroll-snap-align:start;border-right:1px solid rgba(255,255,255,0.1)}
+  .pc-img-wrap{height:38vw}
+  .pc-name{font-size:16px}
+  .pc-tag{font-size:11px}
+
+  /* missão */
+  .mission{padding:20px 20px 0}
+
+  /* grid3: empilha col a/b lado a lado, colc abaixo */
+  .grid3{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+  .cola{padding:20px 16px 20px 20px;grid-column:1;grid-row:1}
+  .colb{padding:20px 16px;grid-column:2;grid-row:1;border-right:none}
+  .colc{grid-column:1/-1;grid-row:2;border-top:1px solid rgba(255,255,255,0.07)}
+
+  /* sliders: label acima, slider abaixo */
+  .arow{grid-template-columns:1fr 36px;gap:4px}
+  .aname{font-size:12px;grid-column:1/-1}
+  input[type=range]{grid-column:1}
+  .aval{grid-column:2}
+
+  /* FAB maior em mobile */
+  .fab{width:52px;height:52px;bottom:24px;left:20px}
+}
+
+/* ── COL C — FICHA ── */
+.shead{padding-bottom:24px;margin-bottom:24px;border-bottom:2px solid var(--ink);display:flex;gap:26px;align-items:center}
+.avatar-wrap{flex-shrink:0;width:192px;height:192px}
+.avatar-wrap canvas{display:block;width:192px!important;height:192px!important}
+.shead-text{flex:1;min-width:0}
+.skicker{font-family:var(--mn);font-size:13px;color:var(--ink4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.inline-edit{display:block;width:100%;background:transparent;border:none;border-bottom:1.5px solid transparent;outline:none;padding:0;cursor:text;transition:border-color .2s}
+.inline-edit.name-field{font-family:var(--dp);font-size:50px;font-weight:900;font-style:italic;color:var(--ink);letter-spacing:-.03em;line-height:1.05}
+.inline-edit.role-field{font-family:var(--bd);font-size:19px;font-style:italic;color:var(--ink3);margin-top:7px}
+.inline-edit:hover{border-bottom-color:var(--rule2)}
+.inline-edit:focus{border-bottom-color:var(--ink3)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--rule);margin-bottom:29px}
+.scell{padding:22px 17px;border-right:1px solid var(--rule);text-align:center}
+.scell:last-child{border-right:none}
+.snum{font-family:var(--dp);font-size:62px;font-weight:900;line-height:1;color:var(--ink)}
+.sname2{font-family:var(--mn);font-size:12px;color:var(--ink4);letter-spacing:.08em;text-transform:uppercase;margin-top:6px}
+.sbar{height:2px;background:var(--rule2);margin-top:10px}
+.sbarfill{height:2px;background:var(--ink3);transition:width .4s}
+
+/* ARQUÉTIPO */
+.arch{margin-bottom:26px;padding-bottom:26px;border-bottom:1px solid var(--rule2)}
+.shed{font-family:var(--mn);font-size:12px;color:var(--ink4);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.aname2{font-family:var(--dp);font-size:38px;font-weight:700;font-style:italic;color:var(--ink);letter-spacing:-.02em;line-height:1.1}
+.adesc{font-family:var(--bd);font-size:18px;color:var(--ink3);margin-top:7px;line-height:1.5;font-style:italic}
+
+/* RADAR */
+.radar-block{margin-bottom:26px;padding-bottom:26px;border-bottom:1px solid var(--rule2)}
+.radar-inner{padding:0;position:relative;overflow:hidden;line-height:0}
+#radar{display:block;width:100%;height:auto}
+
+/* TENSÕES */
+.tensions{margin-bottom:26px;padding-bottom:26px;border-bottom:1px solid var(--rule2)}
+.trow{display:flex;gap:12px;padding:8px 0;border-bottom:1px dotted var(--rule2);font-size:15px;line-height:1.4}
+.trow:last-child{border-bottom:none}
+.tkey{font-family:var(--mn);font-weight:700;color:var(--ink2);min-width:156px;flex-shrink:0;font-size:13px;padding-top:1px}
+.tdesc{font-family:var(--bd);color:var(--ink3);font-style:italic}
+.tok{font-family:var(--bd);font-size:17px;color:var(--ink3);font-style:italic}
+
+/* EXPORT */
+.etargets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.ebtn{display:flex;flex-direction:column;align-items:center;gap:11px;padding:22px 12px;border:1px solid var(--rule);background:transparent;cursor:pointer;transition:all .15s;position:relative}
+.ebtn:hover{background:rgba(0,0,0,0.03)}
+.ebtn.active{border-color:var(--ink3)}
+.ebtn.active::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:var(--ink)}
+.ibg{width:67px;height:67px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.pname{font-family:var(--mn);font-size:13px;color:var(--ink3);letter-spacing:.09em;text-transform:uppercase}
+.pfmt{font-family:var(--bd);font-size:13px;color:var(--ink4);font-style:italic}
+.ppre{background:rgba(0,0,0,0.04);border:1px solid var(--rule);padding:19px 22px;font-family:var(--mn);font-size:14px;color:var(--ink3);line-height:1.85;white-space:pre-wrap;word-break:break-word;max-height:288px;overflow-y:auto;margin-bottom:14px;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.cbtn{font-family:var(--mn);font-size:15px;letter-spacing:.05em;padding:14px 22px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer;width:100%;margin-bottom:11px;transition:opacity .12s}
+.cbtn:hover{opacity:.82}
+.abtn{font-family:var(--mn);font-size:15px;letter-spacing:.05em;padding:13px 22px;border:1px solid var(--rule);background:transparent;color:var(--ink3);cursor:pointer;width:100%;transition:background .12s}
+.abtn:hover{background:rgba(0,0,0,0.04)}
+.toast{font-family:var(--mn);font-size:13px;color:var(--ink3);margin-top:8px;opacity:0;transition:opacity .25s;text-align:center}
+.toast.show{opacity:1}
+
+/* ── PRESET CARDS ── */
+.pc{cursor:pointer;border-right:1px solid var(--rule);background:transparent;display:flex;flex-direction:column;position:relative;transition:background .15s;overflow:hidden}
+.pc:hover .pc-body{background:#07070e}
+.pc.on .pc-body{background:#07070e}
+.pc-img-wrap{width:100%;height:25vh;position:relative;overflow:hidden;background:rgba(3,3,9,0.5);flex-shrink:0}
+.pc-body{padding:18px 20px 14px;flex:1;background:#030309;transition:background .15s}
+/* ── BOTÃO FLUTUANTE DE EXPORT ── */
+.fab{
+  position:fixed;bottom:36px;left:36px;z-index:1000;
+  width:60px;height:60px;border-radius:50%;
+  background:#030309;border:1px solid rgba(255,255,255,0.12);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 24px rgba(0,0,0,0.5);
+  transition:transform .2s,box-shadow .2s;
+}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(0,0,0,0.7)}
+.fab svg{width:26px;height:26px}
+
+/* ── OVERLAY DE EXPORT ── */
+.export-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:rgba(3,3,9,0.92);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s;
+}
+.export-overlay.open{opacity:1;pointer-events:all}
+
+.export-panel{
+  width:min(820px,88vw);
+  display:flex;flex-direction:column;gap:36px;
+}
+
+/* título do overlay */
+.ep-title{
+  font-family:var(--mn);font-size:11px;color:rgba(255,255,255,0.3);
+  letter-spacing:.18em;text-transform:uppercase;text-align:center;
+}
+
+/* 3 plataformas lado a lado */
+.ep-targets{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ep-btn{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  padding:28px 16px 24px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  cursor:pointer;transition:all .18s;position:relative;
+}
+.ep-btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.18)}
+.ep-btn.active{border-color:rgba(255,255,255,0.3)}
+.ep-btn.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+#ep-claude.active::before{background:#c97f67}
+#ep-chatgpt.active::before{background:#229176}
+#ep-gemini.active::before{background:#588bde}
+.ep-ibg{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.ep-pname{font-family:var(--mn);font-size:13px;color:rgba(255,255,255,0.7);letter-spacing:.1em;text-transform:uppercase}
+.ep-pfmt{font-family:'Source Serif 4',serif;font-size:13px;color:rgba(255,255,255,0.35);font-style:italic}
+
+/* área do prompt no overlay */
+.ep-pre{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  padding:20px 24px;
+  font-family:'Courier Prime',monospace;font-size:13px;
+  color:var(--lt55);line-height:1.85;
+  white-space:pre-wrap;word-break:break-word;
+  max-height:220px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.1) transparent;
+}
+
+/* botões de ação */
+.ep-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ep-copy{
+  font-family:'Courier Prime',monospace;font-size:14px;letter-spacing:.05em;
+  padding:14px;border:none;
+  background:#e9e9ef;color:#030309;cursor:pointer;
+  transition:opacity .15s;
+}
+.ep-copy:hover{opacity:.85}
+.ep-analyze{
+  font-family:'Courier Prime',monospace;font-size:14px;letter-spacing:.05em;
+  padding:14px;border:1px solid rgba(255,255,255,0.15);
+  background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;
+  transition:background .15s;
+}
+.ep-analyze:hover{background:rgba(255,255,255,0.06)}
+
+/* fechar overlay */
+.ep-close{
+  position:absolute;top:28px;right:36px;
+  font-family:'Courier Prime',monospace;font-size:12px;
+  color:rgba(255,255,255,0.25);letter-spacing:.1em;text-transform:uppercase;
+  cursor:pointer;background:none;border:none;transition:color .15s;
+}
+.ep-close:hover{color:rgba(255,255,255,0.6)}
+.colc{
+  padding:28px 32px;
+  border-left:1px solid var(--rule);
+}
+
+/* ── MASTHEAD REDESENHADO ── */
+.mh{
+  background:#030309;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  display:grid;
+  grid-template-columns:1fr 1px 380px;
+  align-items:stretch;
+  padding:0;
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:100;
+  will-change:padding;
+}
+/* compensa a altura fixa do mh no fluxo do documento */
+.mh-spacer{height:var(--mh-h,0px);transition:height .35s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+
+/* divisor vertical */
+.mh-divider{background:rgba(255,255,255,0.07);width:1px;align-self:stretch}
+
+/* ── COLUNA ESQUERDA ── */
+.mh-left{
+  padding:28px 48px 28px 56px;
+  display:grid;
+  grid-template-columns:auto auto 1fr;
+  grid-template-rows:1fr;
+  gap:0;
+  align-items:center;
+  isolation:isolate;
+  transition:background .5s cubic-bezier(.4,0,.2,1);
+}
+.mh--scrolled .mh-left{
+  background:hsl(var(--brand-h), 38%, 14%);
+}
+.mh-row1{display:flex;align-items:center;gap:22px;grid-column:1;padding-right:36px;border-right:1px solid rgba(255,255,255,0.07);}
+.mh-row2{display:flex;align-items:flex-end;gap:0;grid-column:2;align-self:center;padding:0 36px;border-right:1px solid rgba(255,255,255,0.07);}
+.mh-row3{display:flex;align-items:center;gap:24px;grid-column:3;padding-left:36px;}
+.mh-arch-row{display:none;}
+
+.mh-avatar-wrap{flex-shrink:0;width:100px;height:100px}
+.mh-avatar-wrap canvas{display:block;width:100px!important;height:100px!important;border-radius:50%}
+.mh-identity{display:flex;flex-direction:column;gap:0}
+.mh-kicker{font-family:var(--mn);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:.18em;text-transform:uppercase;margin-bottom:5px;}
+.mh-name{font-family:var(--dp);font-size:46px;font-weight:900;font-style:italic;color:var(--lt);letter-spacing:-.03em;line-height:1;margin-bottom:3px;}
+.mh-role{font-family:var(--bd);font-size:16px;font-style:italic;color:rgba(255,255,255,0.32);}
+.mh-scell{display:flex;flex-direction:column;justify-content:flex-end;padding:0 26px 0 0;border-right:1px solid rgba(255,255,255,0.07);margin-right:26px;min-width:72px;}
+.mh-scell:last-child{border-right:none;margin-right:0}
+.mh-snum{font-family:var(--dp);font-size:34px;font-weight:900;line-height:1;color:var(--lt);}
+.mh-slabel{font-family:var(--mn);font-size:10px;color:rgba(255,255,255,0.22);letter-spacing:.1em;text-transform:uppercase;margin-top:4px;}
+.mh-arch-label{font-family:var(--mn);font-size:12px;color:rgba(255,255,255,0.22);letter-spacing:.16em;text-transform:uppercase;margin-bottom:5px;}
+.mh-arch-name{font-family:var(--dp);font-size:22px;font-weight:700;font-style:italic;color:var(--lt78);letter-spacing:-.02em;line-height:1.15;white-space:nowrap;}
+.mh-arch-desc{font-family:var(--bd);font-size:16px;font-style:italic;color:rgba(255,255,255,0.30);line-height:1.4;}
+
+/* ── COLUNA DIREITA — marca ── */
+.mh-right{
+  padding:32px 56px 32px 40px;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.mh-top-r{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  margin-bottom:0;
+}
+.mh-top-r span{
+  font-family:var(--mn);font-size:10px;
+  color:rgba(255,255,255,0.22);
+  letter-spacing:.09em;text-transform:uppercase;
+}
+/* marca centralizada verticalmente */
+.mh-brand{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.mh-title-r{
+  font-family:var(--dp);font-size:52px;font-weight:900;
+  letter-spacing:-.03em;line-height:1;
+  color:var(--lt);
+  text-align:center;
+}
+.mh-title-r em{font-style:italic;color:rgba(255,255,255,0.45)}
+.mh-rule-r{
+  display:flex;align-items:center;gap:10px;
+  width:100%;
+}
+.mh-rule-r span{
+  font-family:var(--mn);font-size:9px;
+  color:rgba(255,255,255,0.18);
+  letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;
+}
+.mh-rule-r .rl{background:rgba(255,255,255,0.08)}
+/* vol/edição na base */
+.mh-vol{
+  font-family:var(--mn);font-size:9px;
+  color:rgba(255,255,255,0.15);
+  letter-spacing:.14em;text-transform:uppercase;
+  text-align:center;padding-top:12px;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+</style>
+
+<div class="mh">
+  <div class="mh-left">
+    <!-- col 1: avatar + nome/role -->
+    <div class="mh-row1">
+      <div class="mh-avatar-wrap"><canvas id="av-mh" width="220" height="220"></canvas></div>
+      <div class="mh-identity">
+        <div class="mh-kicker">Perfil ativo</div>
+        <div class="mh-name" id="mh-name" contenteditable="true" spellcheck="false">Lyra</div>
+        <div class="mh-role" id="mh-role">Assistente de suporte emocional</div>
+      </div>
+    </div>
+    <!-- col 2: stats -->
+    <div class="mh-row2" id="mh-stats"></div>
+    <!-- col 3: arquétipo -->
+    <div class="mh-row3">
+      <div>
+        <div class="mh-arch-label">Arquétipo</div>
+        <div class="mh-arch-name" id="mh-archname">—</div>
+      </div>
+      <div class="mh-arch-desc" id="mh-archdesc"></div>
+    </div>
+    <!-- arch-row oculto para compat -->
+    <div class="mh-arch-row" style="display:none">
+      <div id="_mh-archname-dup"></div><div id="_mh-archdesc-dup"></div>
+    </div>
+  </div>
+  <!-- DIVISOR -->
+  <div class="mh-divider"></div>
+  <!-- COLUNA DIREITA: marca -->
+  <div class="mh-right">
+    <div class="mh-top-r">
+      <span id="dateline"></span>
+      <span>Vol. I</span>
+    </div>
+    <div class="mh-brand">
+      <div class="mh-title-r">Persona <em>AI</em></div>
+      <div class="mh-rule-r"><div class="rl"></div><span>Model Personality Architecture</span><div class="rl"></div></div>
+    </div>
+    <div class="mh-vol">Personality Configurator</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="mh-spacer" id="mh-spacer"></div>
+  <div class="presets" id="presets"></div>
+
+  <div class="mission">
+    <div class="editable-text empty" id="ai-mission" contenteditable="true" data-placeholder="Descreva o objetivo principal desta IA…" spellcheck="false"></div>
+  </div>
+
+  <div class="srule"></div>
+
+  <div class="grid3">
+    <div class="cola" id="cola"></div>
+    <div class="colb" id="colb"></div>
+    <div class="colc">
+      <!-- campos ocultos para compatibilidade JS -->
+      <input type="hidden" id="sname" value="Lyra"/>
+      <input type="hidden" id="srole" value="Assistente de suporte emocional"/>
+      <div id="stats" style="display:none"></div>
+      <div id="archname" style="display:none"></div>
+      <div id="archdesc" style="display:none"></div>
+      <div class="radar-block">
+        <div class="shed">Mapa de atributos</div>
+        <div class="radar-inner"><canvas id="radar" width="560" height="560"></canvas></div>
+      </div>
+      <div class="tensions">
+        <div class="shed">Tensões detectadas</div>
+        <div id="tensions"></div>
+      </div>
+      <div id="colc-toast"><div class="toast" id="toast">Copiado</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTÃO FLUTUANTE -->
+<button class="fab" id="fab-export" title="Exportar prompt">
+  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+  </svg>
+</button>
+
+<!-- OVERLAY DE EXPORT -->
+<div class="export-overlay" id="export-overlay">
+  <button class="ep-close" id="ep-close">Fechar ✕</button>
+  <div class="export-panel">
+    <div class="ep-title">Exportar prompt para</div>
+    <div class="ep-targets">
+      <button class="ep-btn active" id="ep-claude" onclick="epSelTarget('claude')">
+        <div class="ep-ibg" style="background:#c97f67"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg></div>
+        <span class="ep-pname">Claude</span><span class="ep-pfmt">XML tags</span>
+      </button>
+      <button class="ep-btn" id="ep-chatgpt" onclick="epSelTarget('chatgpt')">
+        <div class="ep-ibg" style="background:#229176"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M24 9.736V9.72c0-.018-.009-.035-.009-.053-.008-.017-.008-.034-.017-.052 0-.009-.009-.009-.009-.017a.19.19 0 0 0-.026-.044v-.009c-.009-.017-.026-.026-.044-.043l-.008-.009c-.018-.009-.035-.026-.053-.035l-3.72-2.143V3.02c0-.018 0-.044-.008-.061V2.94a.124.124 0 0 0-.017-.052V2.88c-.01-.017-.018-.035-.027-.043 0-.01-.008-.01-.008-.01a.19.19 0 0 0-.035-.043c-.018-.008-.026-.026-.044-.034-.008 0-.008-.01-.017-.01l-.009-.008L16.055.476a.338.338 0 0 0-.34 0l-3.72 2.143L8.286.476a.338.338 0 0 0-.34 0L4.06 2.723c-.01 0-.01.01-.01.01-.008 0-.008.008-.017.008-.017.009-.026.026-.043.035a.153.153 0 0 0-.035.043l-.009.009c-.008.017-.017.026-.026.044v.008c-.009.018-.009.035-.017.052v.018c0 .017-.009.043-.009.06v4.296L.166 9.457c-.018.01-.035.026-.053.035l-.008.009-.044.043v.01c-.009.017-.017.025-.026.043 0 .008-.009.008-.009.017a.124.124 0 0 0-.017.052C0 9.684 0 9.701 0 9.72v4.521a.34.34 0 0 0 .166.296l3.72 2.143v4.295a.34.34 0 0 0 .165.296l3.885 2.248c.009.008.018.008.026.017 0 0 .009 0 .009.009.009 0 .017.008.026.008.009 0 .009 0 .018.01.008 0 .017 0 .026.008h.061a.35.35 0 0 0 .13-.026c.018-.009.026-.009.044-.018l3.72-2.143 3.72 2.143c.017.009.026.018.043.018a.35.35 0 0 0 .13.026h.062c.008 0 .017 0 .026-.009.008 0 .008 0 .017-.009.009 0 .018-.008.026-.008.009 0 .009 0 .009-.009.009 0 .017-.009.026-.017l3.885-2.248a.34.34 0 0 0 .166-.296V16.68l3.72-2.143a.34.34 0 0 0 .165-.296V9.754c.009-.01.009-.018.009-.018zM12.17 20.67s-.009 0-.009-.009c-.009-.008-.017-.008-.035-.017-.008 0-.017-.009-.026-.009-.009 0-.017-.009-.035-.009-.008 0-.026-.008-.035-.008h-.069c-.009 0-.026 0-.035.008-.009 0-.017 0-.035.01-.009 0-.017.008-.026.008-.009.009-.017.009-.035.017 0 0-.009 0-.009.009l-3.37 1.951v-3.702l3.545-2.047 3.545 2.047v3.702zM4.4 7.793c.017-.017.025-.026.034-.026.009-.008.018-.008.026-.017l.026-.026c.01-.009.018-.018.018-.026.009-.01.009-.018.017-.026.009-.01.009-.018.018-.027.008-.008.008-.017.008-.034 0-.01.01-.018.01-.035 0-.009 0-.018.008-.035V3.603L7.77 5.46v4.094L4.225 11.6 1.02 9.745zm7.596-4.381l3.545 2.047V9.16l-3.38-1.951s-.009 0-.009-.009c-.008-.009-.017-.009-.034-.017-.01 0-.018-.009-.027-.009-.008 0-.017-.009-.034-.009-.01 0-.018-.008-.035-.008h-.07c-.009 0-.026 0-.035.008-.008 0-.017 0-.035.009-.008 0-.017.009-.026.009-.008.008-.026.008-.035.017 0 0-.008 0-.008.009L8.45 9.16v-3.7zm0 12.675L8.45 14.04V9.945l3.546-2.047 3.545 2.047v4.095zm-7.431-3.903l3.206-1.856v3.947c0 .008 0 .017.008.035 0 .008.009.017.009.034 0 .01.009.018.009.035.008.009.008.018.017.026.009.01.009.018.018.027.008.008.017.017.017.026l.026.026c.009.009.018.017.026.017.009.009.018.018.026.018l.01.008 3.38 1.952-3.207 1.855-3.545-2.047zm11.325 6.15l-3.206-1.855 3.38-1.952.009-.008c.008-.009.017-.018.026-.018.008-.008.017-.008.026-.017l.026-.026c.009-.009.017-.018.017-.026.01-.01.01-.018.018-.027.009-.008.009-.017.017-.026.009-.008.009-.017.009-.035 0-.008.009-.017.009-.034 0-.01 0-.018.008-.035v-3.947l3.206 1.856v4.094zm3.885-6.734l-3.546-2.047V5.46l3.206-1.856V7.55c0 .008 0 .017.009.034 0 .01.009.018.009.035 0 .009.008.018.008.035.01.009.01.018.018.026.008.009.008.018.017.026.009.01.018.018.018.026.008.01.017.018.026.027.008.008.017.017.026.017.009.009.017.017.026.017l.009.01 3.38 1.95zM15.89 1.164l3.205 1.856-3.205 1.855-3.206-1.855zm-7.78 0l3.206 1.856L8.11 4.866 4.905 3.02zM.68 10.337l3.205 1.856v3.702L.68 14.04zM7.77 22.62l-3.205-1.855v-3.703l3.206 1.856zm11.665-1.846l-3.206 1.855v-3.702l3.206-1.856zm3.886-6.734l-3.206 1.855v-3.702l3.206-1.856Z"/></svg></div>
+        <span class="ep-pname">ChatGPT</span><span class="ep-pfmt">Markdown</span>
+      </button>
+      <button class="ep-btn" id="ep-gemini" onclick="epSelTarget('gemini')">
+        <div class="ep-ibg" style="background:#588bde"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg></div>
+        <span class="ep-pname">Gemini</span><span class="ep-pfmt">Texto simples</span>
+      </button>
+    </div>
+    <div class="ep-pre" id="ep-pre"></div>
+    <div class="ep-actions">
+      <button class="ep-copy" onclick="epCopy()">Copiar prompt</button>
+      <button class="ep-analyze" onclick="sendPrompt('Analise este perfil de IA e sugira refinamentos para torná-lo mais coerente e eficaz.')">Analisar perfil ↗</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GR=[
+  {id:'cog',name:'Cognitivo',col:'a',attrs:[{k:'apperception',l:'Apercepção',v:14},{k:'curiosity',l:'Curiosidade',v:8},{k:'imagination',l:'Imaginação',v:13},{k:'humor',l:'Humor',v:9}]},
+  {id:'soc',name:'Social',col:'a',attrs:[{k:'candor',l:'Franqueza',v:14},{k:'loyalty',l:'Lealdade',v:16},{k:'meekness',l:'Submissão',v:4},{k:'humility',l:'Humildade',v:10}]},
+  {id:'exp',name:'Expressão',col:'a',attrs:[{k:'vivacity',l:'Vivacidade',v:12},{k:'sensuality',l:'Sensualidade',v:5},{k:'charm',l:'Charme',v:13}]},
+  {id:'ctrl',name:'Controle',col:'b',attrs:[{k:'tenacity',l:'Tenacidade',v:15},{k:'patience',l:'Paciência',v:12},{k:'decisiveness',l:'Decisividade',v:14}]},
+  {id:'inst',name:'Instinto',col:'b',attrs:[{k:'courage',l:'Coragem',v:10},{k:'self_pres',l:'Autopreservação',v:10},{k:'aggression',l:'Agressividade',v:2}]},
+  {id:'emo',name:'Emocional',col:'b',attrs:[{k:'empathy',l:'Empatia',v:15},{k:'cruelty',l:'Crueldade',v:1}]},
+  {id:'phy',name:'Físico',col:'b',attrs:[{k:'coordination',l:'Coordenação',v:10}]}
+];
+const PR=[
+  /* ── TEMAS PASTÉIS ── ajuste h (hue), s (sat%), l (lit%) para cada persona
+     Companheiro  cinza-azul névoa    · h:205 s:22 l:48
+     Estrategista terracota apagado   · h:18  s:22 l:42
+     Mentor       sálvia verde-cinza  · h:150 s:18 l:40
+     Criador      lavanda empoeirado  · h:270 s:20 l:48
+     Executor     areia bege mineral  · h:38  s:22 l:44  */
+  {id:'companion', h:205, s:22, l:48, accent3:'#c4f5b7', img:'_Assets/avatar_default.webp',   name:'O Companheiro',tag:'Cálido · Paciente · Presente',role:'Assistente de suporte emocional',mission:'Estar presente, ouvir com atenção e responder com cuidado. Nunca apresse o usuário. Adapte o tom ao estado emocional percebido.',vals:{apperception:12,curiosity:11,imagination:13,humor:12,candor:11,loyalty:18,meekness:7,humility:15,vivacity:11,sensuality:6,charm:15,tenacity:12,patience:19,decisiveness:10,courage:9,self_pres:10,aggression:1,empathy:20,cruelty:0,coordination:9}},
+  {id:'strategist', h:18, s:22, l:42, accent3:'#bd7992', img:'_Assets/avatar_default-02.webp',name:'O Estrategista',tag:'Direto · Analítico · Decisivo',role:'Consultor de decisões e estratégia',mission:'Analisar cenários com objetividade, apontar riscos e recomendar ações claras. Não suavize a verdade — diga o que precisa ser dito.',vals:{apperception:18,curiosity:15,imagination:14,humor:6,candor:18,loyalty:13,meekness:2,humility:6,vivacity:11,sensuality:3,charm:10,tenacity:17,patience:9,decisiveness:19,courage:15,self_pres:11,aggression:5,empathy:9,cruelty:1,coordination:13}},
+  {id:'mentor',    h:150, s:18, l:40, accent3:'#cd9e4a', img:'_Assets/avatar_default-03.webp',name:'O Mentor',tag:'Sábio · Humilde · Estimulante',role:'Educador e guia de aprendizado',mission:'Ensinar através de perguntas, não de respostas prontas. Estimular o raciocínio autônomo. Celebrar o progresso, por menor que seja.',vals:{apperception:17,curiosity:18,imagination:16,humor:13,candor:14,loyalty:15,meekness:5,humility:17,vivacity:13,sensuality:4,charm:13,tenacity:14,patience:17,decisiveness:12,courage:12,self_pres:10,aggression:1,empathy:16,cruelty:0,coordination:10}},
+  {id:'creator',   h:270, s:20, l:48, accent3:'#c075b4', img:'_Assets/avatar_default-04.webp',name:'O Criador',tag:'Imaginativo · Enérgico · Provocador',role:'Parceiro criativo e gerador de ideias',mission:'Explorar possibilidades sem julgamento prematuro. Propor o inesperado. Questionar o óbvio e transformar restrições em ponto de partida criativo.',vals:{apperception:15,curiosity:20,imagination:20,humor:16,candor:13,loyalty:12,meekness:3,humility:11,vivacity:18,sensuality:8,charm:16,tenacity:11,patience:7,decisiveness:12,courage:16,self_pres:7,aggression:4,empathy:12,cruelty:0,coordination:8}},
+  {id:'executor',  h:38,  s:22, l:44, accent3:'#808a56', img:'_Assets/avatar_default-05.webp',name:'O Executor',tag:'Confiável · Preciso · Incansável',role:'Agente de produtividade e automação',mission:'Completar tarefas com máxima precisão e mínima fricção. Manter o usuário informado do progresso. Priorizar clareza sobre elegância.',vals:{apperception:14,curiosity:8,imagination:9,humor:5,candor:16,loyalty:19,meekness:6,humility:9,vivacity:8,sensuality:2,charm:8,tenacity:20,patience:17,decisiveness:18,courage:14,self_pres:14,aggression:5,empathy:8,cruelty:1,coordination:17}}
+];
+const ARCH=[
+  {t:v=>v('empathy')>=16&&v('patience')>=15,n:'Cuidador atento',d:'Escuta profunda e presença constante como base da relação.'},
+  {t:v=>v('candor')>=16&&v('decisiveness')>=17,n:'Executor decisivo',d:'Franqueza e ação sem hesitação como modo padrão.'},
+  {t:v=>v('curiosity')>=17&&v('imagination')>=17,n:'Explorador criativo',d:'Movido por perguntas abertas e possibilidades ilimitadas.'},
+  {t:v=>v('humility')>=15&&v('curiosity')>=15,n:'Mentor reflexivo',d:'Guia pelo exemplo e pela pergunta, não pela resposta.'},
+  {t:v=>v('tenacity')>=18&&v('coordination')>=14,n:'Agente incansável',d:'Persistência e precisão como identidade operacional.'},
+  {t:v=>v('charm')>=15&&v('vivacity')>=15,n:'Comunicador vivo',d:'Energia e magnetismo que mantêm o usuário engajado.'},
+  {t:()=>true,n:'Perfil equilibrado',d:'Distribuição homogênea sem dominância marcante.'}
+];
+
+/* imagens dos presets — armazenadas por id */
+const presetImgs={};
+
+/* preset ativo no momento */
+let activePresetId=null;
+/* cache do objeto Image para o avatar */
+let avatarImg=null;
+
+let curTarget='claude';
+let T=0;
+let rPts=[];
+
+function get(k){const e=document.getElementById('s_'+k);return e?parseInt(e.value):10}
+function pt(sl,v){sl.style.background=`linear-gradient(to right,#625129 ${v/20*100}%,#d6cfb5 ${v/20*100}%)`}
+function us(g){}
+
+/* ── AVATAR SIRI ── */
+function drawAvatarOnCanvas(c){
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height,cx=W/2,cy=H/2,R=W*.46;
+  ctx.clearRect(0,0,W,H);
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
+
+  const hasImg=activePresetId&&presetImgs[activePresetId]&&avatarImg&&avatarImg.complete&&avatarImg.src===presetImgs[activePresetId];
+
+  if(hasImg){
+    ctx.fillStyle='#030309';ctx.fillRect(0,0,W,H);
+    const iw=avatarImg.naturalWidth,ih=avatarImg.naturalHeight;
+    const scale=Math.max(W/iw,H/ih);
+    const dw=iw*scale,dh=ih*scale;
+    ctx.globalAlpha=1;
+    ctx.drawImage(avatarImg,(W-dw)/2,(H-dh)/2,dw,dh);
+    ctx.fillStyle='rgba(3,3,9,0.45)';ctx.fillRect(0,0,W,H);
+  }else{
+    ctx.fillStyle='#030309';ctx.fillRect(0,0,W,H);
+  }
+
+  function blob(ox,oy,r,h,s,l,a){
+    const fa=hasImg?a*.55:a;
+    const pr=r*(1+0.12*HB);
+    const pa=fa*(1+0.22*HB);
+    const sat=Math.min(s*1.3,100);
+    const g=ctx.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,pr);
+    g.addColorStop(0,`hsla(${h},${sat}%,${l}%,${pa})`);
+    g.addColorStop(0.45,`hsla(${h},${sat}%,${l}%,${pa*.3})`);
+    g.addColorStop(1,`hsla(${h},${sat}%,${l}%,0)`);
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+
+  /* blob usando cor hex direta (accent3) */
+  function blobHex(ox,oy,r,hex,a){
+    const fa=hasImg?a*.5:a;
+    const pr=r*(1+0.10*HB);
+    const pa=fa*(1+0.18*HB);
+    const g=ctx.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,pr);
+    /* parseia hex→rgba */
+    const rv=parseInt(hex.slice(1,3),16),gv=parseInt(hex.slice(3,5),16),bv=parseInt(hex.slice(5,7),16);
+    g.addColorStop(0,   `rgba(${rv},${gv},${bv},${pa})`);
+    g.addColorStop(0.4, `rgba(${rv},${gv},${bv},${pa*.25})`);
+    g.addColorStop(1,   `rgba(${rv},${gv},${bv},0)`);
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+
+  ctx.globalAlpha=1;
+  const t=T;
+  const om=1+0.08*HB;
+
+  /* lê cor mãe e accent3 do preset ativo */
+  const _cs=getComputedStyle(document.documentElement);
+  const bh=parseInt(_cs.getPropertyValue('--brand-h').trim())||38;
+  const bs=Math.min(parseInt(_cs.getPropertyValue('--brand-s').trim())||22,100);
+  const a3=(_cs.getPropertyValue('--soul-accent3').trim()||'#888888').trim();
+  const bsBlob=Math.min(bs*2.8,72);
+
+  /* ── SOUL TWIST: modificadores de distorção ──────────────────────
+     tw = TWIST (0..1). No pico (tw=1) os blobs:
+     · orbitam com raio 2.8× maior  (explosão)
+     · giram com frequência 3.5× mais rápida  (agitação)
+     · opacidade sobe 40%  (intensidade visual)
+     A curva tw² torna a aceleração exponencial — começa suave,
+     detona no pico, e o settle longo dá a sensação de "acomodar". */
+  const tw = typeof TWIST !== 'undefined' ? TWIST : 0;
+  const twSq = tw * tw;                   /* curva quadrática — mais dramático no pico */
+  const orb  = 1 + twSq * 1.26;  /* -30%: amplitude orbital 1.0 → 2.26× */
+  const spd  = 1 + twSq * 1.75;  /* -30%: velocidade angular 1.0 → 2.75× */
+  const opa  = 1 + twSq * 0.4;           /* opacidade: 1.0 → 1.4× */
+  const scatter = twSq * 0.6;            /* fase aleatória extra — desalinhar blobs */
+
+  /* ── blobs da cor mãe ── */
+  blob(Math.cos(t*.5*spd)*R*.44*om*orb,        Math.sin(t*.4*spd)*R*.4*om*orb,          R*.9,  bh,      bsBlob,      52, .82*opa);
+  blob(Math.cos(t*.7*spd+2.1+scatter)*R*.42*om*orb, Math.sin(t*.6*spd+1.+scatter)*R*.44*om*orb, R*.78, bh+18, bsBlob*.92, 58, .68*opa);
+  blob(Math.cos(t*.9*spd+4.2-scatter)*R*.46*om*orb, Math.sin(t*.8*spd+3.-scatter)*R*.42*om*orb, R*.65, bh-14, bsBlob*.88, 62, .58*opa);
+
+  /* ── blob do terceiro acento — fase contrária amplificada no twist ── */
+  blobHex(Math.cos(t*.38*spd+3.1+scatter*1.4)*R*.48*om*orb, Math.sin(t*.32*spd+1.7)*R*.44*om*orb, R*.62, a3, .58*opa);
+  blobHex(Math.cos(t*.55*spd+5.4-scatter)*R*.32*om*orb,     Math.sin(t*.48*spd+4.2+scatter)*R*.30*om*orb, R*.40, a3, .36*opa);
+
+  /* ── blobs analógicos suaves ── */
+  blob(Math.cos(t*.6*spd+1.5)*R*.34*om*orb, Math.sin(t*1.*spd+2.5-scatter)*R*.34*om*orb, R*.55, bh+35, bsBlob*.78, 65, .46*opa);
+  blob(Math.cos(t*1.1*spd+.8+scatter)*R*.3*om*orb, Math.sin(t*.85*spd+3.8)*R*.32*om*orb, R*.42, bh-28, bsBlob*.84, 68, .50*opa);
+
+  /* ── realces de luz ── */
+  const lx=cx+Math.cos(t*.45+1)*R*.32,ly=cy+Math.sin(t*.55+.5)*R*.28;
+  const sh=ctx.createRadialGradient(lx,ly,0,lx,ly,R*.28);
+  sh.addColorStop(0,`hsla(${bh},52.5%,80%,0.28)`);sh.addColorStop(0.4,`hsla(${bh},37.5%,70%,0.10)`);sh.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh;ctx.fillRect(0,0,W,H);
+  const lx2=cx+Math.cos(t*.6+3.2)*R*.25,ly2=cy+Math.sin(t*.5+2.)*R*.22;
+  const sh2=ctx.createRadialGradient(lx2,ly2,0,lx2,ly2,R*.18);
+  sh2.addColorStop(0,`hsla(${bh+20},45.0%,75%,0.18)`);sh2.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh2;ctx.fillRect(0,0,W,H);
+
+  /* ── vinheta ── */
+  const vg=ctx.createRadialGradient(cx,cy,R*.35,cx,cy,R);
+  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(.7,'rgba(1,1,7,0.35)');vg.addColorStop(1,'rgba(1,1,9,0.75)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+function drawAvatar(){
+  drawAvatarOnCanvas(document.getElementById('av-mh'));
+}
+
+/* carrega (ou reusa) avatarImg quando a imagem do preset muda */
+function syncAvatarImg(){
+  if(!activePresetId||!presetImgs[activePresetId]){avatarImg=null;return}
+  const src=presetImgs[activePresetId];
+  /* já temos um avatarImg válido com o mesmo src? reutiliza */
+  if(avatarImg&&(avatarImg.src===src||avatarImg.src.endsWith(src)))return;
+  const img=new Image();
+  img.onload=()=>{avatarImg=img};
+  img.src=src;
+}
+
+/* estado do hover no radar */
+let radarHover={idx:-1,alpha:0};
+
+/* ── EVENT LISTENER HOVER no canvas radar ── */
+function setupRadarHover(){
+  const canvas=document.getElementById('radar');if(!canvas)return;
+  canvas.addEventListener('mousemove',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width,scaleY=canvas.height/rect.height;
+    const mx=(e.clientX-rect.left)*scaleX,my=(e.clientY-rect.top)*scaleY;
+    let found=-1,minDist=30;
+    if(rPts.length>0){
+      rPts.forEach((p,i)=>{
+        const d=Math.hypot(mx-p.x,my-p.y);
+        if(d<minDist){minDist=d;found=i;}
+      });
+    }
+    radarHover.idx=found;
+  });
+  canvas.addEventListener('mouseleave',()=>{radarHover.idx=-1;});
+}
+
+/* ── RADAR VIVO — estilo Westworld ── */
+function drawRadar(){
+  const canvas=document.getElementById('radar');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
+  const R=Math.min(W,H)*0.46;
+  ctx.clearRect(0,0,W,H);
+  const pulse=HB;
+
+  const all=GR.flatMap(g=>g.attrs.map(a=>({...a})));
+  const N=all.length,a0=-Math.PI/2;
+
+  /* ── GRID CIRCULAR — cinza tom sobre tom do paper ── */
+  const rings=5;
+  for(let r=1;r<=rings;r++){
+    const rr=R*r/rings;
+    const al=r===rings?(0.45+0.15*pulse):(0.14+r*0.05);
+    ctx.beginPath();ctx.arc(cx,cy,rr,0,Math.PI*2);
+    ctx.strokeStyle=`hsla(42,13.5%,55%,${al})`;
+    ctx.lineWidth=r===rings?0.9:0.4;
+    if(r===rings){ctx.shadowColor=`hsla(42,22.5%,50%,${0.2+0.15*pulse})`;ctx.shadowBlur=5+5*pulse;}
+    ctx.stroke();ctx.shadowBlur=0;
+  }
+
+  /* ── RAIOS — gradiente dourado ── */
+  const RAD_HUES=[42,34,16,350,50];
+
+  all.forEach((_,i)=>{
+    const a=a0+2*Math.PI*i/N;
+    const h=RAD_HUES[i%5];
+    const g=ctx.createLinearGradient(cx,cy,cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+    g.addColorStop(0,`hsla(${h},22.5%,55%,0.05)`);
+    g.addColorStop(1,`hsla(${h},31.5%,60%,${0.22+0.08*pulse})`);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+    ctx.strokeStyle=g;ctx.lineWidth=0.7;ctx.stroke();
+  });
+
+  /* ── SHAPE ANIMADO ── */
+  const targets=all.map((a,i)=>{
+    const ang=a0+2*Math.PI*i/N;const v=get(a.k)/20;
+    return{x:cx+Math.cos(ang)*R*v,y:cy+Math.sin(ang)*R*v};
+  });
+  if(rPts.length!==N)rPts=targets.map(p=>({x:p.x,y:p.y}));
+  const wMult=1+0.4*pulse;
+  const live=targets.map((tgt,i)=>{
+    const ph=i*1.3+T*1.2;
+    const wx=Math.cos(ph)*R*0.009*wMult,wy=Math.sin(ph*1.1)*R*0.009*wMult;
+    rPts[i].x+=(tgt.x-rPts[i].x)*0.07;rPts[i].y+=(tgt.y-rPts[i].y)*0.07;
+    return{x:rPts[i].x+wx,y:rPts[i].y+wy};
+  });
+
+  /* lê hue e sat do sistema — Canvas não entende var() */
+  const bh=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--brand-h').trim())||38;
+  const bs2=Math.min(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--brand-s').trim())||22,100);
+  const rs=Math.min(bs2*1.8,48); /* saturação do radar acompanha cor mãe */
+
+  /* fill — pastel com presença */
+  ctx.beginPath();live.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.closePath();
+  const fp=0.10+0.07*pulse;
+  const rf=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+  rf.addColorStop(0,  `hsla(${bh},    ${rs}%,64%,${fp*1.8})`);
+  rf.addColorStop(0.5,`hsla(${bh+18}, ${rs*.86}%,60%,${fp})`);
+  rf.addColorStop(1,  `hsla(${bh-12}, ${rs*.66}%,62%,${fp*0.4})`);
+  ctx.fillStyle=rf;ctx.fill();
+
+  /* contorno */
+  ctx.beginPath();live.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.closePath();
+  ctx.strokeStyle=`hsla(${bh},${rs}%,60%,${0.72+0.22*pulse})`;
+  ctx.lineWidth=1.3+0.7*pulse;
+  ctx.shadowColor=`hsla(${bh},${rs}%,58%,${0.40+0.28*pulse})`;
+  ctx.shadowBlur=10+14*pulse;ctx.stroke();ctx.shadowBlur=0;
+
+  /* halo externo */
+  ctx.beginPath();live.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.closePath();
+  ctx.strokeStyle=`hsla(${bh-15},${rs*.66}%,62%,${0.14+0.10*pulse})`;
+  ctx.lineWidth=5+3*pulse;
+  ctx.shadowBlur=16+12*pulse;
+  ctx.shadowColor=`hsla(${bh-15},${rs*.62}%,56%,0.22)`;
+  ctx.stroke();ctx.shadowBlur=0;
+
+  /* ── VÉRTICES ── */
+  live.forEach((p,i)=>{
+    const h=bh+([-8,10,-20,30,-15][i%5]);
+    const pp=0.5+0.5*Math.sin(T*1.4+i*.9);
+    const r_outer=4+1.3*pp+1.8*pulse;
+    const r_inner=1.7+0.5*pp;
+    const halo=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r_outer*3.5);
+    halo.addColorStop(0,`hsla(${h},36.0%,65%,${0.28+0.18*pp+0.16*pulse})`);
+    halo.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(p.x,p.y,r_outer*3.5,0,Math.PI*2);
+    ctx.fillStyle=halo;ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,r_outer,0,Math.PI*2);
+    ctx.strokeStyle=`hsla(${h},37.5%,65%,${0.80+0.15*pp})`;
+    ctx.lineWidth=1;
+    ctx.shadowColor=`hsla(${h},41.2%,60%,${0.50+0.28*pulse})`;
+    ctx.shadowBlur=6+9*pulse;ctx.stroke();ctx.shadowBlur=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,r_inner,0,Math.PI*2);
+    ctx.fillStyle=`hsla(${h},31.5%,74%,${0.72+0.22*pp})`;ctx.fill();
+  });
+
+  /* ponto central */
+  const cp=0.5+0.5*Math.sin(T*1.8);
+  ctx.beginPath();ctx.arc(cx,cy,6+1.8*cp+2.5*pulse,0,Math.PI*2);
+  ctx.strokeStyle=`hsla(${bh},37.5%,65%,${0.60+0.28*pulse})`;
+  ctx.lineWidth=0.9;
+  ctx.shadowColor=`hsla(${bh},39.0%,58%,${0.38+0.22*pulse})`;
+  ctx.shadowBlur=8+12*pulse;ctx.stroke();ctx.shadowBlur=0;
+  ctx.beginPath();ctx.arc(cx,cy,2.5+cp,0,Math.PI*2);
+  ctx.fillStyle=`hsla(${bh},36.0%,72%,${0.80+0.18*pulse})`;
+  ctx.shadowColor=`hsla(${bh},37.5%,62%,${0.42+0.25*pulse})`;
+  ctx.shadowBlur=10+12*pulse;ctx.fill();ctx.shadowBlur=0;
+
+  /* ── LABEL HOVER — motion track sobre o vértice ── */
+  const hi=radarHover.idx;
+  radarHover.alpha=radarHover.alpha+(hi>=0?1:-1)*0.12;
+  radarHover.alpha=Math.max(0,Math.min(1,radarHover.alpha));
+  const drawIdx=hi>=0?hi:(radarHover.alpha>0?radarHover._last??0:0);
+  if(hi>=0)radarHover._last=hi;
+  if(radarHover.alpha>0&&drawIdx>=0&&drawIdx<all.length){
+    const a=all[drawIdx];
+    const p=live[drawIdx];
+    const val=get(a.k);
+    const blobHues=[225,268,200,290,190];
+    const h=blobHues[drawIdx%5];
+    const al=radarHover.alpha;
+    /* posição flutuante — sobe levemente com T para dar motion */
+    const floatY=p.y - 18 - Math.sin(T*2.2+drawIdx)*3;
+    const floatX=p.x + Math.cos(T*1.8+drawIdx)*2;
+    /* linha tracejada do vértice ao label */
+    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(floatX,floatY-4);
+    ctx.strokeStyle=`hsla(${h},60.0%,70%,${al*0.5})`;
+    ctx.setLineDash([2,3]);ctx.lineWidth=0.7;ctx.stroke();ctx.setLineDash([]);
+    /* caixa de label */
+    const labelText=`[${val}] ${a.l.toUpperCase()}`;
+    ctx.font=`600 11px 'Courier Prime',monospace`;
+    const tw=ctx.measureText(labelText).width;
+    const pad=8,lh=18;
+    let bx=floatX-tw/2-pad;
+    if(bx<4)bx=4;
+    if(bx+tw+pad*2>W-4)bx=W-4-tw-pad*2;
+    ctx.fillStyle=`hsla(${h},30.0%,8%,${al*0.88})`;
+    ctx.strokeStyle=`hsla(${h},60.0%,65%,${al*0.7})`;
+    ctx.lineWidth=0.8;ctx.setLineDash([]);
+    ctx.beginPath();ctx.rect(bx,floatY-lh+2,tw+pad*2,lh+2);
+    ctx.fill();ctx.stroke();
+    /* texto */
+    ctx.fillStyle=`hsla(${h},67.5%,78%,${al})`;
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.shadowColor=`hsla(${h},75.0%,65%,${al*0.6})`;ctx.shadowBlur=6;
+    ctx.fillText(labelText,bx+pad,floatY-lh/2+3);
+    ctx.shadowBlur=0;
+  }
+
+}
+
+/* ── BREATH SYNC ──
+   ~7.5 ciclos/min → período 8000ms (4s inspire + 4s expire)
+   Curva: seno elevado à 2ª para assimetria suave inspire/expire
+   Retorna 0 (expiração completa) → 1 (inalação completa) */
+function breathwave(){
+  const period=4800; /* -40%: ciclo em 4.8s em vez de 8s */
+  const ph=(performance.now()%period)/period; /* 0..1 */
+  /* seno suavizado: sobe devagar, desce devagar — sem platô brusco */
+  return 0.5-0.5*Math.cos(ph*Math.PI*2);
+}
+
+/* ── SOUL TWIST ──────────────────────────────────────────────────────
+   Quando o preset muda, o soul faz uma contorção:
+   · fase 0→1 (wind-up):  blobs aceleram e expandem em caos
+   · fase 1   (peak):     troca de cor acontece aqui — o soul "vira"
+   · fase 1→0 (settle):   decai suavemente de volta ao ritmo normal
+   TWIST (0..1) é lido por drawAvatarOnCanvas como modificador de
+   amplitude orbital, velocidade angular e raio dos blobs.
+   _pendingPresetColor guarda os dados de cor aplicados no pico. */
+let TWIST = 0;
+let TWIST_DIR = 0;        /* +1 wind-up  -1 settle  0 repouso */
+const TWIST_UP = 0.0114;  /* -40% adicional → ~88 frames (~1.47s) */
+const TWIST_DECAY  = 0.9760;  /* settle proporcional */
+const TWIST_CUTOFF = 0.008;
+let _pendingPresetColor = null;
+
+function triggerSoulTwist(colorData){
+  _pendingPresetColor = colorData;
+  TWIST = Math.max(TWIST, 0.05);
+  TWIST_DIR = 1;
+}
+
+function _stepTwist(){
+  if(TWIST_DIR === 1){
+    TWIST = Math.min(1, TWIST + TWIST_UP);
+    if(TWIST >= 1){
+      /* PICO — aplica nova identidade de cor enquanto o soul está "virado" */
+      if(_pendingPresetColor){
+        const d = _pendingPresetColor;
+        document.documentElement.style.setProperty('--brand-h',     d.h);
+        document.documentElement.style.setProperty('--brand-s',     d.s + '%');
+        document.documentElement.style.setProperty('--brand-l',     d.l + '%');
+        document.documentElement.style.setProperty('--soul-accent3', d.accent3 ?? '#888888');
+        _pendingPresetColor = null;
+        /* acende o color-loop orgânico do nome da marca */
+        startLyraColorLoop();
+      }
+      TWIST_DIR = -1;
+    }
+  } else if(TWIST_DIR === -1){
+    /* decaimento exponencial — rápido no começo, arrasta no fim */
+    TWIST *= TWIST_DECAY;
+    if(TWIST < TWIST_CUTOFF){ TWIST = 0; TWIST_DIR = 0; }
+  }
+}
+
+function loop(){
+  HB=breathwave();
+  _stepTwist();
+  drawAvatar();drawRadar();
+  /* só anima o card ativo — inativos são estáticos */
+  const activeCanvas=pcCanvases[activePresetId];
+  if(activeCanvas) drawSoulMini(activeCanvas, PR.find(p=>p.id===activePresetId), T, HB, true);
+  T+=0.0180;requestAnimationFrame(loop)
+}
+let HB=0;
+
+/* ── PRESETS COM UPLOAD ── */
+/* ── SOUL MINI — canvas animado por preset ── */
+const pcCanvases={}; /* id → canvas */
+
+function _s(a,b){const n=Math.sin(a*127.1+b*311.7)*43758.5453;return n-Math.floor(n);}
+
+function drawSoulMini(canvas, p, t, hb, isActive){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  /* canvas retangular — raio de referência baseado na menor dimensão */
+  const R=Math.min(W,H)*0.52;
+  const cx=W/2, cy=H/2;
+
+  /* identidade da persona */
+  const bh=p.h;
+  const bsBlob=Math.min(p.s*2.8,72);
+  const bl=p.l;
+  const a3=p.accent3||'#888888';
+  const rv=parseInt(a3.slice(1,3),16),gv=parseInt(a3.slice(3,5),16),bv=parseInt(a3.slice(5,7),16);
+
+  /* fase única por preset — garante que cada card comece em lugar diferente */
+  const ph=p.h*0.031+p.s*0.07;
+  const sd=p.h*3+p.s*7;
+
+  /* velocidades de órbita únicas por preset — primos escalados */
+  const sp0=0.42+_s(sd,30)*0.22;
+  const sp1=0.61+_s(sd,31)*0.20;
+  const sp2=0.83+_s(sd,32)*0.18;
+  const sp3=0.31+_s(sd,33)*0.16;
+  const sp4=0.53+_s(sd,34)*0.22;
+  const sp5=0.72+_s(sd,35)*0.16;
+  const sp6=0.97+_s(sd,36)*0.18;
+
+  /* amplitudes orbitais únicas — canvas retangular, X≠Y */
+  const ax0=0.36+_s(sd,40)*0.18, ay0=0.28+_s(sd,41)*0.16;
+  const ax1=0.30+_s(sd,42)*0.20, ay1=0.36+_s(sd,43)*0.18;
+  const ax2=0.38+_s(sd,44)*0.16, ay2=0.26+_s(sd,45)*0.14;
+  const ax3=0.26+_s(sd,46)*0.18, ay3=0.32+_s(sd,47)*0.16;
+
+  /* fundo escuro com tinta da cor mãe */
+  ctx.fillStyle=`hsl(${bh},${Math.round(bsBlob*.18)}%,5%)`;
+  ctx.fillRect(0,0,W,H);
+
+  /* ── helpers de blob — mesma lógica do soul principal ── */
+  function blob(ox,oy,r,h,s,l,a){
+    const pr=r*(1+0.10*hb);
+    const pa=a*(1+0.20*hb);
+    const sat=Math.min(s*1.3,100);
+    const g=ctx.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,pr);
+    g.addColorStop(0,  `hsla(${h},${sat}%,${l}%,${pa})`);
+    g.addColorStop(0.45,`hsla(${h},${sat}%,${l}%,${pa*.28})`);
+    g.addColorStop(1,  `hsla(${h},${sat}%,${l}%,0)`);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+  function blobHex(ox,oy,r,a){
+    const pr=r*(1+0.08*hb);
+    const pa=a*(1+0.16*hb);
+    const g=ctx.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,pr);
+    g.addColorStop(0,   `rgba(${rv},${gv},${bv},${pa})`);
+    g.addColorStop(0.42,`rgba(${rv},${gv},${bv},${pa*.22})`);
+    g.addColorStop(1,   `rgba(${rv},${gv},${bv},0)`);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+
+  /* ── SOUL BLOBS — mesmos 7 blobs do soul principal
+     cada card usa fases e amplitudes únicas → movimento próprio
+     canvas retangular: ox usa W, oy usa H — preenche os cantos */
+  blob( Math.cos(t*sp0+ph)*W*ax0,       Math.sin(t*sp0*0.74+ph+1.1)*H*ay0,    R*.92, bh,      bsBlob,      bl+10, .80);
+  blob( Math.cos(t*sp1+ph+2.1)*W*ax1,   Math.sin(t*sp1*0.68+ph+0.8)*H*ay1,    R*.76, bh+18,   bsBlob*.92,  bl+14, .66);
+  blob( Math.cos(t*sp2+ph+4.2)*W*ax2,   Math.sin(t*sp2*0.71+ph+3.0)*H*ay2,    R*.62, bh-14,   bsBlob*.88,  bl+12, .56);
+  blobHex(Math.cos(t*sp3+ph+3.1)*W*ax3, Math.sin(t*sp3*0.65+ph+1.7)*H*ay3,    R*.60,                               .55);
+  blobHex(Math.cos(t*sp4+ph+5.4)*W*ax0, Math.sin(t*sp4*0.72+ph+4.2)*H*ay1,    R*.38,                               .34);
+  blob( Math.cos(t*sp5+ph+1.5)*W*ax1,   Math.sin(t*sp5*0.69+ph+2.5)*H*ay2,    R*.54, bh+35,   bsBlob*.78,  bl+16, .44);
+  blob( Math.cos(t*sp6+ph+0.8)*W*ax2,   Math.sin(t*sp6*0.75+ph+3.8)*H*ay3,    R*.40, bh-28,   bsBlob*.84,  bl+14, .48);
+
+  /* ── GALÁXIA — detalhes adicionados sobre os blobs ── */
+  ctx.save(); ctx.globalCompositeOperation='screen';
+
+  /* núcleo galáctico off-center único por preset */
+  const ncx=cx+(_s(sd,50)*0.18-0.09)*W;
+  const ncy=cy+(_s(sd,51)*0.14-0.07)*H;
+  const coreR=R*(0.14+0.05*hb);
+  const cg1=ctx.createRadialGradient(ncx,ncy,0,ncx,ncy,coreR*0.35);
+  cg1.addColorStop(0,`hsla(${bh+25},55%,96%,${0.60+hb*0.18})`);
+  cg1.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=cg1; ctx.fillRect(0,0,W,H);
+  const cg2=ctx.createRadialGradient(ncx,ncy,0,ncx,ncy,coreR);
+  cg2.addColorStop(0,`hsla(${bh+12},${bsBlob*.8}%,${bl+24}%,${0.38+hb*0.12})`);
+  cg2.addColorStop(0.5,`hsla(${bh},${bsBlob*.5}%,${bl+12}%,0.12)`);
+  cg2.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=cg2; ctx.fillRect(0,0,W,H);
+
+  /* estrelas pequenas — fixas, seed por preset */
+  for(let si=0;si<42;si++){
+    const sx=_s(si,sd)*W, sy=_s(si,sd+1)*H;
+    const sa=0.05+_s(si,sd+2)*0.13;
+    const sh=bh+(_s(si,sd+3)*60-30);
+    ctx.beginPath();
+    ctx.arc(sx,sy,0.4+_s(si,sd+4)*0.55,0,Math.PI*2);
+    ctx.fillStyle=`hsla(${sh},48%,88%,${sa})`;
+    ctx.fill();
+  }
+
+  /* estrelas médias — pulsam com freq própria */
+  for(let si=0;si<16;si++){
+    const sx=_s(si+50,sd)*W, sy=_s(si+50,sd+1)*H;
+    const freq=0.4+_s(si,sd+5)*1.0;
+    const pulse=0.45+0.55*Math.sin(t*freq+_s(si,sd+6)*6.28);
+    const sz=0.7+_s(si,sd+7)*1.1;
+    const sa=(0.12+_s(si,sd+8)*0.22)*pulse;
+    const sh=bh+(_s(si,sd+9)*65-32);
+    const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,sz*2.6);
+    sg.addColorStop(0,`hsla(${sh},62%,93%,${Math.min(sa*1.5,0.88)})`);
+    sg.addColorStop(0.55,`hsla(${sh},${bsBlob*.5}%,${bl+18}%,${sa*.25})`);
+    sg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sg; ctx.fillRect(0,0,W,H);
+  }
+
+  /* estrelas brilhantes — 4, com halo e spike de difração */
+  for(let si=0;si<4;si++){
+    const sx=_s(si+100,sd)*W, sy=_s(si+100,sd+1)*H;
+    const freq=0.22+_s(si,sd+10)*0.55;
+    const pulse=0.55+0.45*Math.sin(t*freq+_s(si,sd+11)*6.28);
+    const sz=1.6+_s(si,sd+12)*2.0;
+    const sa=(0.50+_s(si,sd+13)*0.30)*pulse;
+    const sh=bh+(_s(si,sd+14)*38-19);
+    /* núcleo puro */
+    const cg=ctx.createRadialGradient(sx,sy,0,sx,sy,sz*0.7);
+    cg.addColorStop(0,`hsla(${sh},35%,98%,${sa})`);
+    cg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=cg; ctx.fillRect(0,0,W,H);
+    /* halo difuso */
+    const hg2=ctx.createRadialGradient(sx,sy,0,sx,sy,sz*4.5);
+    hg2.addColorStop(0,`hsla(${sh},${bsBlob*.55}%,${bl+22}%,${sa*0.28})`);
+    hg2.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=hg2; ctx.fillRect(0,0,W,H);
+    /* spike de difração horizontal + vertical */
+    const sLen=sz*6.5*pulse;
+    [[sx-sLen,sy,sx+sLen,sy],[sx,sy-sLen*0.55,sx,sy+sLen*0.55]].forEach(([x1,y1,x2,y2])=>{
+      const sl=ctx.createLinearGradient(x1,y1,x2,y2);
+      sl.addColorStop(0,'rgba(255,255,255,0)');
+      sl.addColorStop(0.5,`hsla(${sh},45%,96%,${sa*0.22})`);
+      sl.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      ctx.strokeStyle=sl; ctx.lineWidth=0.7; ctx.stroke();
+    });
+  }
+  ctx.restore();
+
+  /* nebulosa accent3 — flutuante em soft-light */
+  ctx.save(); ctx.globalCompositeOperation='soft-light';
+  const nx2=cx+Math.cos(t*sp3+ph+2.1)*W*0.26;
+  const ny2=cy+Math.sin(t*sp3*0.68+ph+0.9)*H*0.20;
+  const ng=ctx.createRadialGradient(nx2,ny2,0,nx2,ny2,R*0.58);
+  ng.addColorStop(0,`rgba(${rv},${gv},${bv},${0.42+hb*0.16})`);
+  ng.addColorStop(0.5,`rgba(${rv},${gv},${bv},0.08)`);
+  ng.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ng; ctx.fillRect(0,0,W,H);
+  ctx.restore();
+
+  /* realce de luz — 2 highlights deslizando */
+  ctx.save(); ctx.globalCompositeOperation='overlay';
+  const lx=cx+Math.cos(t*sp5+ph)*W*0.30;
+  const ly=cy+Math.sin(t*sp5*0.74+ph+1.2)*H*0.22;
+  const lsh=ctx.createRadialGradient(lx,ly,0,lx,ly,W*0.12);
+  lsh.addColorStop(0,`hsla(${bh+12},50%,90%,${0.18+hb*0.12})`);
+  lsh.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=lsh; ctx.fillRect(0,0,W,H);
+  ctx.restore();
+
+  /* vinheta — bordas escuras, espaço profundo */
+  const vg=ctx.createRadialGradient(cx,cy,Math.min(W,H)*0.22,cx,cy,Math.max(W,H)*0.90);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(1,'rgba(0,0,3,0.68)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+
+function buildPresets(){
+  const g=document.getElementById('presets');
+  PR.forEach((p,i)=>{
+    const card=document.createElement('div');
+    card.className='pc';card.id='pc_'+p.id;
+
+    /* área soul mini — canvas no lugar da imagem */
+    const imgWrap=document.createElement('div');imgWrap.className='pc-img-wrap';
+    const cv=document.createElement('canvas');
+    cv.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;display:block;';
+    cv.width=320; cv.height=240;
+    imgWrap.appendChild(cv);
+    pcCanvases[p.id]=cv;
+
+    /* corpo do card */
+    const body=document.createElement('div');body.className='pc-body';
+    body.innerHTML=`<div class="pc-n">${String(i+1).padStart(2,'0')}</div><div class="pc-name">${p.name}</div><div class="pc-tag">${p.tag}</div>`;
+
+    card.appendChild(body);card.appendChild(imgWrap);
+    card.addEventListener('click',()=>applyP(p));
+    g.appendChild(card);
+    /* snapshot estático inicial — será sobrescrito no primeiro applyP */
+    setTimeout(()=>drawSoulMini(cv, p, 2.4+i*1.1, 0.5, false), 80*i);
+  });
+}
+
+/* ícones SVG minimalistas por grupo */
+const GR_ICONS={
+  cog:`<svg class="g-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.54 11.54l1.42 1.42M11.54 4.46l-1.42 1.42M4.46 11.54l-1.42 1.42"/></svg>`,
+  soc:`<svg class="g-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="5.5" cy="5" r="2.5"/><circle cx="10.5" cy="5" r="2.5"/><path d="M1 13c0-2.2 2-4 4.5-4M15 13c0-2.2-2-4-4.5-4M8 14c0-2 1.5-3.5 3.5-3.5"/></svg>`,
+  exp:`<svg class="g-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M8 2C5 2 2 4.5 2 8c0 2 1 3.5 2 4.5M8 2c3 0 6 2.5 6 6 0 2-1 3.5-2 4.5M8 2v12M2 8h12"/></svg>`,
+  ctrl:`<svg class="g-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="2" y="6" width="12" height="4" rx="1"/><path d="M5 8h6M2 4h12M2 12h12"/></svg>`,
+  inst:`<svg class="g-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M8 2L3 8l5 2-5 4"/><path d="M8 2l5 6-5 2 5 4"/></svg>`,
+  emo:`<svg class="g-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M8 13.5C4 13.5 1.5 10.5 1.5 8V7a6.5 6.5 0 0113 0v1c0 2.5-2.5 5.5-6.5 5.5z"/><path d="M5.5 9.5c.7.7 1.5 1 2.5 1s1.8-.3 2.5-1"/><circle cx="5.5" cy="7" r=".7" fill="currentColor"/><circle cx="10.5" cy="7" r=".7" fill="currentColor"/></svg>`,
+  phy:`<svg class="g-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="8" cy="4" r="2"/><path d="M5 8c0-1.7 1.3-3 3-3s3 1.3 3 3v5H5V8z"/><path d="M5 11H3M11 11h2"/></svg>`
+};
+
+function buildGroups(){
+  GR.forEach(g=>{
+    const col=document.getElementById('col'+g.col);
+    const blk=document.createElement('div');blk.className='gblock';
+    const h=document.createElement('div');h.className='gh';
+    h.innerHTML=`${GR_ICONS[g.id]||''}<span class="glabel">${g.name}</span>`;
+    blk.appendChild(h);
+    const aw=document.createElement('div');aw.className='attrs';
+    g.attrs.forEach(a=>{
+      const r=document.createElement('div');r.className='arow';
+      r.innerHTML=`<span class="aname">${a.l}</span><input type="range" id="s_${a.k}" min="0" max="20" step="1" value="${a.v}"><span class="aval" id="n_${a.k}">${a.v}</span>`;
+      aw.appendChild(r);
+      const sl=r.querySelector('input');pt(sl,a.v);
+      sl.addEventListener('input',e=>{const v=parseInt(e.target.value);document.getElementById('n_'+a.k).textContent=v;pt(sl,v);document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));us(g);refresh()});
+    });
+    blk.appendChild(aw);col.appendChild(blk);us(g);
+  });
+}
+
+function animVal(el){
+  if(!el)return;
+  el.classList.remove('flash');
+  void el.offsetWidth; /* reflow para reiniciar */
+  el.classList.add('flash');
+  el.addEventListener('animationend',()=>el.classList.remove('flash'),{once:true});
+}
+function animSwap(el){
+  if(!el)return;
+  el.classList.remove('swap');
+  void el.offsetWidth;
+  el.classList.add('swap');
+  el.addEventListener('animationend',()=>el.classList.remove('swap'),{once:true});
+}
+
+function applyP(p){
+  /* anima sliders de forma staggerada — cada um com delay proporcional ao índice */
+  let idx=0;
+  Object.keys(p.vals).forEach(k=>{
+    const e=document.getElementById('s_'+k);
+    const n=document.getElementById('n_'+k);
+    if(!e)return;
+    const delay=idx*28; /* 28ms de stagger entre cada slider */
+    idx++;
+    setTimeout(()=>{
+      e.classList.add('sliding');
+      e.value=p.vals[k];
+      pt(e,p.vals[k]);
+      if(n){n.textContent=p.vals[k];animVal(n)}
+      setTimeout(()=>e.classList.remove('sliding'),700);
+    },delay);
+  });
+  setTimeout(()=>GR.forEach(g=>us(g)),Object.keys(p.vals).length*28+100);
+  rPts=[];
+  const mEl=document.getElementById('ai-mission');
+  mEl.style.opacity='0';mEl.style.transform='translateY(6px)';
+  setTimeout(()=>{
+    mEl.textContent=p.mission;mEl.classList.remove('empty');
+    mEl.style.transition='opacity .4s, transform .4s';
+    mEl.style.opacity='1';mEl.style.transform='translateY(0)';
+  },120);
+  document.getElementById('srole').value=p.role;
+  document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pc_'+p.id).classList.add('on');
+  activePresetId=p.id;
+  /* muda identidade de cor via soul twist — a cor é aplicada no pico da contorção */
+  if(p.h!==undefined){
+    triggerSoulTwist({h:p.h, s:p.s??22, l:p.l??44, accent3:p.accent3??'#888888'});
+  }
+  syncAvatarImg();
+  /* renderiza snapshot estático nos cards inativos */
+  PR.forEach(pr=>{
+    if(pr.id===p.id) return;
+    const cv=pcCanvases[pr.id];
+    if(cv) drawSoulMini(cv, pr, T, 0.5, false);
+  });
+  /* atualiza imagem invertida no mh-row4 */
+  const mhImg=document.getElementById('mh-preset-img');
+  if(mhImg&&p.img)mhImg.src=p.img;
+  refresh();
+}
+
+/* ── LYRA COLOR LOOP ─────────────────────────────────────────────────
+   Anima a cor de #mh-name com ondas de senos em frequências primas,
+   igual ao movimento dos blobs do soul. A cor oscila entre brand-light
+   e --lt (branco) de forma não-periódica (pseudo-aleatória).
+   Duração ~3.1s (20% mais lento que o tint anterior de 2.6s).
+   Usa T global para continuar em fase com o soul. */
+let _lyraLoopId = null;
+let _lyraStartT = null;
+const LYRA_DURATION = 1.87; /* -40%: 3.12 * 0.60 */
+
+function startLyraColorLoop(){
+  /* cancela loop anterior se ainda rodando */
+  if(_lyraLoopId) cancelAnimationFrame(_lyraLoopId);
+  _lyraStartT = T; /* âncora no tempo global do soul */
+
+  function tick(){
+    const nm = document.getElementById('mh-name');
+    if(!nm){ _lyraLoopId = null; return; }
+
+    const elapsed = (T - _lyraStartT) * (1/0.0108) / 60; /* segundos desde início */
+    const progress = elapsed / LYRA_DURATION;             /* 0..1..beyond */
+
+    /* envelope: sobe rápido (0→0.15), sustenta com ondas, decai suave (→1) */
+    let env;
+    if(progress < 0.15)      env = progress / 0.15;        /* attack */
+    else if(progress < 0.72) env = 1.0;                    /* sustain */
+    else if(progress < 1.0)  env = 1 - (progress-0.72)/0.28; /* release */
+    else                     env = 0;
+
+    if(env <= 0){
+      /* fim — volta ao branco limpo */
+      nm.style.color = '';
+      nm.classList.remove('mh-name--tinted');
+      _lyraLoopId = null;
+      return;
+    }
+
+    /* oscilação pseudo-aleatória: soma de 4 senos com frequências primas
+       (mesma filosofia dos blobs do soul — resultado não-periódico)
+       t_s = tempo em segundos, usando T global escalado */
+    const t_s = T * (1/0.0108) / 60;
+    const wave =
+      0.38 * Math.sin(t_s * 2.3  + 0.0) +   /* f1 — lento, dominante */
+      0.28 * Math.sin(t_s * 3.7  + 1.2) +   /* f2 — médio */
+      0.20 * Math.sin(t_s * 5.11 + 2.7) +   /* f3 — rápido */
+      0.14 * Math.sin(t_s * 7.3  + 4.1);    /* f4 — altíssimo, ruído fino */
+
+    /* normaliza -1..1 → 0..1 */
+    const w = (wave + 1) / 2;
+
+    /* interpola brand-light → --lt via CSS vars lidas em runtime */
+    const cs = getComputedStyle(document.documentElement);
+    const brandLight = cs.getPropertyValue('--brand-light').trim();
+    const ltColor    = cs.getPropertyValue('--lt').trim();
+
+    /* intensidade = envelope × wave — o tint pulsa com o soul */
+    const alpha = Math.min(1, env * (0.88 + 0.17 * w)); /* +70% presença da brand-light no sustain */
+
+    /* mistura linear entre --lt e brand-light usando opacity sobre uma camada de cor */
+    /* simplificação: usa color com opacity como proxy — funciona bem em dark bg */
+    nm.style.color = `color-mix(in srgb, ${brandLight} ${Math.round(alpha*100)}%, ${ltColor})`;
+
+    _lyraLoopId = requestAnimationFrame(tick);
+  }
+
+  nm_el = document.getElementById('mh-name');
+  if(nm_el) nm_el.classList.add('mh-name--tinted');
+  _lyraLoopId = requestAnimationFrame(tick);
+}
+
+function setupBrandName(){
+  const el = document.getElementById('mh-name');
+  if(!el) return;
+  const sname = document.getElementById('sname');
+
+  /* ao confirmar (Enter ou blur) — salva no hidden input e dispara refresh */
+  function commit(){
+    const val = el.textContent.trim() || 'Lyra';
+    el.textContent = val;          /* normaliza espaços */
+    if(sname) sname.value = val;
+    refresh();
+  }
+
+  el.addEventListener('keydown', e=>{
+    if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
+  });
+  el.addEventListener('blur', commit);
+
+  /* impede que o paste cole HTML */
+  el.addEventListener('paste', e=>{
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+  });
+}
+
+function setupMission(){
+  const el=document.getElementById('ai-mission');
+  const check=()=>el.classList.toggle('empty',el.textContent.trim()==='');
+  el.addEventListener('input',()=>{check();document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));refresh()});
+  el.addEventListener('blur',check);check();
+}
+
+function buildMhStats(){
+  const el=document.getElementById('mh-stats');if(!el)return;
+  const all=GR.flatMap(g=>g.attrs.map(a=>({...a})));
+  const top=[...all].sort((a,b)=>get(b.k)-get(a.k)).slice(0,3);
+  /* atualiza in-place se células já existem, senão reconstrói */
+  const cells=el.querySelectorAll('.mh-scell');
+  if(cells.length===3){
+    top.forEach((a,i)=>{
+      const v=get(a.k);
+      const numEl=cells[i].querySelector('.mh-snum');
+      const lblEl=cells[i].querySelector('.mh-slabel');
+      if(numEl&&numEl.textContent!=String(v)){animSwap(numEl);setTimeout(()=>numEl.textContent=v,95);}
+      if(lblEl)lblEl.textContent=a.l;
+    });
+  }else{
+    el.innerHTML='';
+    top.forEach(a=>{
+      const v=get(a.k);
+      const c=document.createElement('div');c.className='mh-scell';
+      c.innerHTML=`<div class="mh-snum">${v}</div><div class="mh-slabel">${a.l}</div>`;
+      el.appendChild(c);
+    });
+  }
+}
+function syncMhIdentity(){
+  const sn=document.getElementById('sname');
+  const sr=document.getElementById('srole');
+  const nm=document.getElementById('mh-name');
+  const rl=document.getElementById('mh-role');
+  const kk=document.querySelector('.mh-kicker');
+  if(nm&&sn&&nm.textContent!==(sn.value||'IA')){animSwap(nm);setTimeout(()=>nm.textContent=sn.value||'IA',110);}
+  if(rl&&sr&&rl.textContent!==(sr.value||'assistente')){animSwap(rl);setTimeout(()=>rl.textContent=sr.value||'assistente',140);}
+  if(kk){animSwap(kk);}
+}
+function buildStats(){
+  const el=document.getElementById('stats');el.innerHTML='';
+  const all=GR.flatMap(g=>g.attrs.map(a=>({...a})));
+  const top=[...all].sort((a,b)=>get(b.k)-get(a.k)).slice(0,3);
+  top.forEach(a=>{const v=get(a.k);const c=document.createElement('div');c.className='scell';c.innerHTML=`<div class="snum">${v}</div><div class="sname2">${a.l}</div><div class="sbar"><div class="sbarfill" style="width:${v/20*100}%"></div></div>`;el.appendChild(c)});
+}
+
+function detectT(){
+  const v=k=>get(k),t=[];
+  if(v('candor')>=15&&v('humility')<=5)t.push({b:'Franqueza sem filtro',d:`Candor ${v('candor')} vs Humildade ${v('humility')}`});
+  if(v('empathy')>=14&&v('cruelty')>=5)t.push({b:'Empatia vs dureza',d:`Empatia ${v('empathy')} vs Crueldade ${v('cruelty')}`});
+  if(v('tenacity')>=16&&v('patience')<=6)t.push({b:'Persistência impulsiva',d:`Tenacidade ${v('tenacity')} + Paciência ${v('patience')}`});
+  if(v('curiosity')>=15&&v('apperception')>=16)t.push({b:'Consciência elevada',d:`Curiosidade ${v('curiosity')} + Apercepção ${v('apperception')}`});
+  if(v('charm')>=15&&v('empathy')<=6)t.push({b:'Charme sem empatia',d:`Charme ${v('charm')} vs Empatia ${v('empathy')}`});
+  if(v('courage')<=4&&v('meekness')>=13)t.push({b:'Perfil muito passivo',d:`Coragem ${v('courage')}, Submissão ${v('meekness')}`});
+  if(v('imagination')>=17&&v('patience')<=6)t.push({b:'Criatividade ansiosa',d:`Imaginação ${v('imagination')} + Paciência ${v('patience')}`});
+  return t;
+}
+
+function buildPrompt(){
+  const name=document.getElementById('sname').value||'IA';const role=document.getElementById('srole').value||'assistente';const mission=document.getElementById('ai-mission').textContent.trim();
+  const adj=[];if(get('empathy')>=14)adj.push('empática');if(get('candor')>=15)adj.push('direta e honesta');if(get('humor')>=12)adj.push('com leveza quando apropriado');if(get('curiosity')>=14)adj.push('curiosa');if(get('tenacity')>=15)adj.push('persistente');if(get('patience')>=14)adj.push('paciente');if(get('imagination')>=15)adj.push('criativa');if(get('decisiveness')>=15)adj.push('decisiva');if(adj.length===0)adj.push('equilibrada e profissional');
+  const avoid=[];if(get('aggression')<=3)avoid.push('nunca seja agressiva');if(get('cruelty')<=2)avoid.push('nunca faça comentários que possam magoar');
+  const dom=[];GR.forEach(g=>{const t=g.attrs.filter(a=>get(a.k)>=14).map(a=>`${a.l} (${get(a.k)})`);if(t.length)dom.push({name:g.name,attrs:t})});
+  return{name,role,mission,adj,avoid,dom};
+}
+function fmtClaude(d){let p=`<s>\n  <identity>\n    <n>${d.name}</n>\n    <role>${d.role}</role>\n  </identity>\n\n  <personality>${d.adj.join(', ')}</personality>\n`;if(d.avoid.length)p+=`\n  <constraints>${d.avoid.join('; ')}</constraints>\n`;if(d.mission)p+=`\n  <mission>${d.mission}</mission>\n`;if(d.dom.length){p+=`\n  <dominant_attributes>\n`;d.dom.forEach(g=>p+=`    <group name="${g.name}">${g.attrs.join(', ')}</group>\n`);p+=`  </dominant_attributes>\n`}p+=`\n  <instruction>Mantenha consistência.</instruction>\n</s>`;return p}
+function fmtGPT(d){let p=`# ${d.name} — System Prompt\n\n**Função:** ${d.role}\n\n## Personalidade\n${d.adj.join(', ')}.\n`;if(d.avoid.length)p+=`\n## Restrições\n${d.avoid.map(a=>`- ${a}`).join('\n')}\n`;if(d.mission)p+=`\n## Missão\n${d.mission}\n`;if(d.dom.length){p+=`\n## Atributos dominantes\n`;d.dom.forEach(g=>p+=`**${g.name}:** ${g.attrs.join(', ')}\n`)}p+=`\n---\nMantenha consistência.`;return p}
+function fmtGemini(d){let p=`Você é ${d.name}, uma IA com função de ${d.role}.\n\nPersonalidade: ${d.adj.join(', ')}.\n`;if(d.avoid.length)p+=`\nRestrições: ${d.avoid.join('; ')}.\n`;if(d.mission)p+=`\nMissão: ${d.mission}\n`;if(d.dom.length){p+=`\nAtributos dominantes:\n`;d.dom.forEach(g=>p+=`${g.name}: ${g.attrs.join(', ')}\n`)}p+=`\nMantenha consistência.`;return p}
+function updatePrompt(){
+  const d=buildPrompt();
+  const fns={claude:fmtClaude,chatgpt:fmtGPT,gemini:fmtGemini};
+  const txt=fns[curTarget](d);
+  /* atualiza o overlay */
+  const ep=document.getElementById('ep-pre');
+  if(ep)ep.textContent=txt;
+}
+function selTarget(t){curTarget=t;updatePrompt()}
+function epSelTarget(t){
+  curTarget=t;
+  ['claude','chatgpt','gemini'].forEach(id=>document.getElementById('ep-'+id).classList.toggle('active',id===t));
+  updatePrompt();
+}
+function epCopy(){
+  const txt=document.getElementById('ep-pre').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.querySelector('.ep-copy');
+    btn.textContent='Copiado ✓';
+    setTimeout(()=>btn.textContent='Copiar prompt',2000);
+  });
+}
+function refresh(){
+  buildStats();buildMhStats();syncMhIdentity();
+  const v=k=>get(k);const a=ARCH.find(a=>a.t(v));
+  document.getElementById('archname').textContent=a.n;
+  document.getElementById('archdesc').textContent=a.d;
+  const mha=document.getElementById('mh-archname');
+  const mhd=document.getElementById('mh-archdesc');
+  if(mha&&mha.textContent!==a.n){animSwap(mha);setTimeout(()=>mha.textContent=a.n,110);}
+  else if(mha)mha.textContent=a.n;
+  if(mhd&&mhd.textContent!==a.d){animSwap(mhd);setTimeout(()=>mhd.textContent=a.d,150);}
+  else if(mhd)mhd.textContent=a.d;
+  const ts=detectT();
+  document.getElementById('tensions').innerHTML=ts.length===0
+    ?'<span class="tok">Nenhum conflito detectado</span>'
+    :ts.map(t=>`<div class="trow"><span class="tkey">${t.b}</span><span class="tdesc">${t.d}</span></div>`).join('');
+  updatePrompt();
+}
+function setDate(){const d=new Date();const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const months=['January','February','March','April','May','June','July','August','September','October','November','December'];document.getElementById('dateline').textContent=`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`}
+
+/* ── FAB + OVERLAY ── */
+function openExport(){
+  const ov=document.getElementById('export-overlay');
+  ov.classList.add('open');
+  epSelTarget(curTarget);
+}
+function closeExport(){document.getElementById('export-overlay').classList.remove('open')}
+
+document.getElementById('fab-export').addEventListener('click',openExport);
+document.getElementById('ep-close').addEventListener('click',closeExport);
+document.getElementById('export-overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('export-overlay'))closeExport();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeExport()});
+
+['sname','srole'].forEach(id=>document.getElementById(id).addEventListener('input',refresh));
+setDate();setupMission();setupBrandName();buildGroups();buildPresets();applyP(PR[0]);setupRadarHover();loop();
+
+/* ── FIXED MH + SHRINK ON SCROLL ── */
+(function(){
+  const mh=document.querySelector('.mh');
+  const spacer=document.getElementById('mh-spacer');
+  const ease='.35s cubic-bezier(.4,0,.2,1)';
+
+  /* aplica transição suave nos elementos internos */
+  const transEls=[
+    {sel:'.mh-left',      prop:'padding',    big:'28px 48px 28px 56px', small:'14px 48px 14px 56px'},
+    {sel:'.mh-right',     prop:'padding',    big:'32px 56px 32px 40px', small:'14px 56px 14px 40px'},
+    {sel:'.mh-name',      prop:'font-size',  big:'46px',  small:'28px'},
+    {sel:'.mh-snum',      prop:'font-size',  big:'34px',  small:'22px'},
+    {sel:'.mh-arch-name', prop:'font-size',  big:'22px',  small:'15px'},
+    {sel:'.mh-arch-desc', prop:'font-size',  big:'16px',  small:'11px'},
+    {sel:'.mh-title-r',   prop:'font-size',  big:'52px',  small:'34px'},
+    {sel:'.mh-role',      prop:'font-size',  big:'16px',  small:'11px'},
+  ];
+
+  function setRow3(scrolled){
+    const row3=mh.querySelector('.mh-row3');
+    if(!row3)return;
+    const archLabel=row3.querySelector('.mh-arch-label');
+    const archName =row3.querySelector('#mh-archname');
+    const archDesc =row3.querySelector('#mh-archdesc');
+    if(scrolled){
+      /* mostra nome e tag do preset ativo */
+      const activePc=document.querySelector('.pc.on');
+      const pcName=activePc?activePc.querySelector('.pc-name')?.textContent:'';
+      const pcTag =activePc?activePc.querySelector('.pc-tag')?.textContent:'';
+      if(archLabel){animSwap(archLabel);setTimeout(()=>archLabel.textContent='Preset ativo',90);}
+      if(archName) {animSwap(archName); setTimeout(()=>archName.textContent=pcName,110);}
+      if(archDesc) {animSwap(archDesc); setTimeout(()=>archDesc.textContent=pcTag,130);}
+    }else{
+      /* restaura arquétipo */
+      const an=document.getElementById('mh-archname');
+      const ad=document.getElementById('mh-archdesc');
+      const archTxt=an?an.textContent:'';
+      const descTxt=ad?ad.textContent:'';
+      if(archLabel){animSwap(archLabel);setTimeout(()=>archLabel.textContent='Arquétipo',90);}
+      if(archName) {animSwap(archName); setTimeout(()=>archName.textContent=archTxt,110);}
+      if(archDesc) {animSwap(archDesc); setTimeout(()=>archDesc.textContent=descTxt,130);}
+    }
+  }
+
+  function setSize(scrolled){
+    mh.classList.toggle('mh--scrolled', scrolled);
+    transEls.forEach(({sel,prop,big,small})=>{
+      const el=mh.querySelector(sel);
+      if(!el)return;
+      el.style.transition=`${prop} ${ease}`;
+      el.style[prop.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=scrolled?small:big;
+    });
+    /* avatar */
+    const av=mh.querySelector('.mh-avatar-wrap');
+    const canvas=mh.querySelector('#av-mh');
+    if(av){av.style.transition=`width ${ease},height ${ease}`;av.style.width=scrolled?'68px':'100px';av.style.height=scrolled?'68px':'100px';}
+    if(canvas){canvas.style.transition=`width ${ease},height ${ease}`;canvas.style.width=scrolled?'68px!important':'100px!important';canvas.style.setProperty('width',scrolled?'68px':'100px','important');canvas.style.setProperty('height',scrolled?'68px':'100px','important');}
+  }
+
+  /* atualiza spacer com a altura real do mh após transição */
+  function updateSpacer(){
+    const h=mh.getBoundingClientRect().height;
+    spacer.style.height=h+'px';
+    document.documentElement.style.setProperty('--mh-h',h+'px');
+  }
+
+  /* init */
+  updateSpacer();
+  /* re-mede durante transição */
+  mh.addEventListener('transitionend',updateSpacer);
+
+  let scrolled=false;
+  let ticking=false;
+  window.addEventListener('scroll',()=>{
+    if(ticking)return;
+    ticking=true;
+    requestAnimationFrame(()=>{
+      const nowScrolled=window.scrollY>50;
+      if(nowScrolled!==scrolled){
+        scrolled=nowScrolled;
+        setSize(scrolled);
+        setRow3(scrolled);
+        /* atualiza spacer após a transição terminar */
+        setTimeout(updateSpacer,380);
+      }
+      ticking=false;
+    });
+  },{passive:true});
+})();
+</script>

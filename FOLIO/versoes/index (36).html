@@ -36,9 +36,9 @@
   --ink4:    rgba(var(--ink-rgb), 0.22);
 
   /* spacing — calibrated for 1920×1080 */
-  --pad:     108px;  /* page horizontal padding */
-  --nav-h:   68px;
-  --gap:     36px;   /* card gap */
+  --pad:     72px;   /* page horizontal padding */
+  --nav-h:   56px;
+  --gap:     28px;   /* card gap */
 
   /* transitions */
   --ease: 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -185,8 +185,8 @@ nav {
 
 .hero-text {
   position: relative; z-index: 2;
-  padding: 140px var(--pad) 140px;
-  max-width: 1000px;
+  padding: 100px var(--pad) 100px;
+  max-width: 860px;
 }
 
 .eyebrow {
@@ -204,7 +204,7 @@ nav {
 }
 
 .hero-title {
-  font-size: clamp(80px, 5.6vw, 138px);
+  font-size: clamp(56px, 4.8vw, 92px);
   font-weight: var(--fw-display);
   line-height: 1.04;
   letter-spacing: var(--ls-heading);
@@ -215,7 +215,7 @@ nav {
 .hero-title em { font-style: italic; font-weight: inherit; }
 
 .hero-body {
-  font-size: 28px;
+  font-size: 19px;
   line-height: 1.82;
   font-weight: var(--fw-body);
   color: var(--ink2);
@@ -231,7 +231,7 @@ nav {
   border-top: 1px solid var(--border);
 }
 .stat-n {
-  font-size: 66px;
+  font-size: 44px;
   font-weight: var(--fw-display);
   color: rgba(var(--ink-rgb), var(--ink-str));
   line-height: 1; letter-spacing: -0.03em;
@@ -295,13 +295,13 @@ nav {
 ════════════════════════════════════════════ */
 .manifesto { padding-bottom: 120px; }
 .m-row {
-  display: grid; grid-template-columns: 360px 1fr; gap: 0 120px;
+  display: grid; grid-template-columns: 240px 1fr; gap: 0 80px;
   padding-bottom: 80px; border-bottom: 1px solid var(--border2);
   margin-bottom: 80px; align-items: start;
 }
 .m-row:last-child { border-bottom: none; margin-bottom: 0; }
 .m-ix {
-  font-size: 168px;
+  font-size: 112px;
   font-weight: var(--fw-display);
   line-height: 0.88; letter-spacing: -0.05em;
   color: var(--border);
@@ -309,7 +309,7 @@ nav {
   transition: font-weight var(--ease), color var(--ease);
 }
 .m-heading {
-  font-size: 48px;
+  font-size: 32px;
   font-weight: var(--fw-display);
   line-height: 1.22; letter-spacing: var(--ls-heading);
   color: rgba(var(--ink-rgb), var(--ink-str));
@@ -318,7 +318,7 @@ nav {
 }
 .m-heading em { font-style: italic; }
 .m-text {
-  font-size: 25px; line-height: 1.84;
+  font-size: 17px; line-height: 1.84;
   font-weight: var(--fw-body); color: var(--ink2);
   max-width: 640px;
   transition: font-weight var(--ease);
@@ -333,7 +333,7 @@ nav {
   margin-bottom: 48px;
 }
 .labs-title {
-  font-size: 78px;
+  font-size: 52px;
   font-weight: var(--fw-display);
   letter-spacing: var(--ls-heading);
   color: rgba(var(--ink-rgb), var(--ink-str));
@@ -365,7 +365,7 @@ nav {
 /* ── THUMB (hero visual do card) ── */
 .card-thumb {
   position: relative;
-  height: 620px;        /* protagonismo maior + 15% */
+  height: 480px;        /* protagonismo maior */
   overflow: hidden;
   cursor: pointer;
   background: #0a0a09;
@@ -439,7 +439,7 @@ nav {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: start;
-  padding: 38px 44px 32px;
+  padding: 28px 32px 24px;
   gap: 24px;
 }
 
@@ -454,7 +454,7 @@ nav {
   transition: font-weight var(--ease);
 }
 .card-title {
-  font-size: 38px;
+  font-size: 26px;
   font-weight: var(--fw-display);
   letter-spacing: var(--ls-heading);
   color: rgba(var(--ink-rgb), var(--ink-str));
@@ -463,7 +463,7 @@ nav {
 }
 .card-title em { font-style: italic; font-weight: inherit; color: var(--ink3); }
 .card-desc {
-  font-size: 22px; line-height: 1.72;
+  font-size: 15px; line-height: 1.72;
   font-weight: var(--fw-body); color: var(--ink3);
   max-width: 560px;
   transition: font-weight var(--ease);
@@ -505,7 +505,7 @@ nav {
 /* card footer */
 .card-foot {
   display: flex; align-items: center; gap: 14px;
-  padding: 14px 44px;
+  padding: 12px 32px;
   border-top: 1px solid var(--border2);
 }
 .foot-label {
@@ -587,48 +587,77 @@ nav {
 .footer-links a:hover { color: var(--ink); }
 
 /* ════════════════════════════════════════════
-   MODAL — App preview fullscreen
+   MODAL — Threads preview
 ════════════════════════════════════════════ */
 #modal {
   position: fixed; inset: 0; z-index: 9000;
-  background: rgba(8,8,7,0.82);
-  display: flex; align-items: center; justify-content: center;
+  background: rgba(8,8,7,0.96);
+  display: flex; flex-direction: column;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.32s ease;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  transition: opacity 0.28s ease;
 }
 #modal.is-open { opacity: 1; pointer-events: all; }
 
-.modal-shell {
-  position: relative;
-  width: 95vw; height: 95vh;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
-  transform: translateY(12px) scale(0.98);
-  transition: transform 0.36s cubic-bezier(0.25, 0.1, 0.25, 1);
+.modal-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
 }
-#modal.is-open .modal-shell { transform: translateY(0) scale(1); }
-
-#modal-iframe {
-  width: 100%; height: 100%;
-  border: none; display: block;
-  background: #0a0a09;
+.modal-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
 }
-
+.modal-ctrls { display: flex; gap: 10px; align-items: center; }
+.modal-ext {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.26); text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.09); padding: 5px 13px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.modal-ext:hover { color: rgba(255,255,255,0.82); border-color: rgba(255,255,255,0.26); }
 .modal-x {
-  position: absolute; top: 16px; right: 16px; z-index: 10;
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(10,10,9,0.7);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.6); cursor: pointer; font-size: 16px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: transparent; border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.42); cursor: pointer; font-size: 17px;
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s, color 0.15s, transform 0.22s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.15s, color 0.15s, transform 0.26s ease;
+  flex-shrink: 0;
 }
-.modal-x:hover { background: rgba(255,255,255,0.12); color: #fff; transform: rotate(90deg); }
+.modal-x:hover {
+  background: rgba(255,255,255,0.09); color: #fff;
+  transform: rotate(90deg);
+}
+
+/* Threads embed wrapper */
+.modal-body {
+  flex: 1; overflow: hidden; position: relative;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 40px 28px;
+  overflow-y: auto;
+}
+/* Threads oEmbed iframe */
+.modal-body iframe {
+  width: 100%; max-width: 540px;
+  border: none; display: block;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+  border-radius: 12px;
+  background: #fff;
+  min-height: 420px;
+}
+#modal.is-open .modal-body iframe { opacity: 1; transform: none; }
+
+.modal-esc {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  font-family: 'DM Mono', monospace; font-size: 8px; font-weight: 300;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.14); pointer-events: none;
+  transition: opacity 2s ease;
+}
+.modal-esc.gone { opacity: 0; }
 
 /* ════════════════════════════════════════════
    SCROLL REVEAL
@@ -669,7 +698,7 @@ nav {
   .labs-title { font-size: 36px; }
 
   /* card thumb — mobile shows only thumb + basic info, no iframe */
-  .card-thumb { height: 276px; }
+  .card-thumb { height: 240px; }
   .card-body { grid-template-columns: 1fr; gap: 16px; padding: 20px 20px 16px; }
   .card-actions { flex-direction: row; align-items: center; }
   .card-foot { padding: 10px 20px; }
@@ -830,13 +859,13 @@ nav {
   <!-- ── 001 Soul Gradient ── -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
-         onclick="openModal('https://dev-teken.github.io/labs/SOUL/')"
+         onclick="openModal('https://www.threads.net/@tutoprompt/post/DWIUO49CGrh','Soul Gradient — v5','https://www.threads.net/@tutoprompt/post/DWIUO49CGrh')"
          role="button" tabindex="0"
          aria-label="Ver preview Soul Gradient">
       <!-- Mídia do Threads como capa -->
       <img
         class="thumb-visual"
-        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/soul-gradient.jpg"
+        src="https://www.threads.com/@tutoprompt/post/DWIUO49CGrh/media?hl=pt-br"
         alt="Soul Gradient — preview"
         loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
@@ -872,7 +901,7 @@ nav {
       <div class="card-actions">
         <div class="pulse-badge"><div class="pulse"></div> Em evolução</div>
         <button class="btn-preview"
-          onclick="openModal('https://dev-teken.github.io/labs/SOUL/')">
+          onclick="openModal('https://www.threads.net/@tutoprompt/post/DWIUO49CGrh','Soul Gradient — v5','https://www.threads.net/@tutoprompt/post/DWIUO49CGrh')">
           Preview ↗
         </button>
       </div>
@@ -890,17 +919,10 @@ nav {
   <!-- ── 002 Persona AI ── -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
-         onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')"
+         onclick="openModal('https://www.threads.net/@seu_usuario/post/ID_002','Persona AI — v3','https://www.threads.net/@seu_usuario/post/ID_002')"
          role="button" tabindex="0"
          aria-label="Ver preview Persona AI">
-      <img
-        class="thumb-visual"
-        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/persona-ai.jpg"
-        alt="Persona AI — preview"
-        loading="lazy"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-      />
-      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
+      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
         <rect width="1600" height="480" fill="#e8e9e4"/>
         <!-- newsprint grid lines -->
         <line x1="0" y1="80" x2="1600" y2="80" stroke="#d0d1cb" stroke-width="0.8"/>
@@ -949,7 +971,7 @@ nav {
       <div class="card-actions">
         <div class="pulse-badge"><div class="pulse"></div> Em evolução</div>
         <button class="btn-preview"
-          onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')">
+          onclick="openModal('https://www.threads.net/@seu_usuario/post/ID_002','Persona AI — v3','https://www.threads.net/@seu_usuario/post/ID_002')">
           Preview ↗
         </button>
       </div>
@@ -966,17 +988,10 @@ nav {
   <!-- ── 003 Trália ── -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
-         onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
+         onclick="openModal('https://www.threads.net/@seu_usuario/post/ID_003','Trália — Sistema de Tarefas','https://www.threads.net/@seu_usuario/post/ID_003')"
          role="button" tabindex="0"
          aria-label="Ver preview Trália">
-      <img
-        class="thumb-visual"
-        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/tralia.jpg"
-        alt="Trália — preview"
-        loading="lazy"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-      />
-      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
+      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
         <rect width="1600" height="480" fill="#080d10"/>
         <!-- topbar -->
         <rect x="0" y="0" width="1600" height="52" fill="#0c1215"/>
@@ -1024,7 +1039,7 @@ nav {
       <div class="card-actions">
         <div class="pulse-badge"><div class="pulse"></div> Em evolução</div>
         <button class="btn-preview"
-          onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')">
+          onclick="openModal('https://www.threads.net/@seu_usuario/post/ID_003','Trália — Sistema de Tarefas','https://www.threads.net/@seu_usuario/post/ID_003')">
           Preview ↗
         </button>
       </div>
@@ -1090,10 +1105,17 @@ nav {
 
 <!-- ════ MODAL — Threads ══════════════════════ -->
 <div id="modal" role="dialog" aria-modal="true">
-  <div class="modal-shell">
-    <iframe id="modal-iframe" src="" allow="autoplay; fullscreen" loading="lazy"></iframe>
-    <button class="modal-x" onclick="closeModal()" aria-label="Fechar">&#x2715;</button>
+  <div class="modal-bar">
+    <span class="modal-lbl" id="modal-lbl">—</span>
+    <div class="modal-ctrls">
+      <a class="modal-ext" id="modal-ext" href="#" target="_blank" rel="noopener">Ver no Threads ↗</a>
+      <button class="modal-x" onclick="closeModal()" aria-label="Fechar">&#x2715;</button>
+    </div>
   </div>
+  <div class="modal-body" id="modal-body">
+    <!-- Threads embed injectado via JS -->
+  </div>
+  <span class="modal-esc" id="modal-esc">ESC para fechar</span>
 </div>
 
 <script>
@@ -1106,27 +1128,56 @@ slider.addEventListener('input', () => applyIntensity(slider.value));
 applyIntensity(slider.value);
 
 /* ── Modal ───────────────────────────────── */
-const modal       = document.getElementById('modal');
-const modalIframe = document.getElementById('modal-iframe');
+const modal    = document.getElementById('modal');
+const mLbl     = document.getElementById('modal-lbl');
+const mExt     = document.getElementById('modal-ext');
+const mBody    = document.getElementById('modal-body');
+const mEsc     = document.getElementById('modal-esc');
+let   escTimer = null;
 
-function openModal(appUrl) {
-  modalIframe.src = appUrl;
+function openModal(threadsUrl, label, extUrl) {
+  mLbl.textContent = label;
+  mExt.href = extUrl || threadsUrl;
+
+  /* Threads embed: usa blockquote + script oficial
+     Se o post URL for válido, carrega o embed nativo.
+     Fallback elegante se não carregar.               */
+  mBody.innerHTML = `
+    <div style="width:100%;max-width:540px;display:flex;flex-direction:column;gap:0">
+      <blockquote class="text-post-media-content"
+        data-url="${threadsUrl}"
+        style="background:#fff;border-radius:12px;overflow:hidden;min-height:360px;
+               display:flex;align-items:center;justify-content:center;width:100%">
+        <a href="${threadsUrl}" target="_blank" rel="noopener"
+           style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;
+                  text-transform:uppercase;color:#888;text-decoration:none">
+          Abrir no Threads ↗
+        </a>
+      </blockquote>
+    </div>`;
+
+  /* tenta carregar o script oficial de embed do Threads */
+  const s = document.createElement('script');
+  s.src = 'https://www.threads.net/embed.js';
+  s.async = true;
+  mBody.appendChild(s);
+
   modal.classList.add('is-open');
   document.body.style.overflow = 'hidden';
+
+  clearTimeout(escTimer);
+  mEsc.classList.remove('gone');
+  escTimer = setTimeout(() => mEsc.classList.add('gone'), 3200);
 }
 
 function closeModal() {
   modal.classList.remove('is-open');
   document.body.style.overflow = '';
-  setTimeout(() => { modalIframe.src = ''; }, 350);
+  setTimeout(() => { mBody.innerHTML = ''; }, 300);
 }
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
-});
-
-modal.addEventListener('click', e => {
-  if (e.target === modal) closeModal();
 });
 
 /* ── Scroll reveal ────────────────────────── */
