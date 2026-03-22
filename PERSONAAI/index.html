@@ -1,10 +1,8 @@
 <!--
-<!--
 ╔══════════════════════════════════════════════════════════════════════╗
-║  PERSONA AI — SNAPSHOT v41  (para quando der aquela viagem e você   ║
-║  esquecer tudo: cola este arquivo num novo chat com o Claude e diz  ║
-║  "continua o projeto a partir deste snapshot" — ele lembra melhor   ║
-║  que você)                                                           ║
+║  PERSONA AI — SNAPSHOT v40  (para quando beber demais e perder a    ║
+║  memória: cola este arquivo num novo chat com o Claude e diz        ║
+║  "continua o projeto a partir deste snapshot")                      ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║  CONCEITO SOUL                                                       ║
 ║  O elemento #av-mh (canvas circular no masthead) é o "soul" —       ║
@@ -27,24 +25,14 @@
 ║  · blob(ox,oy,r,h,s,l,a)  blob HSL da cor mãe (5 instâncias)      ║
 ║  · blobHex(ox,oy,r,hex,a) blob RGB do accent3  (2 instâncias,      ║
 ║    fase oposta t*0.38 / t*0.55, orbit mais lenta = contraste vivo)  ║
-║  · T global  tempo contínuo (+=0.0180/frame, -40% vs original)     ║
-║  · HB        heartbeat breath de 4.8s, modula raio + opacidade     ║
+║  · T global  tempo contínuo (+=0.0108/frame)                       ║
+║  · HB        heartbeat pulsado, modula raio + opacidade             ║
 ║  CSS vars lidas no canvas: --brand-h  --brand-s  --soul-accent3    ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  CARDS (drawSoulMini):                                              ║
-║  · Só o card ativo anima — inativos têm snapshot estático          ║
-║  · Snapshot renderizado em applyP() e buildPresets()               ║
-║  · Sem mapa de atributos, sem espiral                              ║
-║  · Mini galáxia: blobs soul + núcleo off-center + 3 tiers estrelas ║
-║  · Frequências únicas por preset via seed (p.h*3 + p.s*7)         ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  TIMING:                                                            ║
-║  · TWIST_UP 0.0114 — troca de preset ~1.5s                        ║
-║  · orb 1.26 / spd 1.75 — centrífuga -30% vs versão anterior       ║
-║  · breath period 4800ms                                            ║
-║  · LYRA_DURATION 1.87s                                             ║
+║                                                                      ║
+║  PRÓXIMOS PASSOS PLANEJADOS:                                        ║
+║  · símbolo vivo de marca (substituir/sobrepor degradê)             ║
+║  · movimentação temporal além dos blobs (partículas, linhas, etc.) ║
 ╚══════════════════════════════════════════════════════════════════════╝
--->
 -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
