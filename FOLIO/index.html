@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="theme-dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.5">
-<title>Labs — Design & IA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labs ”” Design & IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;0,500;0,600;1,200;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    INTENSITY SYSTEM
    --I: 0..1 (slider value / 100)
    Controla: font-weight, letter-spacing,
    color strength, ink opacity
-════════════════════════════════════════════ */
+════════════════════════════════════════════ */
 :root {
-  --I: 0.55; /* default intensity */
+  --I: 0.70; /* intensidade fixa — 70% */
 
   /* derived from intensity */
   --fw-display: calc(200 + var(--I) * 400); /* 200..600 */
@@ -24,7 +24,35 @@
   --ls-heading: calc(-0.04em + var(--I) * 0.02em);
   --ink-str:    calc(0.55 + var(--I) * 0.45); /* 0.55..1.0 */
 
-  /* palette — fixed */
+  /* ── TEMA ESCURO (padrão) ── */
+  --bg:      #0e0e0c;
+  --bg2:     #141412;
+  --white:   #0e0e0c;
+  --off:     #141412;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.04);
+  --ink-rgb: 232,230,220;
+  --ink:     rgba(var(--ink-rgb), 1);
+  --ink2:    rgba(var(--ink-rgb), 0.60);
+  --ink3:    rgba(var(--ink-rgb), 0.38);
+  --ink4:    rgba(var(--ink-rgb), 0.20);
+  --nav-bg:  rgba(14,14,12,0.92);
+  --card-bg: #111110;
+
+  /* spacing ”” calibrated for 1920×1080 */
+  --pad:     5rem;      /* 108px → rem, herda escala 135% do html */
+  --nav-h:   3.15rem;  /* 68px  → rem */
+  --gap:     1.67rem;  /* 36px  → rem */
+
+  /* transitions */
+  --ease: 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+
+/* ══ TEMA CLARO — secundário ══════════════════════════════════════════════ */
+html.theme-light {
+  --bg:      #fafaf8;
+  --bg2:     #f4f3ef;
   --white:   #fafaf8;
   --off:     #f4f3ef;
   --border:  rgba(0,0,0,0.065);
@@ -34,22 +62,22 @@
   --ink2:    rgba(var(--ink-rgb), 0.62);
   --ink3:    rgba(var(--ink-rgb), 0.40);
   --ink4:    rgba(var(--ink-rgb), 0.22);
-
-  /* spacing — calibrated for 1920×1080 */
-  --pad:     72px;   /* page horizontal padding */
-  --nav-h:   56px;
-  --gap:     28px;   /* card gap */
-
-  /* transitions */
-  --ease: 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+  --nav-bg:  rgba(250,250,248,0.94);
+  --card-bg: #fafaf8;
+  --bg-svg:  #fafaf8;
 }
 
+/* No tema claro: anéis mais escuros, visíveis */
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  font-size: 135%; /* escala global 1.35× — todos os rem herdam */
+}
 
 body {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  background: var(--white);
+  background: var(--bg);
   color: var(--ink);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -57,35 +85,63 @@ body {
   transition: color var(--ease);
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    UTILITY
-════════════════════════════════════════════ */
+════════════════════════════════════════════ */
 .wrap {
-  max-width: 1680px;
+  max-width: 105rem;
   margin: 0 auto;
   padding: 0 var(--pad);
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    NAV
-════════════════════════════════════════════ */
+════════════════════════════════════════════ */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 500;
   height: var(--nav-h);
-  background: rgba(250,250,248,0.94);
-  backdrop-filter: blur(24px) saturate(1.5);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  background: var(--nav-bg);
+  backdrop-filter: blur(1.111rem) saturate(1.5);
+  -webkit-backdrop-filter: blur(1.111rem) saturate(1.5);
   border-bottom: 1px solid var(--border);
+  /* sombra sobre o soul — escurece o topo do hero */
+  box-shadow:
+    0 1.5rem  3rem  0 rgba(0,0,0,0.55),
+    0 3rem    7rem  0 rgba(0,0,0,0.32),
+    0 6rem   14rem  0 rgba(0,0,0,0.14);
 }
 .nav-inner {
-  max-width: 1680px; margin: 0 auto; padding: 0 var(--pad);
+  max-width: 105rem; margin: 0 auto; padding: 0 var(--pad);
   height: 100%;
   display: flex; align-items: center; justify-content: space-between;
-  gap: 40px;
+  gap: 1.852rem;
+}
+
+/* nav counter — discreto ao lado do logo */
+.nav-count {
+  display: flex; align-items: baseline; gap: 0.28rem;
+  border-left: 1px solid var(--border);
+  padding-left: 0.74rem;
+  margin-left: 0.18rem;
+}
+.nav-count-n {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.72rem;
+  font-weight: var(--fw-display);
+  color: rgba(var(--ink-rgb), var(--ink-str));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: font-weight var(--ease), color var(--ease);
+}
+.nav-count-l {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.30rem; font-weight: 300;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink4);
 }
 .nav-logo {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  font-size: 0.556rem;
   font-weight: 400;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -93,110 +149,160 @@ nav {
   flex-shrink: 0;
 }
 .nav-links {
-  display: flex; gap: 36px; list-style: none;
+  display: flex; gap: 1.667rem; list-style: none;
   flex: 1; justify-content: center;
 }
 .nav-links a {
   font-family: 'DM Mono', monospace;
-  font-size: 10px; font-weight: 300;
+  font-size: 0.463rem; font-weight: 300;
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--ink3); text-decoration: none;
   transition: color 0.15s;
 }
 .nav-links a:hover, .nav-links a.active { color: var(--ink); }
 
-/* ── intensity slider ── */
+/* â”€â”€ intensity slider â”€â”€ */
 .nav-right {
-  display: flex; align-items: center; gap: 16px;
+  display: flex; align-items: center; gap: 0.741rem;
   flex-shrink: 0;
 }
-.intensity-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: 300;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink4);
-  white-space: nowrap;
-}
-.intensity-wrap {
-  position: relative;
-  display: flex; align-items: center;
-  gap: 8px;
-}
-.intensity-ends {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px; font-weight: 300;
-  color: var(--ink4);
-}
-
-/* custom range */
-#intensity {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 120px; height: 1px;
-  background: var(--border);
-  outline: none; cursor: pointer;
-  border-radius: 1px;
-  position: relative;
-}
-#intensity::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: var(--ink);
-  border: none;
-  cursor: pointer;
-  transition: transform 0.15s, background 0.15s;
-}
-#intensity::-webkit-slider-thumb:hover { transform: scale(1.3); }
-#intensity::-moz-range-thumb {
-  width: 12px; height: 12px; border-radius: 50%;
-  background: var(--ink); border: none; cursor: pointer;
-}
-
 .nav-gh {
   font-family: 'DM Mono', monospace;
-  font-size: 10px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: 0.463rem; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--ink3); text-decoration: none; transition: color 0.15s;
   flex-shrink: 0;
 }
 .nav-gh:hover { color: var(--ink); }
 
+/* ════════════════════════════════════════════
+   HERO ”” calibrado para 1920×1080
+════════════════════════════════════════════ */
+
 /* ════════════════════════════════════════════
-   HERO — calibrado para 1920×1080
+   SOUL CLUSTER — 4 esferas no hero
 ════════════════════════════════════════════ */
+.hero-soul {
+  position: absolute;
+  /* topo colado na nav, desce até o fundo */
+  inset: 0;                   /* cobre todo o hero */
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  pointer-events: none;
+  z-index: 1;
+  overflow: visible;
+}
+
+/* 1 esfera — ocupa toda a área do hero-soul */
+.soul-cluster {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  filter: contrast(18) brightness(1.04) saturate(1.2);
+  opacity: calc(0.72 + var(--I) * 0.28);
+  transition: opacity var(--ease);
+}
+
+/* Cada esfera — preenche a célula do grid */
+.soul-sphere {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 50svh;           /* garante altura mínima decente */
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  filter: blur(4px);
+}
+.soul-sphere canvas {
+  position: absolute;
+  /* canvas maior que a div — blobs têm espaço extra para mover */
+  inset: -30%;
+  width: 160%;
+  height: 160%;
+  filter: blur(12px);
+}
+/* Camada de cor neon — color-dodge ativa sobre o branco do canvas */
+.soul-sphere .color-layer {
+  position: absolute;
+  inset: -30%;
+  width: 160%;
+  height: 160%;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: color-dodge;
+}
+
+/* mix-blend-mode: screen no cluster todo — preto = transparência */
+.soul-cluster-wrap {
+  mix-blend-mode: screen;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+/* tema claro — multiply inverte a lógica */
+html.theme-light .soul-cluster-wrap {
+  mix-blend-mode: multiply;
+}
+html.theme-light .soul-cluster {
+  filter: contrast(14) brightness(1.1) saturate(1.2);
+}
+
+
+/* ════════════════════════════════════════════
+   HERO MINI-SOUL — fluido, sem corte, transparente
+════════════════════════════════════════════ */
+.hero-mini-soul {
+  position: relative;
+  width: 100%;
+  height: 6rem;
+  margin-top: 2rem;
+  /* SEM overflow:hidden — blobs extravasam livremente */
+  overflow: visible;
+  /* preto = transparência via screen */
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.hero-mini-soul canvas {
+  position: absolute;
+  /* canvas bem maior que o container — blobs jamais cortados */
+  top: -60%;
+  left: -15%;
+  width: 130%;
+  height: 220%;
+  /* blur suaviza + contrast cria membrana + screen elimina preto */
+  filter: blur(18px) contrast(14) brightness(1.1) saturate(1.5);
+  mix-blend-mode: screen;
+}
+html.theme-light .hero-mini-soul { mix-blend-mode: multiply; }
+html.theme-light .hero-mini-soul canvas { filter: blur(18px) contrast(10) brightness(1.05) saturate(1.2); }
+
 .hero {
   position: relative;
   min-height: 100svh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 65fr 35fr;
   align-items: center;
   padding-top: var(--nav-h);
   overflow: hidden;
 }
 
-.hero-art {
-  position: absolute;
-  inset: 0; left: 48%;
-  pointer-events: none; overflow: hidden;
-  opacity: calc(0.3 + var(--I) * 0.4);
-  transition: opacity var(--ease);
-}
-.hero-art svg { width: 100%; height: 100%; }
 
 .hero-text {
-  position: relative; z-index: 2;
-  padding: 100px var(--pad) 100px;
-  max-width: 860px;
+  position: relative; z-index: 3;   /* acima do cluster (z-index:1) */
+  padding: 6.481rem var(--pad) 6.481rem;
+  max-width: 60rem;
 }
 
 .eyebrow {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 36px;
+  display: flex; align-items: center; gap: 0.648rem;
+  margin-bottom: 1.667rem;
 }
-.eyebrow-line { width: 28px; height: 1px; background: var(--ink4); }
+.eyebrow-line { width: 1.296rem; height: 1px; background: var(--ink4); }
 .eyebrow-text {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 0.463rem;
   font-weight: var(--fw-mono);
   letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink3);
@@ -204,54 +310,85 @@ nav {
 }
 
 .hero-title {
-  font-size: clamp(56px, 4.8vw, 92px);
+  font-size: clamp(3.704rem, 5.6vw, 6.389rem);
   font-weight: var(--fw-display);
   line-height: 1.04;
   letter-spacing: var(--ls-heading);
   color: rgba(var(--ink-rgb), var(--ink-str));
-  margin-bottom: 36px;
+  margin-bottom: 1.667rem;
   transition: font-weight var(--ease), letter-spacing var(--ease), color var(--ease);
 }
 .hero-title em { font-style: italic; font-weight: inherit; }
 
 .hero-body {
-  font-size: 19px;
+  font-size: 1.296rem;
   line-height: 1.82;
   font-weight: var(--fw-body);
   color: var(--ink2);
-  max-width: 520px;
+  max-width: 31.296rem;
   transition: font-weight var(--ease);
 }
-.hero-body p + p { margin-top: 14px; }
+.hero-body p + p { margin-top: 0.648rem; }
 .hero-body b { color: rgba(var(--ink-rgb), var(--ink-str)); font-weight: calc(var(--fw-body) + 100); }
 
-.hero-stats {
-  display: flex; gap: 52px;
-  margin-top: 64px; padding-top: 40px;
+
+
+
+/* ════════════════════════════════════════════
+   PRIMITIVES SECTION — full-width, fora de qualquer wrap
+════════════════════════════════════════════ */
+.primitives-section {
+  width: 100%;
   border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1.4rem var(--pad);
+  background: var(--bg);
+  transition: background var(--ease), border-color var(--ease);
 }
-.stat-n {
-  font-size: 44px;
-  font-weight: var(--fw-display);
-  color: rgba(var(--ink-rgb), var(--ink-str));
-  line-height: 1; letter-spacing: -0.03em;
-  margin-bottom: 6px;
-  transition: font-weight var(--ease), color var(--ease);
-}
-.stat-l {
+.primitive-strip-label {
   font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: var(--fw-mono);
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--ink3);
-  transition: font-weight var(--ease);
+  font-size: 0.33rem; font-weight: 300;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink4);
+  display: block;
+  margin-bottom: 1.2rem;
+}
+.primitives {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.prim {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.72rem;
+  position: relative;
+  padding: 0.96rem 0;
+}
+.prim + .prim::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 12%; bottom: 12%;
+  width: 1px;
+  background: var(--border);
+}
+.prim svg { display: block; overflow: visible; }
+.prim-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.36rem; font-weight: 300;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink4);
+  white-space: nowrap;
 }
 
 .hero-scroll {
-  position: absolute; bottom: 44px; left: var(--pad);
+  position: absolute; bottom: 2.037rem; left: var(--pad);
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
 .scroll-line {
-  width: 1px; height: 52px;
+  width: 1px; height: 2.407rem;
   background: linear-gradient(to bottom, transparent, var(--ink4));
   animation: scr 2.6s ease-in-out infinite;
 }
@@ -261,47 +398,47 @@ nav {
   100% { transform: scaleY(1); transform-origin: bottom; opacity: 0; }
 }
 .scroll-l {
-  font-family: 'DM Mono', monospace; font-size: 8px; font-weight: 300;
+  font-family: 'DM Mono', monospace; font-size: 0.37rem; font-weight: 300;
   letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--ink4); writing-mode: vertical-rl;
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    SECTION SEPARATOR
-════════════════════════════════════════════ */
+════════════════════════════════════════════ */
 .sep {
-  max-width: 1680px; margin: 0 auto; padding: 0 var(--pad);
+  max-width: 105rem; margin: 0 auto; padding: 0 var(--pad);
 }
 .sep-inner {
-  display: flex; align-items: center; gap: 20px;
-  padding: 24px 0 52px;
+  display: flex; align-items: center; gap: 0.926rem;
+  padding: 1.111rem 0 2.407rem;
   border-top: 1px solid var(--border);
 }
 .sep-label {
   font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: var(--fw-mono);
+  font-size: 0.417rem; font-weight: var(--fw-mono);
   letter-spacing: 0.24em; text-transform: uppercase;
   color: var(--ink4); white-space: nowrap;
   transition: font-weight var(--ease);
 }
 .sep-n {
-  font-size: 13px; color: var(--ink4); margin-left: auto;
+  font-size: 0.602rem; color: var(--ink4); margin-left: auto;
   font-weight: var(--fw-body);
   transition: font-weight var(--ease);
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    MANIFESTO
-════════════════════════════════════════════ */
-.manifesto { padding-bottom: 120px; }
+════════════════════════════════════════════ */
+.manifesto { padding-bottom: 5.556rem; }
 .m-row {
-  display: grid; grid-template-columns: 240px 1fr; gap: 0 80px;
-  padding-bottom: 80px; border-bottom: 1px solid var(--border2);
-  margin-bottom: 80px; align-items: start;
+  display: grid; grid-template-columns: 16.667rem 1fr; gap: 0 5.556rem;
+  padding-bottom: 3.704rem; border-bottom: 1px solid var(--border2);
+  margin-bottom: 3.704rem; align-items: start;
 }
 .m-row:last-child { border-bottom: none; margin-bottom: 0; }
 .m-ix {
-  font-size: 112px;
+  font-size: 7.778rem;
   font-weight: var(--fw-display);
   line-height: 0.88; letter-spacing: -0.05em;
   color: var(--border);
@@ -309,31 +446,31 @@ nav {
   transition: font-weight var(--ease), color var(--ease);
 }
 .m-heading {
-  font-size: 32px;
+  font-size: 2.222rem;
   font-weight: var(--fw-display);
   line-height: 1.22; letter-spacing: var(--ls-heading);
   color: rgba(var(--ink-rgb), var(--ink-str));
-  margin-bottom: 20px;
+  margin-bottom: 0.926rem;
   transition: font-weight var(--ease), letter-spacing var(--ease), color var(--ease);
 }
 .m-heading em { font-style: italic; }
 .m-text {
-  font-size: 17px; line-height: 1.84;
+  font-size: 1.157rem; line-height: 1.84;
   font-weight: var(--fw-body); color: var(--ink2);
-  max-width: 640px;
+  max-width: 29.63rem;
   transition: font-weight var(--ease);
 }
-.m-text p + p { margin-top: 14px; }
+.m-text p + p { margin-top: 0.648rem; }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    LABS HEADER
-════════════════════════════════════════════ */
+════════════════════════════════════════════ */
 .labs-head {
   display: flex; align-items: baseline; justify-content: space-between;
-  margin-bottom: 48px;
+  margin-bottom: 2.222rem;
 }
 .labs-title {
-  font-size: 52px;
+  font-size: 3.611rem;
   font-weight: var(--fw-display);
   letter-spacing: var(--ls-heading);
   color: rgba(var(--ink-rgb), var(--ink-str));
@@ -342,30 +479,31 @@ nav {
 .labs-title em { font-style: italic; }
 .labs-sub {
   font-family: 'DM Mono', monospace;
-  font-size: 10px; font-weight: var(--fw-mono);
+  font-size: 0.463rem; font-weight: var(--fw-mono);
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3);
   transition: font-weight var(--ease);
 }
 
-/* ════════════════════════════════════════════
-   PROJECT CARD — video-first
-════════════════════════════════════════════ */
+/* ════════════════════════════════════════════
+   PROJECT CARD ”” video-first
+════════════════════════════════════════════ */
 .lab-card {
   margin-bottom: var(--gap);
   border: 1px solid var(--border);
-  background: var(--white);
+  background: var(--card-bg);
   overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.22s ease;
 }
 .lab-card:hover {
   border-color: rgba(0,0,0,0.16);
-  box-shadow: 0 4px 40px rgba(0,0,0,0.05);
+  box-shadow: 0 0.185rem 1.852rem rgba(0,0,0,0.05);
 }
 
-/* ── THUMB (hero visual do card) ── */
+/* â”€â”€ THUMB (hero visual do card) â”€â”€ */
 .card-thumb {
   position: relative;
-  height: 552px;        /* protagonismo maior + 15% */
+  height: 20.093rem;
+
   overflow: hidden;
   cursor: pointer;
   background: #0a0a09;
@@ -393,13 +531,13 @@ nav {
   transition: opacity 0.25s ease;
 }
 .thumb-play {
-  width: 64px; height: 64px;
+  width: 2.074rem; height: 2.074rem;
   border-radius: 50%;
   background: rgba(250,250,248,0.92);
   display: flex; align-items: center; justify-content: center;
   transition: transform 0.2s ease;
 }
-.thumb-play svg { width: 20px; height: 20px; margin-left: 3px; }
+.thumb-play svg { width: 0.648rem; height: 0.648rem; margin-left: 0.097rem; }
 
 /* threads embed dentro do thumb */
 .thumb-embed {
@@ -411,8 +549,8 @@ nav {
 }
 .thumb-embed iframe {
   width: 100%;
-  max-width: 540px;
-  height: 600px;
+  max-width: 17.5rem;
+  height: 19.444rem;
   border: none;
   transform-origin: top center;
   transform: scale(1);
@@ -421,192 +559,303 @@ nav {
 
 /* version badge */
 .thumb-badge {
-  position: absolute; bottom: 16px; right: 16px;
+  position: absolute; bottom: 0.519rem; right: 0.519rem;
   font-family: 'DM Mono', monospace;
-  font-size: 8px; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase;
+  font-size: 0.337rem; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase;
   color: rgba(255,255,255,0.38); background: rgba(0,0,0,0.32);
-  padding: 3px 8px; pointer-events: none;
+  padding: 0.126rem 0.337rem; pointer-events: none;
 }
 .thumb-num {
-  position: absolute; top: 20px; left: 24px;
+  position: absolute; top: 0.648rem; left: 0.778rem;
   font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: 300; letter-spacing: 0.14em;
+  font-size: 0.380rem; font-weight: 300; letter-spacing: 0.14em;
   color: rgba(255,255,255,0.32); pointer-events: none;
 }
 
-/* ── CARD BODY ── */
+/* â”€â”€ CARD BODY â”€â”€ */
 .card-body {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr 1fr 14rem;
   align-items: start;
-  padding: 28px 32px 24px;
-  gap: 24px;
+  padding: 1.600rem 1.854rem 1.348rem;
+  gap: 1.4rem;
 }
 
-.card-meta {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+/* coluna central — versões */
+.card-versions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-top: 0.1rem;
 }
-.card-tag {
+.card-versions-label {
   font-family: 'DM Mono', monospace;
-  font-size: 8px; font-weight: var(--fw-mono);
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink3); border: 1px solid var(--border); padding: 2px 9px;
-  transition: font-weight var(--ease);
+  font-size: 0.28rem; font-weight: 300;
+  letter-spacing: 0.20em; text-transform: uppercase;
+  color: var(--ink4);
+  margin-bottom: 0.2rem;
 }
+
+/* coluna direita — estado */
+
+/* status dot pulsante */
+@keyframes pulse-status {
+  0%, 100% { opacity: 1;   transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,77,77,0.4); }
+  50%       { opacity: 0.7; transform: scale(0.85); box-shadow: 0 0 0 0.25rem rgba(255,77,77,0); }
+}
+
+
+
+
+
 .card-title {
-  font-size: 26px;
+  font-size: 1.600rem;
   font-weight: var(--fw-display);
   letter-spacing: var(--ls-heading);
   color: rgba(var(--ink-rgb), var(--ink-str));
-  margin-bottom: 8px; line-height: 1.25;
+  margin-bottom: 0.481rem; line-height: 1.25;
   transition: font-weight var(--ease), letter-spacing var(--ease), color var(--ease);
 }
 .card-title em { font-style: italic; font-weight: inherit; color: var(--ink3); }
 .card-desc {
-  font-size: 15px; line-height: 1.72;
+  font-size: 0.927rem; line-height: 1.72;
   font-weight: var(--fw-body); color: var(--ink3);
-  max-width: 560px;
+  max-width: none;
   transition: font-weight var(--ease);
 }
 
-/* actions */
-.card-actions {
-  display: flex; flex-direction: column;
-  align-items: flex-end; gap: 10px;
-  padding-top: 4px;
-}
-.pulse-badge {
-  display: flex; align-items: center; gap: 5px;
-  font-family: 'DM Mono', monospace;
-  font-size: 8px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink4);
-}
-.pulse {
-  width: 5px; height: 5px; border-radius: 50%; background: #8aba8a;
-  animation: pa 2.6s ease-in-out infinite;
-}
-@keyframes pa { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-/* ── PREVIEW BUTTON ── */
-.btn-preview {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: var(--fw-mono);
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--white); background: var(--ink);
-  border: 1px solid var(--ink); padding: 9px 20px;
-  cursor: pointer; text-decoration: none; display: inline-block;
-  transition: background 0.15s, color 0.15s, font-weight var(--ease);
-}
-.btn-preview:hover {
-  background: transparent; color: var(--ink);
-}
-.btn-preview:active { transform: scale(0.98); }
+/* botão circular e status removidos — ver .btn-circle-preview */
 
 /* card footer */
 .card-foot {
-  display: flex; align-items: center; gap: 14px;
-  padding: 12px 32px;
+  display: flex; align-items: center; gap: 0.590rem;
+  padding: 0.590rem 1.854rem;
   border-top: 1px solid var(--border2);
 }
 .foot-label {
   font-family: 'DM Mono', monospace;
-  font-size: 8px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase;
+  font-size: 0.337rem; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--ink4);
 }
-.foot-dots { display: flex; gap: 5px; }
-.foot-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+.foot-dots { display: flex; gap: 0.211rem; }
+.foot-dot { width: 0.252rem; height: 0.252rem; border-radius: 50%; background: var(--border); }
 .foot-dot.on { background: var(--ink3); }
 .foot-note {
   font-family: 'DM Mono', monospace;
-  font-size: 8px; font-weight: 300; color: var(--ink4); margin-left: auto;
+  font-size: 0.337rem; font-weight: 300; color: var(--ink4); margin-left: auto;
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    TIMELINE
+════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════
+   VERSION PICKER — seletor de versões do card
 ════════════════════════════════════════════ */
-.timeline {
-  display: grid; grid-template-columns: 180px 1fr;
-  max-width: 820px; padding-bottom: 120px;
+.version-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
 }
-.tl-spine { padding-right: 36px; position: relative; }
+.version-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.version-strip-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.336rem; font-weight: 300;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink4);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.version-thumbs {
+  display: flex;
+  gap: 0.456rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+/* Versões — bolinhas circulares minimalistas */
+.vtmb {
+  position: relative;
+  width: 1.92rem;
+  height: 1.92rem;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 0 0 transparent;
+}
+.vtmb:hover {
+  transform: scale(1.12);
+  border-color: rgba(var(--ink-rgb), 0.30);
+}
+.vtmb.active {
+  border-color: rgba(var(--ink-rgb), 0.60);
+  box-shadow: 0 0 0.5rem rgba(var(--ink-rgb), 0.12);
+}
+.vtmb svg, .vtmb img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+/* esconde label de texto — círculo fala por si */
+.vtmb-label { display: none; }
+/* pontinho "mais recente" */
+.vtmb-latest::after {
+  content: '';
+  position: absolute;
+  bottom: 0.1rem; right: 0.1rem;
+  width: 0.26rem; height: 0.26rem;
+  border-radius: 50%;
+  background: #7ab87a;
+  border: 1px solid rgba(0,0,0,0.4);
+}
+/* Botão circular de preview */
+.btn-circle-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  /* canvas soul como fundo — preto do canvas = transparência via screen */
+  background: transparent;
+  border: 1px solid rgba(var(--ink-rgb), 0.18);
+  cursor: pointer;
+  color: rgba(var(--ink-rgb), 0.80);
+  transition: border-color 0.3s, box-shadow 0.3s, color 0.3s, transform 0.22s;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+/* soul canvas dentro do botão */
+.btn-circle-preview canvas {
+  position: absolute;
+  inset: -35%;
+  width: 170%; height: 170%;
+  filter: blur(6px) contrast(12) brightness(1.1) saturate(1.4);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0.72;
+  transition: opacity 0.3s;
+}
+/* glow halo externo — tênue em repouso */
+.btn-circle-preview::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 0.35s;
+  pointer-events: none;
+}
+.btn-circle-preview:hover canvas { opacity: 0.95; }
+.btn-circle-preview:hover {
+  border-color: rgba(var(--ink-rgb), 0.45);
+  color: rgba(var(--ink-rgb), 1);
+  transform: scale(1.08);
+}
+.btn-circle-preview:hover::after {
+  box-shadow:
+    0 0 1.4rem 0.3rem rgba(180,160,120,0.18),
+    0 0 3rem 0.6rem rgba(160,140,100,0.08);
+}
+.btn-circle-preview:active { transform: scale(0.94); }
+.btn-circle-preview svg {
+  width: 0.9rem; height: 0.9rem;
+  position: relative; z-index: 2;
+  /* seta sempre visível sobre o canvas */
+  filter: drop-shadow(0 0 0.15rem rgba(0,0,0,0.6));
+}
+
+.timeline {
+  display: grid; grid-template-columns: 8.333rem 1fr;
+  max-width: 49.352rem; padding-bottom: 7.222rem;
+}
+.tl-spine { padding-right: 2.167rem; position: relative; }
 .tl-spine::after {
   content: ''; position: absolute;
-  top: 8px; right: 18px; bottom: 0; width: 1px; background: var(--border);
+  top: 0.37rem; right: 0.833rem; bottom: 0; width: 1px; background: var(--border);
 }
 .tl-yr {
   font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: 300; letter-spacing: 0.1em;
-  color: var(--ink4); margin-bottom: 44px;
-  text-align: right; padding-right: 28px; position: relative;
+  font-size: 0.542rem; font-weight: 300; letter-spacing: 0.1em;
+  color: var(--ink4); margin-bottom: 2.648rem;
+  text-align: right; padding-right: 1.685rem; position: relative;
 }
 .tl-yr::after {
   content: ''; position: absolute; right: -4px; top: 4px;
-  width: 7px; height: 7px; border-radius: 50%;
+  width: 0.324rem; height: 0.324rem; border-radius: 50%;
   background: var(--white); border: 1px solid var(--border);
 }
 .tl-yr.now::after { background: var(--ink); border-color: var(--ink); }
 .tl-event {
-  margin-bottom: 36px; padding-bottom: 36px; border-bottom: 1px solid var(--border2);
+  margin-bottom: 2.167rem; padding-bottom: 2.167rem; border-bottom: 1px solid var(--border2);
 }
 .tl-event:last-child { border-bottom: none; }
 .tl-lbl {
   font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: var(--fw-mono);
-  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink3); margin-bottom: 7px;
+  font-size: 0.542rem; font-weight: var(--fw-mono);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink3); margin-bottom: 0.421rem;
   transition: font-weight var(--ease);
 }
 .tl-title {
-  font-size: 22px; font-weight: var(--fw-display); color: rgba(var(--ink-rgb), var(--ink-str));
-  margin-bottom: 7px;
+  font-size: 1.325rem; font-weight: var(--fw-display); color: rgba(var(--ink-rgb), var(--ink-str));
+  margin-bottom: 0.421rem;
   transition: font-weight var(--ease), color var(--ease);
 }
 .tl-desc {
-  font-size: 15px; line-height: 1.74; font-weight: var(--fw-body); color: var(--ink3);
+  font-size: 0.902rem; line-height: 1.74; font-weight: var(--fw-body); color: var(--ink3);
   transition: font-weight var(--ease);
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    FOOTER
-════════════════════════════════════════════ */
-.site-footer { border-top: 1px solid var(--border); padding: 28px 0; }
+════════════════════════════════════════════ */
+.site-footer { border-top: 1px solid var(--border); padding: 1.296rem 0; }
 .foot-inner {
-  max-width: 1680px; margin: 0 auto; padding: 0 var(--pad);
+  max-width: 105rem; margin: 0 auto; padding: 0 var(--pad);
   display: flex; align-items: center; justify-content: space-between;
 }
 .footer-brand {
   font-family: 'DM Mono', monospace;
-  font-size: 11px; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase;
+  font-size: 0.509rem; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--ink4);
 }
-.footer-links { display: flex; gap: 28px; list-style: none; }
+.footer-links { display: flex; gap: 1.296rem; list-style: none; }
 .footer-links a {
   font-family: 'DM Mono', monospace;
-  font-size: 9px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: 0.417rem; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--ink4); text-decoration: none; transition: color 0.15s;
 }
 .footer-links a:hover { color: var(--ink); }
 
-/* ════════════════════════════════════════════
-   MODAL — App preview fullscreen
-════════════════════════════════════════════ */
+/* ════════════════════════════════════════════
+   MODAL ”” App preview fullscreen
+════════════════════════════════════════════ */
 #modal {
   position: fixed; inset: 0; z-index: 9000;
   background: rgba(8,8,7,0.82);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
   transition: opacity 0.32s ease;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(0.556rem);
+  -webkit-backdrop-filter: blur(0.556rem);
 }
 #modal.is-open { opacity: 1; pointer-events: all; }
 
 .modal-shell {
   position: relative;
   width: 95vw; height: 95vh;
-  border-radius: 16px;
+  border-radius: 0.741rem;
   overflow: hidden;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
-  transform: translateY(12px) scale(0.98);
+  box-shadow: 0 1.481rem 3.704rem rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+  transform: translateY(0.556rem) scale(0.98);
   transition: transform 0.36s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 #modal.is-open .modal-shell { transform: translateY(0) scale(1); }
@@ -618,11 +867,11 @@ nav {
 }
 
 .modal-x {
-  position: absolute; top: 16px; right: 16px; z-index: 10;
-  width: 36px; height: 36px; border-radius: 50%;
+  position: absolute; top: 0.741rem; right: 0.741rem; z-index: 10;
+  width: 1.667rem; height: 1.667rem; border-radius: 50%;
   background: rgba(10,10,9,0.7);
   border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.6); cursor: pointer; font-size: 16px;
+  color: rgba(255,255,255,0.6); cursor: pointer; font-size: 0.741rem;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s, color 0.15s, transform 0.22s ease;
   backdrop-filter: blur(8px);
@@ -630,11 +879,11 @@ nav {
 }
 .modal-x:hover { background: rgba(255,255,255,0.12); color: #fff; transform: rotate(90deg); }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════════
    SCROLL REVEAL
-════════════════════════════════════════════ */
+════════════════════════════════════════════ */
 .fade-up {
-  opacity: 0; transform: translateY(18px);
+  opacity: 0; transform: translateY(0.833rem);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .fade-up.in { opacity: 1; transform: none; }
@@ -642,111 +891,185 @@ nav {
 .fade-up:nth-child(3) { transition-delay: 0.18s; }
 .fade-up:nth-child(4) { transition-delay: 0.27s; }
 
-/* ════════════════════════════════════════════
-   MOBILE — simplificado
-════════════════════════════════════════════ */
+/* ════════════════════════════════════════════
+   MOBILE ”” simplificado
+════════════════════════════════════════════ */
 @media (max-width: 960px) {
-  :root { --pad: 22px; }
+  :root { --pad: 1.019rem; }
 
   /* nav: hide links, keep logo + slider + gh */
   .nav-links { display: none; }
-  #intensity { width: 80px; }
 
   /* hero: single col */
   .hero { grid-template-columns: 1fr; min-height: auto; }
-  .hero-art { left: 0; opacity: 0.12; }
-  .hero-text { padding: calc(var(--nav-h) + 52px) var(--pad) 72px; max-width: 100%; }
-  .hero-title { font-size: clamp(40px, 8vw, 64px); }
-  .hero-stats { gap: 32px; }
-  .stat-n { font-size: 36px; }
-
+  .hero-soul { left: 0; }
+  .hero-text { padding: calc(var(--nav-h) + 2.407rem) var(--pad) 3.333rem; max-width: 100%; }
+  .hero-title { font-size: clamp(1.852rem, 8vw, 2.963rem); }
+    
   /* manifesto */
-  .m-row { grid-template-columns: 1fr; gap: 16px; }
-  .m-ix { font-size: 72px; }
+  .m-row { grid-template-columns: 1fr; gap: 0.741rem; }
+  .m-ix { font-size: 3.333rem; }
 
   /* labs */
   .labs-head { flex-direction: column; gap: 8px; align-items: flex-start; }
-  .labs-title { font-size: 36px; }
+  .labs-title { font-size: 1.667rem; }
 
-  /* card thumb — mobile shows only thumb + basic info, no iframe */
-  .card-thumb { height: 276px; }
-  .card-body { grid-template-columns: 1fr; gap: 16px; padding: 20px 20px 16px; }
+  /* card thumb ”” mobile shows only thumb + basic info, no iframe */
+  .card-thumb { height: 8.944rem; }
+  .card-body { grid-template-columns: 1fr; gap: 0.519rem; padding: 0.648rem 0.648rem 0.519rem; }
   .card-actions { flex-direction: row; align-items: center; }
-  .card-foot { padding: 10px 20px; }
+  .card-foot { padding: 0.324rem 0.648rem; }
 
   /* timeline */
   .timeline { grid-template-columns: 1fr; }
   .tl-spine { display: none; }
 
   /* footer */
-  .foot-inner { flex-direction: column; gap: 14px; text-align: center; }
+  .foot-inner { flex-direction: column; gap: 0.648rem; text-align: center; }
 }
+
+/* ══ THEME TOGGLE ══════════════════════════════════════════════════════════ */
+.theme-toggle {
+  display: flex; align-items: center; gap: 0.37rem;
+  cursor: pointer; background: none; border: none;
+  padding: 0; flex-shrink: 0;
+}
+.toggle-track {
+  width: 1.85rem; height: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--border);
+  position: relative;
+  transition: background 0.3s, border-color 0.3s;
+  flex-shrink: 0;
+}
+.toggle-thumb {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  left: 0.12rem;
+  width: 0.6rem; height: 0.6rem;
+  border-radius: 50%;
+  background: var(--ink3);
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
+}
+html.theme-light .toggle-thumb {
+  left: calc(100% - 0.72rem);
+  background: var(--ink);
+}
+.toggle-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.37rem; font-weight: 300;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink4);
+  transition: color 0.3s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* transições suaves de tema em tudo */
+body, nav, .lab-card, .card-body, .card-foot,
+.sep-inner, .site-footer, .hero-text, .manifesto {
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+
+
+/* animações das primitivas */
+@keyframes pulse-r {
+  0%, 100% { r: 3; opacity: 0.9; }
+  50%       { r: 5; opacity: 0.4; }
+}
+@keyframes stroke-dash {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -40; }
+}
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes orbit-rev {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes tri-breath {
+  0%, 100% { transform: scale(1);    opacity: 0.90; }
+  50%       { transform: scale(0.88); opacity: 0.50; }
+}
+@keyframes rect-scan {
+  0%   { transform: translateY(-6px); opacity: 0; }
+  20%  { opacity: 0.7; }
+  80%  { opacity: 0.7; }
+  100% { transform: translateY(6px);  opacity: 0; }
+}
+@keyframes grid-fade {
+  0%, 100% { opacity: 0.18; }
+  50%       { opacity: 0.55; }
+}
+.prim-dot circle.core          { animation: pulse-r 2.8s ease-in-out infinite; transform-origin: center; }
+.prim-line line                { stroke-dasharray: 6 4; animation: stroke-dash 1.8s linear infinite; }
+.prim-circle .orbit-ring       { transform-origin: 26px 26px; animation: orbit 6s linear infinite; }
+.prim-circle .orbit-ring-rev   { transform-origin: 26px 26px; animation: orbit-rev 9s linear infinite; }
+.prim-tri g                    { transform-origin: 26px 26px; animation: tri-breath 3.2s ease-in-out infinite; }
+.prim-rect .scan               { animation: rect-scan 2.4s ease-in-out infinite; }
+.prim-grid .gc                 { animation: grid-fade 2s ease-in-out infinite; }
+.prim-grid .gc:nth-child(1)  { animation-delay: 0s; }
+.prim-grid .gc:nth-child(2)  { animation-delay: 0.18s; }
+.prim-grid .gc:nth-child(3)  { animation-delay: 0.36s; }
+.prim-grid .gc:nth-child(4)  { animation-delay: 0.54s; }
+.prim-grid .gc:nth-child(5)  { animation-delay: 0.72s; }
+.prim-grid .gc:nth-child(6)  { animation-delay: 0.90s; }
+.prim-grid .gc:nth-child(7)  { animation-delay: 1.08s; }
+.prim-grid .gc:nth-child(8)  { animation-delay: 1.26s; }
+.prim-grid .gc:nth-child(9)  { animation-delay: 1.44s; }
+
 </style>
 </head>
 <body>
 
-<!-- ════ NAV ════════════════════════════════ -->
+<!-- ════ NAV ════════════════════════════════ -->
 <nav>
   <div class="nav-inner">
     <span class="nav-logo">Labs</span>
+    <span class="nav-count">
+      <span class="nav-count-n">3</span>
+      <span class="nav-count-l">labs ativos</span>
+    </span>
     <ul class="nav-links">
       <li><a href="#sobre">Sobre</a></li>
       <li><a href="#labs">Projetos</a></li>
       <li><a href="#jornada">Jornada</a></li>
     </ul>
     <div class="nav-right">
-      <span class="intensity-label">Intensidade</span>
-      <div class="intensity-wrap">
-        <span class="intensity-ends">○</span>
-        <input type="range" id="intensity" min="0" max="100" value="55" aria-label="Intensidade visual">
-        <span class="intensity-ends">●</span>
-      </div>
-      <a class="nav-gh" href="https://github.com" target="_blank">GitHub ↗</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <span class="toggle-label" id="toggleLabel">Claro</span>
+      </button>
+      <a class="nav-gh" href="https://github.com" target="_blank">GitHub &#8599;</a>
     </div>
   </div>
 </nav>
 
-<!-- ════ HERO ════════════════════════════════ -->
+<!-- ════ HERO ════════════════════════════════ -->
 <section class="hero" id="sobre">
 
-  <!-- Círculos SVG — composição de identidade -->
-  <div class="hero-art" aria-hidden="true">
-    <svg viewBox="0 0 800 1000" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <linearGradient id="af" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stop-color="#b0aca3" stop-opacity="0.6"/>
-          <stop offset="100%" stop-color="#b0aca3" stop-opacity="0.04"/>
-        </linearGradient>
-        <linearGradient id="fl" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"  stop-color="#fafaf8" stop-opacity="1"/>
-          <stop offset="32%" stop-color="#fafaf8" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="fb" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%"  stop-color="#fafaf8" stop-opacity="1"/>
-          <stop offset="28%" stop-color="#fafaf8" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <circle cx="440" cy="440" r="400" stroke="#d8d5cc" stroke-width="0.5" stroke-opacity="0.55"/>
-      <circle cx="440" cy="440" r="330" stroke="#d0cdc4" stroke-width="0.5" stroke-opacity="0.44"/>
-      <circle cx="440" cy="440" r="260" stroke="#c8c4bc" stroke-width="0.5" stroke-opacity="0.36"/>
-      <circle cx="440" cy="440" r="190" stroke="#c0bcb4" stroke-width="0.5" stroke-opacity="0.30"/>
-      <circle cx="440" cy="440" r="120" stroke="#b8b4ac" stroke-width="0.5" stroke-opacity="0.24"/>
-      <circle cx="440" cy="440" r="55"  stroke="#b0aca4" stroke-width="0.5" stroke-opacity="0.18"/>
-      <circle cx="180" cy="760" r="300" stroke="#c8c4bc" stroke-width="0.5" stroke-opacity="0.28"/>
-      <circle cx="180" cy="760" r="220" stroke="#c0bcb4" stroke-width="0.5" stroke-opacity="0.22"/>
-      <circle cx="180" cy="760" r="140" stroke="#b8b4ac" stroke-width="0.5" stroke-opacity="0.16"/>
-      <circle cx="680" cy="100" r="200" stroke="#d0ccc4" stroke-width="0.5" stroke-opacity="0.32"/>
-      <circle cx="680" cy="100" r="130" stroke="#c8c4bc" stroke-width="0.5" stroke-opacity="0.26"/>
-      <circle cx="680" cy="100" r="65"  stroke="#c0bcb4" stroke-width="0.5" stroke-opacity="0.20"/>
-      <path d="M 440 40 A 400 400 0 0 1 820 330" stroke="url(#af)" stroke-width="0.9" stroke-linecap="round"/>
-      <path d="M 440 110 A 330 330 0 0 1 750 330" stroke="#c0bcb4" stroke-width="0.6" stroke-linecap="round" stroke-opacity="0.46"/>
-      <path d="M 50 440 A 390 390 0 0 0 310 820"  stroke="#c8c4bc" stroke-width="0.5" stroke-linecap="round" stroke-opacity="0.32"/>
-      <circle cx="440" cy="40"  r="3" fill="#c0bcb4" fill-opacity="0.55"/>
-      <circle cx="820" cy="330" r="2.2" fill="#c0bcb4" fill-opacity="0.44"/>
-      <circle cx="50"  cy="440" r="2.2" fill="#c8c4bc" fill-opacity="0.36"/>
-      <rect x="0" y="0"   width="260" height="1000" fill="url(#fl)"/>
-      <rect x="0" y="820" width="800" height="180"  fill="url(#fb)"/>
-    </svg>
+  <!-- Sol SVG — centro da composição visual, lado direito -->
+
+  <!-- Soul cluster — 4 esferas, preto como transparência -->
+  <div class="hero-soul" aria-hidden="true">
+    <div class="soul-cluster-wrap">
+      <div class="soul-cluster" id="soul-cluster">
+
+        <!-- Névoa — azul frio -->
+        <div class="soul-sphere" id="soul-a">
+          <!-- COSMOS base — violeta escuro dessaturado, dark-friendly -->
+          <div class="color-layer" style="background:radial-gradient(circle at 48% 46%, hsla(270,20%,38%,0.82) 0%, hsla(260,18%,28%,0.52) 42%, hsla(250,15%,18%,0.22) 78%, transparent 100%)"></div>
+          <!-- accent3 #c075b4 — violeta-rosé suave, zona deslocada -->
+          <div class="color-layer" style="background:radial-gradient(circle at 65% 58%, hsla(295,18%,44%,0.50) 0%, hsla(280,15%,30%,0.22) 55%, transparent 82%);mix-blend-mode:color-dodge;z-index:3;"></div>
+          <!-- azul-noite bh-28=242 — ancoragem fria no canto -->
+          <div class="color-layer" style="background:radial-gradient(circle at 28% 68%, hsla(242,16%,36%,0.38) 0%, hsla(255,14%,24%,0.16) 52%, transparent 78%);mix-blend-mode:color-dodge;z-index:4;"></div>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <div class="hero-text">
@@ -760,23 +1083,13 @@ nav {
       guiado por IA
     </h1>
     <div class="hero-body">
-      <p>Transição de carreira em curso — da gestão para o design de interfaces que vivem na fronteira entre código, linguagem e experiência humana.</p>
-      <p>A IA não substituiu o processo criativo — ela <b>ampliou o raio de alcance</b> do que é possível explorar sozinho.</p>
+      <p>Transição de carreira em curso ”” da gestão para o design de interfaces que vivem na fronteira entre código, linguagem e experiência humana.</p>
+      <p>A IA não substituiu o processo criativo ”” ela <b>ampliou o raio de alcance</b> do que é possível explorar sozinho.</p>
     </div>
-    <div class="hero-stats">
-      <div>
-        <div class="stat-n">3</div>
-        <div class="stat-l">Labs ativos</div>
-      </div>
-      <div>
-        <div class="stat-n" style="font-style:italic">∞</div>
-        <div class="stat-l">Versões abertas</div>
-      </div>
-      <div>
-        <div class="stat-n">01</div>
-        <div class="stat-l">Portfolio</div>
-      </div>
-    </div>
+
+    <!-- Mini soul fluido — mesmo efeito do botão, sem corte -->
+    <div class="hero-mini-soul" id="hero-mini-soul" aria-hidden="true"></div>
+
   </div>
 
   <div class="hero-scroll" aria-hidden="true">
@@ -785,7 +1098,104 @@ nav {
   </div>
 </section>
 
-<!-- ════ MANIFESTO ════════════════════════════ -->
+<!-- ════ PRIMITIVES — full-width ════════════════════════════════ -->
+<div class="primitives-section" aria-label="Formas primitivas do design">
+  <span class="primitive-strip-label">Primitivas — a base geométrica do design por prompt</span>
+  <div class="primitives">
+
+    <!-- PONTO -->
+    <div class="prim prim-dot">
+      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
+        <circle cx="18" cy="18" r="11" stroke="rgba(var(--ink-rgb),0.20)" stroke-width="0.6" fill="none"/>
+        <circle cx="18" cy="18" r="6"  stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.5" fill="none"/>
+        <circle class="core" cx="18" cy="18" r="3" fill="rgba(var(--ink-rgb),0.70)"/>
+      </svg>
+      <span class="prim-label">Ponto</span>
+    </div>
+
+    <!-- LINHA -->
+    <div class="prim prim-line">
+      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
+        <line x1="4" y1="14" x2="32" y2="14" stroke="rgba(var(--ink-rgb),0.22)" stroke-width="0.5" stroke-dasharray="6 4"/>
+        <line x1="4" y1="18" x2="32" y2="18" stroke="rgba(var(--ink-rgb),0.55)" stroke-width="0.7" stroke-dasharray="6 4" style="animation-delay:-0.6s"/>
+        <line x1="4" y1="22" x2="32" y2="22" stroke="rgba(var(--ink-rgb),0.22)" stroke-width="0.5" stroke-dasharray="6 4" style="animation-delay:-1.2s"/>
+        <circle cx="4" cy="18" r="1.4" fill="rgba(var(--ink-rgb),0.50)"/>
+        <circle cx="32" cy="18" r="1.4" fill="rgba(var(--ink-rgb),0.30)"/>
+      </svg>
+      <span class="prim-label">Linha</span>
+    </div>
+
+    <!-- CÍRCULO -->
+    <div class="prim prim-circle">
+      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
+        <circle cx="18" cy="18" r="15" stroke="rgba(var(--ink-rgb),0.18)" stroke-width="0.5" fill="none"/>
+        <g class="orbit-ring">
+          <circle cx="18" cy="18" r="10" stroke="rgba(var(--ink-rgb),0.32)" stroke-width="0.6" fill="none" stroke-dasharray="14 18"/>
+          <circle cx="18" cy="8" r="1.5" fill="rgba(var(--ink-rgb),0.65)"/>
+        </g>
+        <g class="orbit-ring-rev">
+          <circle cx="18" cy="18" r="6" stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.5" fill="none" stroke-dasharray="8 10"/>
+        </g>
+        <circle cx="18" cy="18" r="2" fill="rgba(var(--ink-rgb),0.60)"/>
+      </svg>
+      <span class="prim-label">Círculo</span>
+    </div>
+
+    <!-- TRIÂNGULO -->
+    <div class="prim prim-tri">
+      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
+        <g>
+          <polygon points="18,4 33,30 3,30" stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.6" fill="none" stroke-linejoin="round"/>
+          <polygon points="18,26 8,10 28,10" stroke="rgba(var(--ink-rgb),0.18)" stroke-width="0.4" fill="none" stroke-linejoin="round"/>
+          <circle cx="18" cy="20" r="1.5" fill="rgba(var(--ink-rgb),0.55)"/>
+          <circle cx="18" cy="4"  r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
+          <circle cx="33" cy="30" r="1.2" fill="rgba(var(--ink-rgb),0.30)"/>
+          <circle cx="3"  cy="30" r="1.2" fill="rgba(var(--ink-rgb),0.30)"/>
+        </g>
+      </svg>
+      <span class="prim-label">Triângulo</span>
+    </div>
+
+    <!-- QUADRADO -->
+    <div class="prim prim-rect">
+      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
+        <rect x="4" y="4" width="28" height="28" stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.6" fill="none"/>
+        <rect x="10" y="10" width="16" height="16" stroke="rgba(var(--ink-rgb),0.18)" stroke-width="0.4" fill="none"/>
+        <line class="scan" x1="5" y1="18" x2="31" y2="18" stroke="rgba(var(--ink-rgb),0.45)" stroke-width="0.5"/>
+        <circle cx="4"  cy="4"  r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
+        <circle cx="32" cy="4"  r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
+        <circle cx="4"  cy="32" r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
+        <circle cx="32" cy="32" r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
+      </svg>
+      <span class="prim-label">Quadrado</span>
+    </div>
+
+    <!-- GRID -->
+    <div class="prim prim-grid">
+      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
+        <line x1="4"  y1="4"  x2="4"  y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
+        <line x1="18" y1="4"  x2="18" y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
+        <line x1="32" y1="4"  x2="32" y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
+        <line x1="4"  y1="4"  x2="32" y2="4"  stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
+        <line x1="4"  y1="18" x2="32" y2="18" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
+        <line x1="4"  y1="32" x2="32" y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
+        <circle class="gc" cx="4"  cy="4"  r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="18" cy="4"  r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="32" cy="4"  r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="4"  cy="18" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="18" cy="18" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="32" cy="18" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="4"  cy="32" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="18" cy="32" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+        <circle class="gc" cx="32" cy="32" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
+      </svg>
+      <span class="prim-label">Grid</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ MANIFESTO ════════════════════════════ -->
 <div class="sep" id="manifesto">
   <div class="sep-inner">
     <span class="sep-label">§ manifesto</span>
@@ -798,8 +1208,8 @@ nav {
     <div>
       <h2 class="m-heading">A IA como <em>lanterna</em>, não como destino</h2>
       <div class="m-text">
-        <p>Comecei sem saber escrever uma linha de CSS. A transição não foi planejada como um curso — foi uma série de perguntas que pediram ferramentas novas para serem respondidas.</p>
-        <p>O que a IA tornou possível não foi apenas "gerar código mais rápido". Foi poder levar uma ideia que existia só na cabeça até um protótipo funcional em horas — e então entender, depurar, refinar.</p>
+        <p>Comecei sem saber escrever uma linha de CSS. A transição não foi planejada como um curso ”” foi uma série de perguntas que pediram ferramentas novas para serem respondidas.</p>
+        <p>O que a IA tornou possível não foi apenas "gerar código mais rápido". Foi poder levar uma ideia que existia só na cabeça até um protótipo funcional em horas ”” e então entender, depurar, refinar.</p>
       </div>
     </div>
   </div>
@@ -808,26 +1218,26 @@ nav {
     <div>
       <h2 class="m-heading">Versionar é <em>contar a história</em></h2>
       <div class="m-text">
-        <p>O GitHub aqui não é só repositório — é diário de desenvolvimento. Cada commit tem intenção. Cada pasta tem um README que contextualiza por que aquilo existe.</p>
+        <p>O GitHub aqui não é só repositório ”” é diário de desenvolvimento. Cada commit tem intenção. Cada pasta tem um README que contextualiza por que aquilo existe.</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ════ LABS ══════════════════════════════════ -->
+<!-- ════ LABS ══════════════════════════════════ -->
 <div class="sep" id="labs">
   <div class="sep-inner">
     <span class="sep-label">§ projetos</span>
     <span class="sep-n">03</span>
   </div>
 </div>
-<div class="wrap" style="padding-bottom:120px">
+<div class="wrap" style="padding-bottom:5.556rem">
   <div class="labs-head fade-up">
     <div class="labs-title">Os <em>experimentos</em></div>
-    <div class="labs-sub">Três perguntas — três projetos</div>
+    <div class="labs-sub">Três perguntas ”” três projetos</div>
   </div>
 
-  <!-- ── 001 Soul Gradient ── -->
+  <!-- â”€â”€ 001 Soul Gradient â”€â”€ -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
          onclick="openModal('https://dev-teken.github.io/labs/SOUL/')"
@@ -837,7 +1247,7 @@ nav {
       <img
         class="thumb-visual"
         src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/soul-gradient.jpg"
-        alt="Soul Gradient — preview"
+        alt="Soul Gradient ”” preview"
         loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
       />
@@ -851,31 +1261,98 @@ nav {
         <rect width="1600" height="480" fill="url(#g1)" opacity="0.7"/>
         <rect width="1600" height="480" fill="url(#g2)" opacity="0.6"/>
         <rect width="1600" height="480" fill="url(#g3)" opacity="0.5"/>
-        <text x="800" y="256" font-family="Georgia,serif" font-size="22" fill="rgba(255,255,255,0.18)" text-anchor="middle" letter-spacing="6">SOUL GRADIENT — CONCEPT</text>
+        <text x="800" y="256" font-family="Georgia,serif" font-size="22" fill="rgba(255,255,255,0.18)" text-anchor="middle" letter-spacing="6">SOUL GRADIENT ”” CONCEPT</text>
       </svg>
-      <div class="thumb-overlay">
-        <div class="thumb-play">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 5.14v14l11-7-11-7z" fill="#111110"/>
-          </svg>
+      <span class="thumb-num">001</span>
+      <span class="thumb-badge" id="soul-thumb-badge">v5 · soul_grid</span>
+    </div>
+    <div class="card-body" style="display:grid;grid-template-columns:1fr auto auto;align-items:center;padding:1.6rem 1.854rem 1.348rem;gap:2.2rem;">
+
+      <!-- col 1 — texto -->
+      <div>
+        <h3 class="card-title">Soul Gradient <em>"" Concept</em></h3>
+        <p class="card-desc">Gradientes orgânicos animados. Cada soul tem velocidade, paleta e heartbeat próprios "" metáfora visual para personalidade. Canvas API puro, zero dependências.</p>
+      </div>
+
+      <!-- col 2 — versões -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.55rem;padding-left:2.2rem;">
+        <span class="version-strip-label">Histórico</span>
+        <div class="version-thumbs" id="soul-version-thumbs">
+<div class="vtmb vtmb-latest active" data-version="v5" data-badge="v5 · soul_grid" onclick="soulSelectVersion(this)" title="v5 — soul_grid">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="#080809"/>
+                  <defs>
+                    <radialGradient id="tv5a" cx="38%" cy="52%" r="60%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#080809" stop-opacity="0"/></radialGradient>
+                    <radialGradient id="tv5b" cx="65%" cy="40%" r="52%"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#080809" stop-opacity="0"/></radialGradient>
+                    <radialGradient id="tv5c" cx="50%" cy="68%" r="48%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#080809" stop-opacity="0"/></radialGradient>
+                  </defs>
+                  <rect width="100" height="100" fill="url(#tv5a)" opacity="0.82"/>
+                  <rect width="100" height="100" fill="url(#tv5b)" opacity="0.70"/>
+                  <rect width="100" height="100" fill="url(#tv5c)" opacity="0.58"/>
+                </svg>
+              </div>
+
+              <div class="vtmb" data-version="v4" data-badge="v4 · smoke lab" onclick="soulSelectVersion(this)" title="v4 — smoke lab">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="#06060a"/>
+                  <defs>
+                    <radialGradient id="tv4a" cx="45%" cy="50%" r="65%"><stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#06060a" stop-opacity="0"/></radialGradient>
+                    <radialGradient id="tv4b" cx="60%" cy="38%" r="45%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#06060a" stop-opacity="0"/></radialGradient>
+                  </defs>
+                  <rect width="100" height="100" fill="url(#tv4a)" opacity="0.80"/>
+                  <rect width="100" height="100" fill="url(#tv4b)" opacity="0.58"/>
+                </svg>
+              </div>
+
+              <div class="vtmb" data-version="v3" data-badge="v3 · avatar Siri" onclick="soulSelectVersion(this)" title="v3 — avatar Siri">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="#040a06"/>
+                  <defs>
+                    <radialGradient id="tv3a" cx="50%" cy="50%" r="62%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#040a06" stop-opacity="0"/></radialGradient>
+                    <radialGradient id="tv3b" cx="35%" cy="40%" r="48%"><stop offset="0%" stop-color="#6ee7b7"/><stop offset="100%" stop-color="#040a06" stop-opacity="0"/></radialGradient>
+                  </defs>
+                  <rect width="100" height="100" fill="url(#tv3a)" opacity="0.80"/>
+                  <rect width="100" height="100" fill="url(#tv3b)" opacity="0.55"/>
+                </svg>
+              </div>
+
+              <div class="vtmb" data-version="v2" data-badge="v2 · liquid" onclick="soulSelectVersion(this)" title="v2 — liquid">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="#090608"/>
+                  <defs>
+                    <radialGradient id="tv2a" cx="42%" cy="55%" r="58%"><stop offset="0%" stop-color="#fb7185"/><stop offset="100%" stop-color="#090608" stop-opacity="0"/></radialGradient>
+                    <radialGradient id="tv2b" cx="64%" cy="36%" r="46%"><stop offset="0%" stop-color="#fda4af"/><stop offset="100%" stop-color="#090608" stop-opacity="0"/></radialGradient>
+                  </defs>
+                  <rect width="100" height="100" fill="url(#tv2a)" opacity="0.76"/>
+                  <rect width="100" height="100" fill="url(#tv2b)" opacity="0.50"/>
+                </svg>
+              </div>
+
+              <div class="vtmb" data-version="v1" data-badge="v1 · origin" onclick="soulSelectVersion(this)" title="v1 — origin">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="100" height="100" fill="#0a090a"/>
+                  <defs>
+                    <radialGradient id="tv1a" cx="50%" cy="48%" r="55%"><stop offset="0%" stop-color="#e2e8f0"/><stop offset="100%" stop-color="#0a090a" stop-opacity="0"/></radialGradient>
+                  </defs>
+                  <rect width="100" height="100" fill="url(#tv1a)" opacity="0.60"/>
+                </svg>
+              </div>
         </div>
       </div>
-      <span class="thumb-num">001</span>
-      <span class="thumb-badge">v5 · soul_grid</span>
-    </div>
-    <div class="card-body">
-      <div>
-        <div class="card-meta"><span class="card-tag">Canvas API · Animação</span></div>
-        <h3 class="card-title">Soul Gradient <em>— Concept</em></h3>
-        <p class="card-desc">Gradientes orgânicos animados. Cada soul tem velocidade, paleta e heartbeat próprios — metáfora visual para personalidade. Canvas API puro, zero dependências.</p>
-      </div>
-      <div class="card-actions">
-        <div class="pulse-badge"><div class="pulse"></div> Em evolução</div>
-        <button class="btn-preview"
-          onclick="openModal('https://dev-teken.github.io/labs/SOUL/')">
-          Preview ↗
+
+      <!-- col 3 — preview -->
+      <div style="display:flex;align-items:center;justify-content:center;padding-left:2.2rem;">
+        <button class="btn-circle-preview" id="soul-cta"
+          onclick="openModal('https://dev-teken.github.io/labs/SOUL/')"
+          aria-label="Abrir preview Soul Gradient">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 15L15 5M15 5H7M15 5V13"
+              stroke="currentColor" stroke-width="1.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
+
     </div>
     <div class="card-foot">
       <span class="foot-label">Versões</span>
@@ -887,7 +1364,7 @@ nav {
     </div>
   </div>
 
-  <!-- ── 002 Persona AI ── -->
+  <!-- â”€â”€ 002 Persona AI â”€â”€ -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
          onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')"
@@ -896,7 +1373,7 @@ nav {
       <img
         class="thumb-visual"
         src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/persona-ai.jpg"
-        alt="Persona AI — preview"
+        alt="Persona AI ”” preview"
         loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
       />
@@ -930,7 +1407,7 @@ nav {
         <rect x="60" y="160" width="680" height="1" fill="#c8c9c3"/>
         <rect x="60" y="160" width="280" height="1" fill="#1c1c18"/>
         <circle cx="340" cy="160" r="4" fill="#1c1c18"/>
-        <text x="80" y="430" font-family="monospace" font-size="11" fill="rgba(0,0,0,0.18)" letter-spacing="3">PERSONA AI — INTERFACE · EXPORTAÇÃO DE PROMPTS</text>
+        <text x="80" y="430" font-family="monospace" font-size="11" fill="rgba(0,0,0,0.18)" letter-spacing="3">PERSONA AI ”” INTERFACE · EXPORTAÇÃO PROMPTS</text>
       </svg>
       <div class="thumb-overlay">
         <div class="thumb-play">
@@ -940,17 +1417,20 @@ nav {
       <span class="thumb-num">002</span>
       <span class="thumb-badge">v3 · persona_ai</span>
     </div>
-    <div class="card-body">
+    <div class="card-body" style="display:grid;grid-template-columns:1fr auto;align-items:center;padding:1.6rem 1.854rem 1.348rem;gap:2.2rem;">
       <div>
-        <div class="card-meta"><span class="card-tag">Interface · Prompts</span></div>
-        <h3 class="card-title">Persona AI <em>— Model Architecture</em></h3>
+        <h3 class="card-title">Persona AI <em>”” Model Architecture</em></h3>
         <p class="card-desc">Configure personalidades de IAs via 20 atributos inspirados em Westworld. Radar animado, arquétipos automáticos, export para Claude / ChatGPT / Gemini.</p>
       </div>
-      <div class="card-actions">
-        <div class="pulse-badge"><div class="pulse"></div> Em evolução</div>
-        <button class="btn-preview"
-          onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')">
-          Preview ↗
+      <div style="display:flex;align-items:center;justify-content:center;padding-left:2.2rem;">
+        <button class="btn-circle-preview"
+          onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')"
+          aria-label="Abrir preview Persona AI">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 15L15 5M15 5H7M15 5V13"
+              stroke="currentColor" stroke-width="1.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -963,7 +1443,7 @@ nav {
     </div>
   </div>
 
-  <!-- ── 003 Trália ── -->
+  <!-- â”€â”€ 003 Trália â”€â”€ -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
          onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
@@ -972,7 +1452,7 @@ nav {
       <img
         class="thumb-visual"
         src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/tralia.jpg"
-        alt="Trália — preview"
+        alt="Trália ”” preview"
         loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
       />
@@ -1005,7 +1485,7 @@ nav {
         <!-- teal accent -->
         <rect x="232" y="100" width="3" height="80" rx="1" fill="#2a8080" opacity="0.7"/>
         <rect x="552" y="100" width="3" height="68" rx="1" fill="#2a8080" opacity="0.5"/>
-        <text x="240" y="432" font-family="monospace" font-size="11" fill="rgba(255,255,255,0.12)" letter-spacing="3">TRÁLIA — SISTEMA DE TAREFAS · KANBAN</text>
+        <text x="240" y="432" font-family="monospace" font-size="11" fill="rgba(255,255,255,0.12)" letter-spacing="3">TRÁLIA ”” SISTEMA DE TAREFAS · KANBAN</text>
       </svg>
       <div class="thumb-overlay">
         <div class="thumb-play">
@@ -1015,17 +1495,20 @@ nav {
       <span class="thumb-num">003</span>
       <span class="thumb-badge">v2 · trália</span>
     </div>
-    <div class="card-body">
+    <div class="card-body" style="display:grid;grid-template-columns:1fr auto;align-items:center;padding:1.6rem 1.854rem 1.348rem;gap:2.2rem;">
       <div>
-        <div class="card-meta"><span class="card-tag">Produtividade · Kanban</span></div>
-        <h3 class="card-title">Trália <em>— Sistema de Tarefas</em></h3>
-        <p class="card-desc">Kanban com múltiplos temas visuais — dark, Cyberpunk 2077, aqua. Como o design visual muda a relação com a produtividade?</p>
+        <h3 class="card-title">Trália <em>”” Sistema de Tarefas</em></h3>
+        <p class="card-desc">Kanban com múltiplos temas visuais ”” dark, Cyberpunk 2077, aqua. Como o design visual muda a relação com a produtividade?</p>
       </div>
-      <div class="card-actions">
-        <div class="pulse-badge"><div class="pulse"></div> Em evolução</div>
-        <button class="btn-preview"
-          onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')">
-          Preview ↗
+      <div style="display:flex;align-items:center;justify-content:center;padding-left:2.2rem;">
+        <button class="btn-circle-preview"
+          onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
+          aria-label="Abrir preview Trália">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 15L15 5M15 5H7M15 5V13"
+              stroke="currentColor" stroke-width="1.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -1039,7 +1522,7 @@ nav {
   </div>
 </div>
 
-<!-- ════ JORNADA ══════════════════════════════ -->
+<!-- ════ JORNADA ══════════════════════════════ -->
 <div class="sep" id="jornada">
   <div class="sep-inner">
     <span class="sep-label">§ jornada</span>
@@ -1047,48 +1530,80 @@ nav {
   </div>
 </div>
 <div class="wrap">
-  <div class="labs-head fade-up" style="margin-bottom:52px">
+  <div class="labs-head fade-up" style="margin-bottom:2.407rem">
     <div class="labs-title">A <em>linha do tempo</em></div>
   </div>
   <div class="timeline">
     <div class="tl-spine">
       <div class="tl-yr">Antes</div>
+      <div class="tl-yr">&nbsp;</div>
       <div class="tl-yr">Início</div>
+      <div class="tl-yr">&nbsp;</div>
+      <div class="tl-yr">&nbsp;</div>
+      <div class="tl-yr">&nbsp;</div>
       <div class="tl-yr now">Agora</div>
     </div>
     <div>
+
       <div class="tl-event fade-up">
         <div class="tl-lbl">Ponto de partida</div>
         <div class="tl-title">Gestão sem código</div>
         <p class="tl-desc">Carreira consolidada em gestão. A distância do código era grande — mas a curiosidade sobre como as ferramentas digitais funcionavam sempre esteve presente.</p>
       </div>
+
+      <div class="tl-event fade-up">
+        <div class="tl-lbl">Primeiro contato</div>
+        <div class="tl-title">Descoberta do ChatGPT</div>
+        <p class="tl-desc">Uma pergunta sobre automação virou uma hora de conversa. A sensação de que era possível construir sem saber construir.</p>
+      </div>
+
       <div class="tl-event fade-up">
         <div class="tl-lbl">Virada</div>
-        <div class="tl-title">Primeira conversa com IA</div>
-        <p class="tl-desc">Descoberta de que era possível ir de ideia a protótipo funcional em horas. O Dojo dos 9 Quadrados foi o primeiro exercício — CSS grid aprendido célula por célula.</p>
+        <div class="tl-title">Primeira linha de CSS</div>
+        <p class="tl-desc">O Dojo dos 9 Quadrados foi o primeiro exercício — CSS grid aprendido célula por célula. De ideia a protótipo funcional em horas, não em meses.</p>
       </div>
+
+      <div class="tl-event fade-up">
+        <div class="tl-lbl">Primeiro projeto</div>
+        <div class="tl-title">Soul Gradient nasce</div>
+        <p class="tl-desc">A primeira pergunta que gerou código real: como representar personalidade visualmente? Canvas API, blobs animados, cinco versões em iteração contínua.</p>
+      </div>
+
+      <div class="tl-event fade-up">
+        <div class="tl-lbl">Expansão</div>
+        <div class="tl-title">Persona AI e Trália</div>
+        <p class="tl-desc">A questão deixou de ser técnica e virou de design: como a interface muda a relação com o conteúdo? Dois novos projetos, dois novos ângulos da mesma curiosidade.</p>
+      </div>
+
+      <div class="tl-event fade-up">
+        <div class="tl-lbl">Método</div>
+        <div class="tl-title">Versionar como prática</div>
+        <p class="tl-desc">O GitHub deixou de ser repositório e virou diário. Cada commit com intenção, cada pasta com README. A documentação do processo virou parte do processo.</p>
+      </div>
+
       <div class="tl-event fade-up">
         <div class="tl-lbl">Agora</div>
-        <div class="tl-title">Três labs em paralelo</div>
-        <p class="tl-desc">Soul Gradient, Persona AI e Trália são os três fios condutores desta fase. O portfolio é o registro vivo dessa exploração.</p>
+        <div class="tl-title">Portfolio como laboratório vivo</div>
+        <p class="tl-desc">Este portfolio não é portfólio — é o sétimo projeto. Cada seção é uma decisão de design tomada em par com IA, em tempo real, com intenção documentada.</p>
       </div>
+
     </div>
   </div>
 </div>
 
-<!-- ════ FOOTER ═══════════════════════════════ -->
+<!-- ════ FOOTER ═══════════════════════════════ -->
 <footer class="site-footer">
   <div class="foot-inner">
-    <span class="footer-brand">Labs ✦ 2025</span>
+    <span class="footer-brand">Labs âœ¦ 2025</span>
     <ul class="footer-links">
-      <li><a href="https://github.com" target="_blank">GitHub ↗</a></li>
-      <li><a href="https://threads.net" target="_blank">Threads ↗</a></li>
+      <li><a href="https://github.com" target="_blank">GitHub â†—</a></li>
+      <li><a href="https://threads.net" target="_blank">Threads â†—</a></li>
       <li><a href="#sobre">Topo</a></li>
     </ul>
   </div>
 </footer>
 
-<!-- ════ MODAL — Threads ══════════════════════ -->
+<!-- ════ MODAL ”” Threads ══════════════════════ -->
 <div id="modal" role="dialog" aria-modal="true">
   <div class="modal-shell">
     <iframe id="modal-iframe" src="" allow="autoplay; fullscreen" loading="lazy"></iframe>
@@ -1097,15 +1612,154 @@ nav {
 </div>
 
 <script>
-/* ── Intensity slider ─────────────────────── */
-const slider = document.getElementById('intensity');
-function applyIntensity(v) {
-  document.documentElement.style.setProperty('--I', v / 100);
-}
-slider.addEventListener('input', () => applyIntensity(slider.value));
-applyIntensity(slider.value);
+/* â”€â”€ Intensity slider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/* ── Modal ───────────────────────────────── */
+/* ── Soul cluster — ultra-leve (~20fps, canvas 120px, 2 blobs) ── */
+(function () {
+  const SOULS = [{ id: 'soul-a', speed: 1.0, hb_speed: 1.4 }];
+  const MIN_SPEED = 0.15;
+  function clamp(v) { return Math.abs(v) < MIN_SPEED ? (v>=0?1:-1)*MIN_SPEED : v; }
+
+  function createSoul(cfg) {
+    const node = document.getElementById(cfg.id);
+    if (!node) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx    = canvas.getContext('2d');
+    /* 120×120 — 55% menos pixels que 180×180 */
+    const W = canvas.width  = 120;
+    const H = canvas.height = 120;
+    node.appendChild(canvas);
+
+    /* 2 blobs — -33% draws por frame vs 3 */
+    const blobs = Array.from({ length: 2 }, (_, i) => ({
+      x:  W * 0.3 + Math.random() * W * 0.4,
+      y:  H * 0.3 + Math.random() * H * 0.4,
+      vx: (Math.random() - 0.5) * cfg.speed,
+      vy: (Math.random() - 0.5) * cfg.speed,
+      r:  Math.random() * 24 + 22,
+      pulse: Math.random() * Math.PI * 2,
+      phase: i * Math.PI + Math.random(),
+      nextJolt: performance.now() + Math.random() * 5000,
+    }));
+
+    let frame = 0;
+
+    function tick() {
+      /* ~20fps — throttle cada 3 frames */
+      frame++;
+      if (frame % 3 !== 0) { requestAnimationFrame(tick); return; }
+
+      const now = performance.now();
+      const t   = now * 0.001;
+      const hb  = 0.5 + 0.4 * Math.sin(t * cfg.hb_speed);
+
+      ctx.clearRect(0, 0, W, H);
+
+      const cx = W / 2, cy = H / 2, maxD2 = (W * 0.42) ** 2;
+
+      blobs.forEach(b => {
+        if (now > b.nextJolt) {
+          b.vx += (Math.random() - 0.5) * cfg.speed * 1.5;
+          b.vy += (Math.random() - 0.5) * cfg.speed * 1.5;
+          b.nextJolt = now + 3000 + Math.random() * 5000;
+        }
+
+        b.x += b.vx + Math.sin(t * 0.7 + b.phase) * 0.5;
+        b.y += b.vy + Math.sin(t * 0.55 + b.phase) * 0.5;
+        b.vx = clamp(b.vx * 0.991);
+        b.vy = clamp(b.vy * 0.991);
+
+        const dx = b.x - cx, dy = b.y - cy, dist2 = dx*dx + dy*dy;
+        if (dist2 > maxD2) {
+          const dist = Math.sqrt(dist2), over = dist - Math.sqrt(maxD2);
+          b.vx -= (dx/dist) * over * 0.02;
+          b.vy -= (dy/dist) * over * 0.02;
+        }
+
+        const r = b.r * (1 + hb * 0.25);
+        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+        g.addColorStop(0,   'rgba(140,115,165,0.85)');
+        g.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  SOULS.forEach(cfg => createSoul(cfg));
+})();
+
+
+/* ── Version picker — Soul Gradient ──────────────────── */
+function soulSelectVersion(el) {
+  // Atualizar active
+  document.querySelectorAll('#soul-version-thumbs .vtmb').forEach(v => v.classList.remove('active'));
+  el.classList.add('active');
+
+  const version = el.dataset.version;
+  const url     = el.dataset.url;
+  const badge   = el.dataset.badge;
+
+  // Trocar capa (thumb principal do card)
+  const mainThumb = document.querySelector('.lab-card .card-thumb');
+  if (mainThumb) {
+    // Trocar SVG de fallback — pegar o SVG da miniatura clicada
+    const vtSvg = el.querySelector('svg');
+    const mainSvg = mainThumb.querySelector('.thumb-visual[style*="display:none"], .thumb-visual:not(img)');
+    if (mainSvg && vtSvg) {
+      // Fade suave
+      mainThumb.style.opacity = '0.5';
+      mainThumb.style.transition = 'opacity 0.2s';
+      setTimeout(() => { mainThumb.style.opacity = '1'; }, 220);
+    }
+  }
+
+  // Atualizar badge
+  const badgeEl = document.getElementById('soul-thumb-badge');
+  if (badgeEl) badgeEl.textContent = badge;
+
+  // Atualizar URL do CTA
+  const cta = document.getElementById('soul-cta');
+  if (cta) cta.onclick = () => openModal(url);
+}
+
+/* ── Theme toggle ───────────────────────────────────── */
+const htmlEl    = document.documentElement;
+const toggleBtn = document.getElementById('themeToggle');
+const toggleLbl = document.getElementById('toggleLabel');
+
+function applyTheme(isDark) {
+  if (isDark) {
+    htmlEl.classList.remove('theme-light');
+    htmlEl.classList.add('theme-dark');
+    htmlEl.style.setProperty('--bg-svg', '#0e0e0c');
+    if (toggleLbl) toggleLbl.textContent = 'Claro';
+  } else {
+    htmlEl.classList.remove('theme-dark');
+    htmlEl.classList.add('theme-light');
+    htmlEl.style.setProperty('--bg-svg', '#fafaf8');
+    if (toggleLbl) toggleLbl.textContent = 'Escuro';
+  }
+  localStorage.setItem('labs-theme', isDark ? 'dark' : 'light');
+}
+
+const savedTheme = localStorage.getItem('labs-theme');
+applyTheme(savedTheme !== 'light');
+
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    applyTheme(htmlEl.classList.contains('theme-light'));
+  });
+}
+
+
+/* â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const modal       = document.getElementById('modal');
 const modalIframe = document.getElementById('modal-iframe');
 
@@ -1129,13 +1783,13 @@ modal.addEventListener('click', e => {
   if (e.target === modal) closeModal();
 });
 
-/* ── Scroll reveal ────────────────────────── */
+/* â”€â”€ Scroll reveal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
 }, { threshold: 0.07 });
 document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
 
-/* ── Nav active ───────────────────────────── */
+/* â”€â”€ Nav active â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const secs = ['sobre','labs','jornada'];
 const nls  = document.querySelectorAll('.nav-links a');
 window.addEventListener('scroll', () => {
@@ -1147,12 +1801,142 @@ window.addEventListener('scroll', () => {
   nls.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
 }, { passive: true });
 
-/* ── Thumb keyboard a11y ──────────────────── */
+/* â”€â”€ Thumb keyboard a11y â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
   el.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
   });
 });
+
+/* ── Mini soul hero — leve: canvas 700×200, 3 blobs, ~20fps ── */
+(function() {
+  const node = document.getElementById('hero-mini-soul');
+  if (!node) return;
+
+  const canvas = document.createElement('canvas');
+  const ctx    = canvas.getContext('2d');
+  /* 700×200 — 50% da área de 1400×400 */
+  canvas.width  = 700;
+  canvas.height = 200;
+  node.appendChild(canvas);
+  const W = canvas.width, H = canvas.height;
+
+  /* 3 blobs — -40% vs 5 */
+  const BLOBS = [
+    { h: 200, s: 75, l: 62 },
+    { h: 148, s: 65, l: 55 },
+    { h: 260, s: 65, l: 62 },
+  ];
+
+  const blobs = BLOBS.map((col, i) => ({
+    x:  W * 0.2  + Math.random() * W * 0.60,
+    y:  H * 0.35 + Math.random() * H * 0.30,
+    vx: (Math.random() - 0.5) * 0.6,
+    vy: (Math.random() - 0.5) * 0.3,
+    r:  30 + Math.random() * 28,
+    col,
+    pulse: Math.random() * Math.PI * 2,
+    phase: i * (Math.PI * 2 / 3) + Math.random(),
+    nextJolt: performance.now() + Math.random() * 3000,
+  }));
+
+  const MIN_VX = 0.10;
+  let frame = 0;
+
+  function tick() {
+    /* ~20fps */
+    frame++;
+    if (frame % 3 !== 0) { requestAnimationFrame(tick); return; }
+
+    const now = performance.now();
+    const t   = now * 0.0007;
+    ctx.clearRect(0, 0, W, H);
+
+    blobs.forEach(b => {
+      if (now > b.nextJolt) {
+        b.vx += (Math.random() - 0.5) * 0.9;
+        b.vy += (Math.random() - 0.5) * 0.4;
+        b.nextJolt = now + 2500 + Math.random() * 4000;
+      }
+
+      b.x += b.vx + Math.sin(t * 0.75 + b.phase) * 0.6;
+      b.y += b.vy + Math.cos(t * 0.60 + b.phase) * 0.3;
+      b.vx *= 0.993; b.vy *= 0.993;
+      if (Math.abs(b.vx) < MIN_VX) b.vx = (b.vx >= 0 ? 1 : -1) * MIN_VX;
+
+      const cx = W * 0.5, cy = H * 0.5;
+      const dx = b.x - cx, dy = b.y - cy;
+      if (Math.abs(dx) > W * 0.38) b.vx -= dx * 0.004;
+      if (Math.abs(dy) > H * 0.30) b.vy -= dy * 0.012;
+
+      const r = b.r * (1 + 0.15 * Math.sin(t * 1.4 + b.pulse));
+      const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+      g.addColorStop(0,   `hsla(${b.col.h},${b.col.s}%,${b.col.l}%,1)`);
+      g.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ── Mini soul nos botões — 100×100, 2 blobs, ~30fps ── */
+(function() {
+  function createMiniSoul(btn) {
+    const canvas = document.createElement('canvas');
+    const ctx    = canvas.getContext('2d');
+    canvas.width = canvas.height = 100;
+    btn.insertBefore(canvas, btn.firstChild);
+
+    /* 2 blobs */
+    const hues = [200, 260];
+    const blobs = hues.map((h, i) => ({
+      x: 44 + Math.random() * 12,
+      y: 44 + Math.random() * 12,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      r:  22 + Math.random() * 14,
+      h,
+      pulse: Math.random() * Math.PI * 2,
+    }));
+
+    let frame = 0;
+    function tick() {
+      frame++;
+      if (frame % 2 !== 0) { requestAnimationFrame(tick); return; }
+
+      const t = performance.now() * 0.0007;
+      ctx.clearRect(0, 0, 100, 100);
+
+      blobs.forEach((b, i) => {
+        b.x += b.vx + Math.sin(t * 0.9 + i * 1.4) * 0.35;
+        b.y += b.vy + Math.cos(t * 0.8 + i * 1.2) * 0.35;
+        const dx = b.x - 50, dy = b.y - 50;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d > 38) { b.vx -= dx/d * 0.05; b.vy -= dy/d * 0.05; }
+        b.vx *= 0.994; b.vy *= 0.994;
+
+        const r = b.r * (1 + Math.sin(t*1.8 + b.pulse) * 0.10);
+        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+        g.addColorStop(0,   `hsla(${b.h},75%,68%,1)`);
+        g.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, r, 0, Math.PI*2);
+        ctx.fill();
+      });
+      requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  document.querySelectorAll('.btn-circle-preview').forEach(createMiniSoul);
+})();
+
 </script>
 </body>
 </html>
