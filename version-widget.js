@@ -19,7 +19,7 @@
       position: fixed;
       bottom: 1.6rem;
       right: 1.6rem;
-      z-index: 8000;
+      z-index: 2147483647;
       display: flex;
       align-items: center;
       gap: 0.55rem;
@@ -62,7 +62,7 @@
     #vw-panel {
       position: fixed;
       inset: 0;
-      z-index: 9000;
+      z-index: 2147483646;
       display: flex;
       pointer-events: none;
       opacity: 0;
@@ -446,14 +446,17 @@
         <div class="vw-iframe-placeholder" id="vw-placeholder">
           <p>Selecione uma versão</p>
         </div>
-        <iframe id="vw-iframe" src="" allow="autoplay; fullscreen" loading="lazy"></iframe>
+        <iframe id="vw-iframe" src="" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy"></iframe>
       </div>
     </div>
   `;
 
   const wrapper = document.createElement('div');
   wrapper.innerHTML = html;
-  document.body.appendChild(wrapper);
+  document.documentElement.appendChild(wrapper);
+
+  /* ── Garantir que o widget escape de qualquer stacking context ── */
+  document.documentElement.style.setProperty('isolation', 'isolate');
 
   /* ── Referências ─────────────────────────────────────────────── */
   const trigger    = document.getElementById('vw-trigger');
