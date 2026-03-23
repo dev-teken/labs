@@ -1,0 +1,1158 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labs â€” Design & IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;0,500;0,600;1,200;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   INTENSITY SYSTEM
+   --I: 0..1 (slider value / 100)
+   Controla: font-weight, letter-spacing,
+   color strength, ink opacity
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+:root {
+  --I: 0.55; /* default intensity */
+
+  /* derived from intensity */
+  --fw-display: calc(200 + var(--I) * 400); /* 200..600 */
+  --fw-body:    calc(200 + var(--I) * 200); /* 200..400 */
+  --fw-mono:    calc(300 + var(--I) * 200); /* 300..500 */
+  --ls-heading: calc(-0.04em + var(--I) * 0.02em);
+  --ink-str:    calc(0.55 + var(--I) * 0.45); /* 0.55..1.0 */
+
+  /* palette â€” fixed */
+  --white:   #fafaf8;
+  --off:     #f4f3ef;
+  --border:  rgba(0,0,0,0.065);
+  --border2: rgba(0,0,0,0.038);
+  --ink-rgb: 17,17,14;
+  --ink:     rgba(var(--ink-rgb), 1);
+  --ink2:    rgba(var(--ink-rgb), 0.62);
+  --ink3:    rgba(var(--ink-rgb), 0.40);
+  --ink4:    rgba(var(--ink-rgb), 0.22);
+
+  /* spacing â€” calibrated for 1920Ã—1080 */
+  --pad:     108px;  /* page horizontal padding */
+  --nav-h:   68px;
+  --gap:     36px;   /* card gap */
+
+  /* transitions */
+  --ease: 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  background: var(--white);
+  color: var(--ink);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  /* smooth intensity transitions on all text */
+  transition: color var(--ease);
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   UTILITY
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.wrap {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   NAV
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  height: var(--nav-h);
+  background: rgba(250,250,248,0.94);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1680px; margin: 0 auto; padding: 0 var(--pad);
+  height: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 40px;
+}
+.nav-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex; gap: 36px; list-style: none;
+  flex: 1; justify-content: center;
+}
+.nav-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: 300;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink3); text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--ink); }
+
+/* â”€â”€ intensity slider â”€â”€ */
+.nav-right {
+  display: flex; align-items: center; gap: 16px;
+  flex-shrink: 0;
+}
+.intensity-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink4);
+  white-space: nowrap;
+}
+.intensity-wrap {
+  position: relative;
+  display: flex; align-items: center;
+  gap: 8px;
+}
+.intensity-ends {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; font-weight: 300;
+  color: var(--ink4);
+}
+
+/* custom range */
+#intensity {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px; height: 1px;
+  background: var(--border);
+  outline: none; cursor: pointer;
+  border-radius: 1px;
+  position: relative;
+}
+#intensity::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+#intensity::-webkit-slider-thumb:hover { transform: scale(1.3); }
+#intensity::-moz-range-thumb {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--ink); border: none; cursor: pointer;
+}
+
+.nav-gh {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink3); text-decoration: none; transition: color 0.15s;
+  flex-shrink: 0;
+}
+.nav-gh:hover { color: var(--ink); }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   HERO â€” calibrado para 1920Ã—1080
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding-top: var(--nav-h);
+  overflow: hidden;
+}
+
+.hero-art {
+  position: absolute;
+  inset: 0; left: 48%;
+  pointer-events: none; overflow: hidden;
+  opacity: calc(0.3 + var(--I) * 0.4);
+  transition: opacity var(--ease);
+}
+.hero-art svg { width: 100%; height: 100%; }
+
+.hero-text {
+  position: relative; z-index: 2;
+  padding: 140px var(--pad) 140px;
+  max-width: 1000px;
+}
+
+.eyebrow {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 36px;
+}
+.eyebrow-line { width: 28px; height: 1px; background: var(--ink4); }
+.eyebrow-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: var(--fw-mono);
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink3);
+  transition: font-weight var(--ease);
+}
+
+.hero-title {
+  font-size: clamp(80px, 5.6vw, 138px);
+  font-weight: var(--fw-display);
+  line-height: 1.04;
+  letter-spacing: var(--ls-heading);
+  color: rgba(var(--ink-rgb), var(--ink-str));
+  margin-bottom: 36px;
+  transition: font-weight var(--ease), letter-spacing var(--ease), color var(--ease);
+}
+.hero-title em { font-style: italic; font-weight: inherit; }
+
+.hero-body {
+  font-size: 28px;
+  line-height: 1.82;
+  font-weight: var(--fw-body);
+  color: var(--ink2);
+  max-width: 520px;
+  transition: font-weight var(--ease);
+}
+.hero-body p + p { margin-top: 14px; }
+.hero-body b { color: rgba(var(--ink-rgb), var(--ink-str)); font-weight: calc(var(--fw-body) + 100); }
+
+.hero-stats {
+  display: flex; gap: 52px;
+  margin-top: 64px; padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+.stat-n {
+  font-size: 66px;
+  font-weight: var(--fw-display);
+  color: rgba(var(--ink-rgb), var(--ink-str));
+  line-height: 1; letter-spacing: -0.03em;
+  margin-bottom: 6px;
+  transition: font-weight var(--ease), color var(--ease);
+}
+.stat-l {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: var(--fw-mono);
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink3);
+  transition: font-weight var(--ease);
+}
+
+.hero-scroll {
+  position: absolute; bottom: 44px; left: var(--pad);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.scroll-line {
+  width: 1px; height: 52px;
+  background: linear-gradient(to bottom, transparent, var(--ink4));
+  animation: scr 2.6s ease-in-out infinite;
+}
+@keyframes scr {
+  0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  45%  { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1); transform-origin: bottom; opacity: 0; }
+}
+.scroll-l {
+  font-family: 'DM Mono', monospace; font-size: 8px; font-weight: 300;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink4); writing-mode: vertical-rl;
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   SECTION SEPARATOR
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.sep {
+  max-width: 1680px; margin: 0 auto; padding: 0 var(--pad);
+}
+.sep-inner {
+  display: flex; align-items: center; gap: 20px;
+  padding: 24px 0 52px;
+  border-top: 1px solid var(--border);
+}
+.sep-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: var(--fw-mono);
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--ink4); white-space: nowrap;
+  transition: font-weight var(--ease);
+}
+.sep-n {
+  font-size: 13px; color: var(--ink4); margin-left: auto;
+  font-weight: var(--fw-body);
+  transition: font-weight var(--ease);
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MANIFESTO
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.manifesto { padding-bottom: 120px; }
+.m-row {
+  display: grid; grid-template-columns: 360px 1fr; gap: 0 120px;
+  padding-bottom: 80px; border-bottom: 1px solid var(--border2);
+  margin-bottom: 80px; align-items: start;
+}
+.m-row:last-child { border-bottom: none; margin-bottom: 0; }
+.m-ix {
+  font-size: 168px;
+  font-weight: var(--fw-display);
+  line-height: 0.88; letter-spacing: -0.05em;
+  color: var(--border);
+  user-select: none; padding-top: 8px;
+  transition: font-weight var(--ease), color var(--ease);
+}
+.m-heading {
+  font-size: 48px;
+  font-weight: var(--fw-display);
+  line-height: 1.22; letter-spacing: var(--ls-heading);
+  color: rgba(var(--ink-rgb), var(--ink-str));
+  margin-bottom: 20px;
+  transition: font-weight var(--ease), letter-spacing var(--ease), color var(--ease);
+}
+.m-heading em { font-style: italic; }
+.m-text {
+  font-size: 25px; line-height: 1.84;
+  font-weight: var(--fw-body); color: var(--ink2);
+  max-width: 640px;
+  transition: font-weight var(--ease);
+}
+.m-text p + p { margin-top: 14px; }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   LABS HEADER
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.labs-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 48px;
+}
+.labs-title {
+  font-size: 78px;
+  font-weight: var(--fw-display);
+  letter-spacing: var(--ls-heading);
+  color: rgba(var(--ink-rgb), var(--ink-str));
+  transition: font-weight var(--ease), letter-spacing var(--ease), color var(--ease);
+}
+.labs-title em { font-style: italic; }
+.labs-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: var(--fw-mono);
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3);
+  transition: font-weight var(--ease);
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PROJECT CARD â€” video-first
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.lab-card {
+  margin-bottom: var(--gap);
+  border: 1px solid var(--border);
+  background: var(--white);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.22s ease;
+}
+.lab-card:hover {
+  border-color: rgba(0,0,0,0.16);
+  box-shadow: 0 4px 40px rgba(0,0,0,0.05);
+}
+
+/* â”€â”€ THUMB (hero visual do card) â”€â”€ */
+.card-thumb {
+  position: relative;
+  height: 620px;        /* protagonismo maior + 15% */
+  overflow: hidden;
+  cursor: pointer;
+  background: #0a0a09;
+  display: block;
+  border-bottom: 1px solid var(--border2);
+}
+.card-thumb:hover .thumb-overlay { opacity: 1; }
+.card-thumb:hover .thumb-play { transform: scale(1.08); }
+
+/* SVG / imagem de thumb */
+.thumb-visual {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.card-thumb:hover .thumb-visual { transform: scale(1.03); }
+
+/* overlay ao hover */
+.thumb-overlay {
+  position: absolute; inset: 0;
+  background: rgba(8,8,7,0.42);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.thumb-play {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(250,250,248,0.92);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s ease;
+}
+.thumb-play svg { width: 20px; height: 20px; margin-left: 3px; }
+
+/* threads embed dentro do thumb */
+.thumb-embed {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #fff;
+  display: flex; align-items: flex-start; justify-content: center;
+}
+.thumb-embed iframe {
+  width: 100%;
+  max-width: 540px;
+  height: 600px;
+  border: none;
+  transform-origin: top center;
+  transform: scale(1);
+  pointer-events: none; /* sem scroll, sÃ³ visual */
+}
+
+/* version badge */
+.thumb-badge {
+  position: absolute; bottom: 16px; right: 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.38); background: rgba(0,0,0,0.32);
+  padding: 3px 8px; pointer-events: none;
+}
+.thumb-num {
+  position: absolute; top: 20px; left: 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.32); pointer-events: none;
+}
+
+/* â”€â”€ CARD BODY â”€â”€ */
+.card-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  padding: 38px 44px 32px;
+  gap: 24px;
+}
+
+.card-meta {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.card-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; font-weight: var(--fw-mono);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink3); border: 1px solid var(--border); padding: 2px 9px;
+  transition: font-weight var(--ease);
+}
+.card-title {
+  font-size: 38px;
+  font-weight: var(--fw-display);
+  letter-spacing: var(--ls-heading);
+  color: rgba(var(--ink-rgb), var(--ink-str));
+  margin-bottom: 8px; line-height: 1.25;
+  transition: font-weight var(--ease), letter-spacing var(--ease), color var(--ease);
+}
+.card-title em { font-style: italic; font-weight: inherit; color: var(--ink3); }
+.card-desc {
+  font-size: 22px; line-height: 1.72;
+  font-weight: var(--fw-body); color: var(--ink3);
+  max-width: 560px;
+  transition: font-weight var(--ease);
+}
+
+/* actions */
+.card-actions {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 10px;
+  padding-top: 4px;
+}
+.pulse-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink4);
+}
+.pulse {
+  width: 5px; height: 5px; border-radius: 50%; background: #8aba8a;
+  animation: pa 2.6s ease-in-out infinite;
+}
+@keyframes pa { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* â”€â”€ PREVIEW BUTTON â”€â”€ */
+.btn-preview {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: var(--fw-mono);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--white); background: var(--ink);
+  border: 1px solid var(--ink); padding: 9px 20px;
+  cursor: pointer; text-decoration: none; display: inline-block;
+  transition: background 0.15s, color 0.15s, font-weight var(--ease);
+}
+.btn-preview:hover {
+  background: transparent; color: var(--ink);
+}
+.btn-preview:active { transform: scale(0.98); }
+
+/* card footer */
+.card-foot {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 44px;
+  border-top: 1px solid var(--border2);
+}
+.foot-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink4);
+}
+.foot-dots { display: flex; gap: 5px; }
+.foot-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+.foot-dot.on { background: var(--ink3); }
+.foot-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; font-weight: 300; color: var(--ink4); margin-left: auto;
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TIMELINE
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.timeline {
+  display: grid; grid-template-columns: 180px 1fr;
+  max-width: 820px; padding-bottom: 120px;
+}
+.tl-spine { padding-right: 36px; position: relative; }
+.tl-spine::after {
+  content: ''; position: absolute;
+  top: 8px; right: 18px; bottom: 0; width: 1px; background: var(--border);
+}
+.tl-yr {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.1em;
+  color: var(--ink4); margin-bottom: 44px;
+  text-align: right; padding-right: 28px; position: relative;
+}
+.tl-yr::after {
+  content: ''; position: absolute; right: -4px; top: 4px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--white); border: 1px solid var(--border);
+}
+.tl-yr.now::after { background: var(--ink); border-color: var(--ink); }
+.tl-event {
+  margin-bottom: 36px; padding-bottom: 36px; border-bottom: 1px solid var(--border2);
+}
+.tl-event:last-child { border-bottom: none; }
+.tl-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: var(--fw-mono);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink3); margin-bottom: 7px;
+  transition: font-weight var(--ease);
+}
+.tl-title {
+  font-size: 22px; font-weight: var(--fw-display); color: rgba(var(--ink-rgb), var(--ink-str));
+  margin-bottom: 7px;
+  transition: font-weight var(--ease), color var(--ease);
+}
+.tl-desc {
+  font-size: 15px; line-height: 1.74; font-weight: var(--fw-body); color: var(--ink3);
+  transition: font-weight var(--ease);
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   FOOTER
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.site-footer { border-top: 1px solid var(--border); padding: 28px 0; }
+.foot-inner {
+  max-width: 1680px; margin: 0 auto; padding: 0 var(--pad);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-brand {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink4);
+}
+.footer-links { display: flex; gap: 28px; list-style: none; }
+.footer-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink4); text-decoration: none; transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--ink); }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MODAL â€” App preview fullscreen
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+#modal {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(8,8,7,0.82);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.32s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+#modal.is-open { opacity: 1; pointer-events: all; }
+
+.modal-shell {
+  position: relative;
+  width: 95vw; height: 95vh;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.36s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+#modal.is-open .modal-shell { transform: translateY(0) scale(1); }
+
+#modal-iframe {
+  width: 100%; height: 100%;
+  border: none; display: block;
+  background: #0a0a09;
+}
+
+.modal-x {
+  position: absolute; top: 16px; right: 16px; z-index: 10;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(10,10,9,0.7);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.6); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s, transform 0.22s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.modal-x:hover { background: rgba(255,255,255,0.12); color: #fff; transform: rotate(90deg); }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   SCROLL REVEAL
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.fade-up {
+  opacity: 0; transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-up.in { opacity: 1; transform: none; }
+.fade-up:nth-child(2) { transition-delay: 0.09s; }
+.fade-up:nth-child(3) { transition-delay: 0.18s; }
+.fade-up:nth-child(4) { transition-delay: 0.27s; }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MOBILE â€” simplificado
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+@media (max-width: 960px) {
+  :root { --pad: 22px; }
+
+  /* nav: hide links, keep logo + slider + gh */
+  .nav-links { display: none; }
+  #intensity { width: 80px; }
+
+  /* hero: single col */
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-art { left: 0; opacity: 0.12; }
+  .hero-text { padding: calc(var(--nav-h) + 52px) var(--pad) 72px; max-width: 100%; }
+  .hero-title { font-size: clamp(40px, 8vw, 64px); }
+  .hero-stats { gap: 32px; }
+  .stat-n { font-size: 36px; }
+
+  /* manifesto */
+  .m-row { grid-template-columns: 1fr; gap: 16px; }
+  .m-ix { font-size: 72px; }
+
+  /* labs */
+  .labs-head { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .labs-title { font-size: 36px; }
+
+  /* card thumb â€” mobile shows only thumb + basic info, no iframe */
+  .card-thumb { height: 276px; }
+  .card-body { grid-template-columns: 1fr; gap: 16px; padding: 20px 20px 16px; }
+  .card-actions { flex-direction: row; align-items: center; }
+  .card-foot { padding: 10px 20px; }
+
+  /* timeline */
+  .timeline { grid-template-columns: 1fr; }
+  .tl-spine { display: none; }
+
+  /* footer */
+  .foot-inner { flex-direction: column; gap: 14px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- â•â•â•â• NAV â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Labs</span>
+    <ul class="nav-links">
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#labs">Projetos</a></li>
+      <li><a href="#jornada">Jornada</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="intensity-label">Intensidade</span>
+      <div class="intensity-wrap">
+        <span class="intensity-ends">â—‹</span>
+        <input type="range" id="intensity" min="0" max="100" value="55" aria-label="Intensidade visual">
+        <span class="intensity-ends">â—</span>
+      </div>
+      <a class="nav-gh" href="https://github.com" target="_blank">GitHub â†—</a>
+    </div>
+  </div>
+</nav>
+
+<!-- â•â•â•â• HERO â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<section class="hero" id="sobre">
+
+  <!-- CÃ­rculos SVG â€” composiÃ§Ã£o de identidade -->
+  <div class="hero-art" aria-hidden="true">
+    <svg viewBox="0 0 800 1000" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="af" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#b0aca3" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#b0aca3" stop-opacity="0.04"/>
+        </linearGradient>
+        <linearGradient id="fl" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"  stop-color="#fafaf8" stop-opacity="1"/>
+          <stop offset="32%" stop-color="#fafaf8" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="fb" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%"  stop-color="#fafaf8" stop-opacity="1"/>
+          <stop offset="28%" stop-color="#fafaf8" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <circle cx="440" cy="440" r="400" stroke="#d8d5cc" stroke-width="0.5" stroke-opacity="0.55"/>
+      <circle cx="440" cy="440" r="330" stroke="#d0cdc4" stroke-width="0.5" stroke-opacity="0.44"/>
+      <circle cx="440" cy="440" r="260" stroke="#c8c4bc" stroke-width="0.5" stroke-opacity="0.36"/>
+      <circle cx="440" cy="440" r="190" stroke="#c0bcb4" stroke-width="0.5" stroke-opacity="0.30"/>
+      <circle cx="440" cy="440" r="120" stroke="#b8b4ac" stroke-width="0.5" stroke-opacity="0.24"/>
+      <circle cx="440" cy="440" r="55"  stroke="#b0aca4" stroke-width="0.5" stroke-opacity="0.18"/>
+      <circle cx="180" cy="760" r="300" stroke="#c8c4bc" stroke-width="0.5" stroke-opacity="0.28"/>
+      <circle cx="180" cy="760" r="220" stroke="#c0bcb4" stroke-width="0.5" stroke-opacity="0.22"/>
+      <circle cx="180" cy="760" r="140" stroke="#b8b4ac" stroke-width="0.5" stroke-opacity="0.16"/>
+      <circle cx="680" cy="100" r="200" stroke="#d0ccc4" stroke-width="0.5" stroke-opacity="0.32"/>
+      <circle cx="680" cy="100" r="130" stroke="#c8c4bc" stroke-width="0.5" stroke-opacity="0.26"/>
+      <circle cx="680" cy="100" r="65"  stroke="#c0bcb4" stroke-width="0.5" stroke-opacity="0.20"/>
+      <path d="M 440 40 A 400 400 0 0 1 820 330" stroke="url(#af)" stroke-width="0.9" stroke-linecap="round"/>
+      <path d="M 440 110 A 330 330 0 0 1 750 330" stroke="#c0bcb4" stroke-width="0.6" stroke-linecap="round" stroke-opacity="0.46"/>
+      <path d="M 50 440 A 390 390 0 0 0 310 820"  stroke="#c8c4bc" stroke-width="0.5" stroke-linecap="round" stroke-opacity="0.32"/>
+      <circle cx="440" cy="40"  r="3" fill="#c0bcb4" fill-opacity="0.55"/>
+      <circle cx="820" cy="330" r="2.2" fill="#c0bcb4" fill-opacity="0.44"/>
+      <circle cx="50"  cy="440" r="2.2" fill="#c8c4bc" fill-opacity="0.36"/>
+      <rect x="0" y="0"   width="260" height="1000" fill="url(#fl)"/>
+      <rect x="0" y="820" width="800" height="180"  fill="url(#fb)"/>
+    </svg>
+  </div>
+
+  <div class="hero-text">
+    <div class="eyebrow">
+      <span class="eyebrow-line"></span>
+      <span class="eyebrow-text">LaboratÃ³rio de design & IA</span>
+    </div>
+    <h1 class="hero-title">
+      Construindo<br>
+      <em>com curiosidade</em>,<br>
+      guiado por IA
+    </h1>
+    <div class="hero-body">
+      <p>TransiÃ§Ã£o de carreira em curso â€” da gestÃ£o para o design de interfaces que vivem na fronteira entre cÃ³digo, linguagem e experiÃªncia humana.</p>
+      <p>A IA nÃ£o substituiu o processo criativo â€” ela <b>ampliou o raio de alcance</b> do que Ã© possÃ­vel explorar sozinho.</p>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-n">3</div>
+        <div class="stat-l">Labs ativos</div>
+      </div>
+      <div>
+        <div class="stat-n" style="font-style:italic">âˆž</div>
+        <div class="stat-l">VersÃµes abertas</div>
+      </div>
+      <div>
+        <div class="stat-n">01</div>
+        <div class="stat-l">Portfolio</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll" aria-hidden="true">
+    <div class="scroll-line"></div>
+    <span class="scroll-l">scroll</span>
+  </div>
+</section>
+
+<!-- â•â•â•â• MANIFESTO â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div class="sep" id="manifesto">
+  <div class="sep-inner">
+    <span class="sep-label">Â§ manifesto</span>
+    <span class="sep-n">02</span>
+  </div>
+</div>
+<div class="wrap manifesto">
+  <div class="m-row fade-up">
+    <div class="m-ix">01</div>
+    <div>
+      <h2 class="m-heading">A IA como <em>lanterna</em>, nÃ£o como destino</h2>
+      <div class="m-text">
+        <p>Comecei sem saber escrever uma linha de CSS. A transiÃ§Ã£o nÃ£o foi planejada como um curso â€” foi uma sÃ©rie de perguntas que pediram ferramentas novas para serem respondidas.</p>
+        <p>O que a IA tornou possÃ­vel nÃ£o foi apenas "gerar cÃ³digo mais rÃ¡pido". Foi poder levar uma ideia que existia sÃ³ na cabeÃ§a atÃ© um protÃ³tipo funcional em horas â€” e entÃ£o entender, depurar, refinar.</p>
+      </div>
+    </div>
+  </div>
+  <div class="m-row fade-up">
+    <div class="m-ix">02</div>
+    <div>
+      <h2 class="m-heading">Versionar Ã© <em>contar a histÃ³ria</em></h2>
+      <div class="m-text">
+        <p>O GitHub aqui nÃ£o Ã© sÃ³ repositÃ³rio â€” Ã© diÃ¡rio de desenvolvimento. Cada commit tem intenÃ§Ã£o. Cada pasta tem um README que contextualiza por que aquilo existe.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â• LABS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div class="sep" id="labs">
+  <div class="sep-inner">
+    <span class="sep-label">Â§ projetos</span>
+    <span class="sep-n">03</span>
+  </div>
+</div>
+<div class="wrap" style="padding-bottom:120px">
+  <div class="labs-head fade-up">
+    <div class="labs-title">Os <em>experimentos</em></div>
+    <div class="labs-sub">TrÃªs perguntas â€” trÃªs projetos</div>
+  </div>
+
+  <!-- â”€â”€ 001 Soul Gradient â”€â”€ -->
+  <div class="lab-card fade-up">
+    <div class="card-thumb"
+         onclick="openModal('https://dev-teken.github.io/labs/SOUL/')"
+         role="button" tabindex="0"
+         aria-label="Ver preview Soul Gradient">
+      <!-- MÃ­dia do Threads como capa -->
+      <img
+        class="thumb-visual"
+        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/soul-gradient.jpg"
+        alt="Soul Gradient â€” preview"
+        loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+      />
+      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
+        <defs>
+          <radialGradient id="g1" cx="30%" cy="50%" r="60%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#0a0a09" stop-opacity="0"/></radialGradient>
+          <radialGradient id="g2" cx="70%" cy="40%" r="50%"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#0a0a09" stop-opacity="0"/></radialGradient>
+          <radialGradient id="g3" cx="55%" cy="70%" r="45%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0a0a09" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect width="1600" height="480" fill="#0a0a09"/>
+        <rect width="1600" height="480" fill="url(#g1)" opacity="0.7"/>
+        <rect width="1600" height="480" fill="url(#g2)" opacity="0.6"/>
+        <rect width="1600" height="480" fill="url(#g3)" opacity="0.5"/>
+        <text x="800" y="256" font-family="Georgia,serif" font-size="22" fill="rgba(255,255,255,0.18)" text-anchor="middle" letter-spacing="6">SOUL GRADIENT â€” CONCEPT</text>
+      </svg>
+      <div class="thumb-overlay">
+        <div class="thumb-play">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5.14v14l11-7-11-7z" fill="#111110"/>
+          </svg>
+        </div>
+      </div>
+      <span class="thumb-num">001</span>
+      <span class="thumb-badge">v5 Â· soul_grid</span>
+    </div>
+    <div class="card-body">
+      <div>
+        <div class="card-meta"><span class="card-tag">Canvas API Â· AnimaÃ§Ã£o</span></div>
+        <h3 class="card-title">Soul Gradient <em>â€” Concept</em></h3>
+        <p class="card-desc">Gradientes orgÃ¢nicos animados. Cada soul tem velocidade, paleta e heartbeat prÃ³prios â€” metÃ¡fora visual para personalidade. Canvas API puro, zero dependÃªncias.</p>
+      </div>
+      <div class="card-actions">
+        <div class="pulse-badge"><div class="pulse"></div> Em evoluÃ§Ã£o</div>
+        <button class="btn-preview"
+          onclick="openModal('https://dev-teken.github.io/labs/SOUL/')">
+          Preview â†—
+        </button>
+      </div>
+    </div>
+    <div class="card-foot">
+      <span class="foot-label">VersÃµes</span>
+      <div class="foot-dots">
+        <div class="foot-dot on"></div><div class="foot-dot on"></div>
+        <div class="foot-dot on"></div><div class="foot-dot on"></div><div class="foot-dot on"></div>
+      </div>
+      <span class="foot-note">soul_grid Â· smoke lab Â· avatar Siri</span>
+    </div>
+  </div>
+
+  <!-- â”€â”€ 002 Persona AI â”€â”€ -->
+  <div class="lab-card fade-up">
+    <div class="card-thumb"
+         onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')"
+         role="button" tabindex="0"
+         aria-label="Ver preview Persona AI">
+      <img
+        class="thumb-visual"
+        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/persona-ai.jpg"
+        alt="Persona AI â€” preview"
+        loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+      />
+      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
+        <rect width="1600" height="480" fill="#e8e9e4"/>
+        <!-- newsprint grid lines -->
+        <line x1="0" y1="80" x2="1600" y2="80" stroke="#d0d1cb" stroke-width="0.8"/>
+        <line x1="0" y1="160" x2="1600" y2="160" stroke="#d8d9d3" stroke-width="0.5"/>
+        <line x1="0" y1="240" x2="1600" y2="240" stroke="#d0d1cb" stroke-width="0.8"/>
+        <line x1="0" y1="320" x2="1600" y2="320" stroke="#d8d9d3" stroke-width="0.5"/>
+        <line x1="0" y1="400" x2="1600" y2="400" stroke="#d0d1cb" stroke-width="0.8"/>
+        <line x1="400" y1="0" x2="400" y2="480" stroke="#d8d9d3" stroke-width="0.5"/>
+        <line x1="800" y1="0" x2="800" y2="480" stroke="#d8d9d3" stroke-width="0.5"/>
+        <line x1="1200" y1="0" x2="1200" y2="480" stroke="#d8d9d3" stroke-width="0.5"/>
+        <!-- radar circle -->
+        <circle cx="1280" cy="240" r="180" stroke="#c0c1bb" stroke-width="1" fill="none" opacity="0.6"/>
+        <circle cx="1280" cy="240" r="130" stroke="#c0c1bb" stroke-width="0.7" fill="none" opacity="0.5"/>
+        <circle cx="1280" cy="240" r="80"  stroke="#c0c1bb" stroke-width="0.5" fill="none" opacity="0.4"/>
+        <!-- radar fill -->
+        <polygon points="1280,80 1420,180 1380,350 1180,350 1140,180" fill="#1c1c18" fill-opacity="0.08" stroke="#1c1c18" stroke-width="1" stroke-opacity="0.25"/>
+        <!-- masthead text -->
+        <text x="60" y="56" font-family="Georgia,serif" font-size="42" fill="#1c1c18" font-weight="700" letter-spacing="-1">Persona AI</text>
+        <text x="60" y="80" font-family="monospace" font-size="9" fill="#888880" letter-spacing="3">MODEL PERSONALITY ARCHITECTURE</text>
+        <!-- sliders representation -->
+        <rect x="60" y="110" width="680" height="1" fill="#c8c9c3"/>
+        <rect x="60" y="110" width="420" height="1" fill="#1c1c18"/>
+        <circle cx="480" cy="110" r="4" fill="#1c1c18"/>
+        <rect x="60" y="135" width="680" height="1" fill="#c8c9c3"/>
+        <rect x="60" y="135" width="540" height="1" fill="#1c1c18"/>
+        <circle cx="600" cy="135" r="4" fill="#1c1c18"/>
+        <rect x="60" y="160" width="680" height="1" fill="#c8c9c3"/>
+        <rect x="60" y="160" width="280" height="1" fill="#1c1c18"/>
+        <circle cx="340" cy="160" r="4" fill="#1c1c18"/>
+        <text x="80" y="430" font-family="monospace" font-size="11" fill="rgba(0,0,0,0.18)" letter-spacing="3">PERSONA AI â€” INTERFACE Â· EXPORTAÃ‡ÃƒO DE PROMPTS</text>
+      </svg>
+      <div class="thumb-overlay">
+        <div class="thumb-play">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="#111110"/></svg>
+        </div>
+      </div>
+      <span class="thumb-num">002</span>
+      <span class="thumb-badge">v3 Â· persona_ai</span>
+    </div>
+    <div class="card-body">
+      <div>
+        <div class="card-meta"><span class="card-tag">Interface Â· Prompts</span></div>
+        <h3 class="card-title">Persona AI <em>â€” Model Architecture</em></h3>
+        <p class="card-desc">Configure personalidades de IAs via 20 atributos inspirados em Westworld. Radar animado, arquÃ©tipos automÃ¡ticos, export para Claude / ChatGPT / Gemini.</p>
+      </div>
+      <div class="card-actions">
+        <div class="pulse-badge"><div class="pulse"></div> Em evoluÃ§Ã£o</div>
+        <button class="btn-preview"
+          onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')">
+          Preview â†—
+        </button>
+      </div>
+    </div>
+    <div class="card-foot">
+      <span class="foot-label">VersÃµes</span>
+      <div class="foot-dots">
+        <div class="foot-dot on"></div><div class="foot-dot on"></div><div class="foot-dot on"></div>
+      </div>
+      <span class="foot-note">newsprint Â· radar Â· export 3 plataformas</span>
+    </div>
+  </div>
+
+  <!-- â”€â”€ 003 TrÃ¡lia â”€â”€ -->
+  <div class="lab-card fade-up">
+    <div class="card-thumb"
+         onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
+         role="button" tabindex="0"
+         aria-label="Ver preview TrÃ¡lia">
+      <img
+        class="thumb-visual"
+        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/tralia.jpg"
+        alt="TrÃ¡lia â€” preview"
+        loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+      />
+      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
+        <rect width="1600" height="480" fill="#080d10"/>
+        <!-- topbar -->
+        <rect x="0" y="0" width="1600" height="52" fill="#0c1215"/>
+        <rect x="24" y="18" width="80" height="16" rx="2" fill="#1a2830"/>
+        <rect x="120" y="18" width="60" height="16" rx="2" fill="#1a2830"/>
+        <rect x="196" y="18" width="60" height="16" rx="2" fill="#1a2830"/>
+        <!-- sidebar -->
+        <rect x="0" y="52" width="200" height="428" fill="#0a1214"/>
+        <rect x="20" y="80" width="160" height="28" rx="3" fill="rgba(255,255,255,0.05)"/>
+        <rect x="20" y="118" width="120" height="20" rx="2" fill="rgba(255,255,255,0.03)"/>
+        <rect x="20" y="148" width="140" height="20" rx="2" fill="rgba(255,255,255,0.03)"/>
+        <rect x="20" y="178" width="100" height="20" rx="2" fill="rgba(255,255,255,0.03)"/>
+        <!-- kanban columns -->
+        <rect x="220" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
+        <rect x="540" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
+        <rect x="860" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
+        <rect x="1180" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
+        <!-- cards inside columns -->
+        <rect x="232" y="100" width="276" height="80" rx="3" fill="#111a1f"/>
+        <rect x="232" y="192" width="276" height="60" rx="3" fill="#111a1f"/>
+        <rect x="232" y="264" width="276" height="72" rx="3" fill="#111a1f"/>
+        <rect x="552" y="100" width="276" height="68" rx="3" fill="#111a1f"/>
+        <rect x="552" y="180" width="276" height="80" rx="3" fill="#111a1f"/>
+        <rect x="872" y="100" width="276" height="56" rx="3" fill="#111a1f"/>
+        <rect x="1192" y="100" width="276" height="64" rx="3" fill="#111a1f"/>
+        <!-- teal accent -->
+        <rect x="232" y="100" width="3" height="80" rx="1" fill="#2a8080" opacity="0.7"/>
+        <rect x="552" y="100" width="3" height="68" rx="1" fill="#2a8080" opacity="0.5"/>
+        <text x="240" y="432" font-family="monospace" font-size="11" fill="rgba(255,255,255,0.12)" letter-spacing="3">TRÃLIA â€” SISTEMA DE TAREFAS Â· KANBAN</text>
+      </svg>
+      <div class="thumb-overlay">
+        <div class="thumb-play">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="#111110"/></svg>
+        </div>
+      </div>
+      <span class="thumb-num">003</span>
+      <span class="thumb-badge">v2 Â· trÃ¡lia</span>
+    </div>
+    <div class="card-body">
+      <div>
+        <div class="card-meta"><span class="card-tag">Produtividade Â· Kanban</span></div>
+        <h3 class="card-title">TrÃ¡lia <em>â€” Sistema de Tarefas</em></h3>
+        <p class="card-desc">Kanban com mÃºltiplos temas visuais â€” dark, Cyberpunk 2077, aqua. Como o design visual muda a relaÃ§Ã£o com a produtividade?</p>
+      </div>
+      <div class="card-actions">
+        <div class="pulse-badge"><div class="pulse"></div> Em evoluÃ§Ã£o</div>
+        <button class="btn-preview"
+          onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')">
+          Preview â†—
+        </button>
+      </div>
+    </div>
+    <div class="card-foot">
+      <span class="foot-label">VersÃµes</span>
+      <div class="foot-dots">
+        <div class="foot-dot on"></div><div class="foot-dot on"></div>
+      </div>
+      <span class="foot-note">dark Â· cyberpunk Â· aqua Â· kanban completo</span>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â• JORNADA â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div class="sep" id="jornada">
+  <div class="sep-inner">
+    <span class="sep-label">Â§ jornada</span>
+    <span class="sep-n">04</span>
+  </div>
+</div>
+<div class="wrap">
+  <div class="labs-head fade-up" style="margin-bottom:52px">
+    <div class="labs-title">A <em>linha do tempo</em></div>
+  </div>
+  <div class="timeline">
+    <div class="tl-spine">
+      <div class="tl-yr">Antes</div>
+      <div class="tl-yr">InÃ­cio</div>
+      <div class="tl-yr now">Agora</div>
+    </div>
+    <div>
+      <div class="tl-event fade-up">
+        <div class="tl-lbl">Ponto de partida</div>
+        <div class="tl-title">GestÃ£o sem cÃ³digo</div>
+        <p class="tl-desc">Carreira consolidada em gestÃ£o. A distÃ¢ncia do cÃ³digo era grande â€” mas a curiosidade sobre como as ferramentas digitais funcionavam sempre esteve presente.</p>
+      </div>
+      <div class="tl-event fade-up">
+        <div class="tl-lbl">Virada</div>
+        <div class="tl-title">Primeira conversa com IA</div>
+        <p class="tl-desc">Descoberta de que era possÃ­vel ir de ideia a protÃ³tipo funcional em horas. O Dojo dos 9 Quadrados foi o primeiro exercÃ­cio â€” CSS grid aprendido cÃ©lula por cÃ©lula.</p>
+      </div>
+      <div class="tl-event fade-up">
+        <div class="tl-lbl">Agora</div>
+        <div class="tl-title">TrÃªs labs em paralelo</div>
+        <p class="tl-desc">Soul Gradient, Persona AI e TrÃ¡lia sÃ£o os trÃªs fios condutores desta fase. O portfolio Ã© o registro vivo dessa exploraÃ§Ã£o.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â• FOOTER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<footer class="site-footer">
+  <div class="foot-inner">
+    <span class="footer-brand">Labs âœ¦ 2025</span>
+    <ul class="footer-links">
+      <li><a href="https://github.com" target="_blank">GitHub â†—</a></li>
+      <li><a href="https://threads.net" target="_blank">Threads â†—</a></li>
+      <li><a href="#sobre">Topo</a></li>
+    </ul>
+  </div>
+</footer>
+
+<!-- â•â•â•â• MODAL â€” Threads â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="modal" role="dialog" aria-modal="true">
+  <div class="modal-shell">
+    <iframe id="modal-iframe" src="" allow="autoplay; fullscreen" loading="lazy"></iframe>
+    <button class="modal-x" onclick="closeModal()" aria-label="Fechar">&#x2715;</button>
+  </div>
+</div>
+
+<script>
+/* â”€â”€ Intensity slider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const slider = document.getElementById('intensity');
+function applyIntensity(v) {
+  document.documentElement.style.setProperty('--I', v / 100);
+}
+slider.addEventListener('input', () => applyIntensity(slider.value));
+applyIntensity(slider.value);
+
+/* â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const modal       = document.getElementById('modal');
+const modalIframe = document.getElementById('modal-iframe');
+
+function openModal(appUrl) {
+  modalIframe.src = appUrl;
+  modal.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  modal.classList.remove('is-open');
+  document.body.style.overflow = '';
+  setTimeout(() => { modalIframe.src = ''; }, 350);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+});
+
+modal.addEventListener('click', e => {
+  if (e.target === modal) closeModal();
+});
+
+/* â”€â”€ Scroll reveal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.07 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+/* â”€â”€ Nav active â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const secs = ['sobre','labs','jornada'];
+const nls  = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 80) cur = id;
+  });
+  nls.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+}, { passive: true });
+
+/* â”€â”€ Thumb keyboard a11y â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+  });
+});
+</script>
+</body>
+</html>

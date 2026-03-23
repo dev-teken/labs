@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Liquid Sphere - Synth Color</title>
+    <style>
+        body { background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .sphere-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: #000;
+            overflow: hidden;
+            /* O contraste cria a membrana líquida entre os cinzas */
+            filter: contrast(20) brightness(1.1);
+        }
+
+        /* CAMADA DE COR 1: Azul Cintilante Escuro (Base) */
+        .color-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #001a33 0%, #000 80%);
+            mix-blend-mode: screen;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* CAMADA DE COR 2: Roxo Neon (Reação de fusão) */
+        /* Esta camada reage onde o branco do canvas é mais forte */
+        .neon-glow {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #b026ff 0%, transparent 70%);
+            mix-blend-mode: color-dodge;
+            opacity: 0.7;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        canvas { 
+            width: 100%; 
+            height: 100%; 
+            filter: blur(15px); /* Suaviza os blobs antes do contraste */
+        }
+
+        /* Brilho de Vidro (Lente) */
+        .lens-flare {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 50%);
+            z-index: 4;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sphere-container" id="soul-node">
+    <div class="color-overlay"></div>
+    <div class="neon-glow"></div>
+    <div class="lens-flare"></div>
+</div>
+
+<script>
+class LiquidSoul {
+    constructor(containerId) {
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.w = this.canvas.width = 400;
+        this.h = this.canvas.height = 400;
+        document.getElementById(containerId).appendChild(this.canvas);
+        
+        // Células com comportamentos de "massa" diferentes
+        this.blobs = Array.from({ length: 7 }, () => ({
+            x: Math.random() * this.w,
+            y: Math.random() * this.h,
+            vx: (Math.random() - 0.5) * 1.2,
+            vy: (Math.random() - 0.5) * 1.2,
+            r: Math.random() * 70 + 50,
+            pulse: Math.random() * Math.PI
+        }));
+    }
+
+    update() {
+        const { ctx, w, h, blobs } = this;
+        const t = performance.now() * 0.001;
+
+        // Limpeza suave para rastro de fumaça
+        ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+        ctx.fillRect(0, 0, w, h);
+
+        blobs.forEach((b, i) => {
+            // Movimento líquido ondulado
+            b.x += b.vx + Math.sin(t + i) * 0.4;
+            b.y += b.vy + Math.cos(t + i) * 0.4;
+
+            if (b.x < 50 || b.x > w - 50) b.vx *= -1;
+            if (b.y < 50 || b.y > h - 50) b.vy *= -1;
+
+            const currentR = b.r * (1 + Math.sin(t * 2 + b.pulse) * 0.15);
+
+            // Gradiente de Luminância (Mapa de Calor)
+            const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, currentR);
+            // Centro branco puro (onde o Roxo Neon vai "queimar" mais forte)
+            g.addColorStop(0, "rgba(255, 255, 255, 1)");
+            // Cinza médio para transição de membrana
+            g.addColorStop(0.4, "rgba(120, 120, 120, 0.5)");
+            g.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, currentR, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        requestAnimationFrame(() => this.update());
+    }
+}
+
+const instance = new LiquidSoul('soul-node');
+instance.update();
+</script>
+</body>
+</html>

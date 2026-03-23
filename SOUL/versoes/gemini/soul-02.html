@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Deep Cellular Morphing</title>
+    <style>
+        body { background: #000; margin: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; filter: contrast(25) brightness(0.8); background: #000; }
+        .cell-unit { position: relative; width: 300px; height: 300px; background: #000; overflow: hidden; }
+        canvas { width: 100%; height: 100%; }
+        .label { position: absolute; bottom: 10px; width: 100%; text-align: center; color: #fff; font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; opacity: 0.5; pointer-events: none; filter: blur(0.5px); }
+    </style>
+</head>
+<body>
+
+<div class="grid" id="main-grid"></div>
+
+<script>
+// Variáveis de Profundidade: Controlam a "biologia" de cada modelo
+const MODELS = [
+    { name: 'Mitose', count: 8, viscosity: 0.1, tension: 0.05, range: 1.2, hue: 190 },
+    { name: 'Íon', count: 15, viscosity: 0.4, tension: 0.8, range: 0.8, hue: 45 },
+    { name: 'Abissal', count: 5, viscosity: 0.02, tension: 0.02, range: 2.0, hue: 280 },
+    { name: 'Sinapse', count: 25, viscosity: 0.8, tension: 1.5, range: 0.5, hue: 330 },
+    { name: 'Mercúrio', count: 12, viscosity: 0.05, tension: 2.0, range: 1.0, hue: 210 },
+    { name: 'Núcleo', count: 3, viscosity: 0.01, tension: 0.1, range: 2.5, hue: 10 }
+];
+
+class Blob {
+    constructor(w, h, cfg) {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.radius = (Math.random() * 40 + 20) * cfg.range;
+    }
+
+    update(w, h, hb, cfg) {
+        // Movimento orgânico com "viscosidade"
+        this.x += this.vx * (1 - cfg.viscosity) + (Math.sin(performance.now() * 0.001) * cfg.tension);
+        this.y += this.vy * (1 - cfg.viscosity);
+
+        // Rebote suave nas bordas
+        if (this.x < 0 || this.x > w) this.vx *= -1;
+        if (this.y < 0 || this.y > h) this.vy *= -1;
+
+        // Reação ao Heartbeat (respiração celular)
+        this.currentRadius = this.radius * (1 + hb * 0.4);
+    }
+}
+
+class Organism {
+    constructor(cfg, container) {
+        this.cfg = cfg;
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.canvas.width = 300;
+        this.canvas.height = 300;
+        container.appendChild(this.canvas);
+        
+        this.blobs = Array.from({ length: cfg.count }, () => new Blob(300, 300, cfg));
+    }
+
+    render(hb) {
+        const { ctx, canvas, cfg, blobs } = this;
+        // Limpeza parcial para rastro (profundidade de movimento)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        blobs.forEach(b => {
+            b.update(canvas.width, canvas.height, hb, cfg);
+
+            // O segredo da profundidade: Degradês Radiais com Falloff Suave
+            // Quando dois degradês se sobrepõem, o filtro 'contrast' no CSS cria a membrana
+            const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.currentRadius);
+            
+            // Núcleo mais quente, borda fria
+            grad.addColorStop(0, `hsla(${cfg.hue}, 90%, 60%, 1)`);
+            grad.addColorStop(0.4, `hsla(${cfg.hue + 20}, 70%, 40%, 0.6)`);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.currentRadius, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+}
+
+// Lógica de batimento global
+function getHB() {
+    const t = performance.now() * 0.002;
+    return Math.pow(Math.sin(t), 10) * Math.sin(t * 0.5); // Pulso complexo
+}
+
+const grid = document.getElementById('main-grid');
+const instances = MODELS.map(cfg => {
+    const unit = document.createElement('div');
+    unit.className = 'cell-unit';
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = cfg.name;
+    unit.appendChild(label);
+    grid.appendChild(unit);
+    return new Organism(cfg, unit);
+});
+
+function loop() {
+    const hb = Math.abs(getHB());
+    instances.forEach(ins => ins.render(hb));
+    requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>

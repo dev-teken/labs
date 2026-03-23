@@ -1,0 +1,61 @@
+{
+  "project": "BCARDS — Deck System",
+  "versions": [
+    {
+      "version": "v9",
+      "badge": "v9 · soul_grid",
+      "name": "Soul Grid",
+      "desc": "Versão atual — grid de almas com mecânicas de ataque e defesa.",
+      "file": "soul_grid_v9.html"
+    },
+    {
+      "version": "v6",
+      "badge": "v6 · soul_storm",
+      "name": "Soul Storm",
+      "desc": "Sistema de tempestade — cartas com efeitos climáticos em cadeia.",
+      "file": "soul_storm_v6.html"
+    },
+    {
+      "version": "v5",
+      "badge": "v5 · soul_storm",
+      "name": "Soul Storm v5",
+      "desc": "Iteração anterior do sistema de tempestade.",
+      "file": "soul_storm_v5.html"
+    },
+    {
+      "version": "v4",
+      "badge": "v4 · soul_storm",
+      "name": "Soul Storm v4",
+      "desc": "",
+      "file": "soul_storm_v4.html"
+    },
+    {
+      "version": "v3",
+      "badge": "v3 · soul_storm",
+      "name": "Soul Storm v3",
+      "desc": "",
+      "file": "soul_storm_v3.html"
+    },
+    {
+      "version": "v2",
+      "badge": "v2 · soul_storm",
+      "name": "Soul Storm v2",
+      "desc": "",
+      "file": "soul_storm_v2.html"
+    },
+    {
+      "version": "v3w",
+      "badge": "v3 · warriors",
+      "name": "Soul Warriors",
+      "desc": "Variante com classes de guerreiros — origem do sistema de combate.",
+      "file": "soul_warriors_v3.html"
+    },
+    {
+      "version": "v2s",
+      "badge": "v2 · smoke",
+      "name": "Soul Smoke",
+      "desc": "Primeira experiência com cartas — nasceu do gerador de partículas.",
+      "file": "soul_smoke_v2.html"
+    }
+  ]
+}

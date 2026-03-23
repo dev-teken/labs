@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Soul Grid - Realistic Deep Glow</title>
+<style>
+    body { background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+    
+    .grid { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 30px; 
+        /* O segredo do Glow Realista: Contraste para fusão + Saturação Profunda */
+        filter: contrast(30) brightness(1.2) saturate(2.0);
+    }
+
+    .soul-card { display: flex; flex-direction: column; align-items: center; }
+
+    .sphere-wrapper {
+        position: relative;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: #000;
+        overflow: hidden;
+        /* Blur suave para que as cores não fiquem serrilhadas pelo contraste */
+        filter: blur(5px);
+        /* Brilho externo da esfera (Outer Bloom) */
+        box-shadow: 0 0 80px rgba(0,0,0,0.5);
+    }
+
+    /* CAMADA DE COR NEON: Aplica o degradê profundo sobre o canvas cinza */
+    .color-layer {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 2;
+        pointer-events: none;
+        /* 'color-dodge' intensifica o brilho onde houver luz no canvas */
+        mix-blend-mode: color-dodge; 
+    }
+
+    /* O motor de fusão orgânica (Metaballs Grayscale) */
+    canvas { width: 100%; height: 100%; filter: blur(15px); }
+
+    .label { 
+        color: #fff; opacity: 0.3; font-family: 'Courier New', monospace; 
+        font-size: 10px; margin-top: 15px; letter-spacing: 4px; text-transform: uppercase;
+    }
+</style>
+</head>
+<body>
+
+<div class="grid" id="main-grid"></div>
+
+<script>
+// Configuração das Almas: Definindo a Personalidade e o Gradiente Profundo
+const SOULS = [
+  {id:'a', hue:200, a3:'#4eeff0', label:'névoa', speed: 0.8},
+  {id:'b', hue:20,  a3:'#ff7d50', label:'terra', speed: 1.2},
+  {id:'c', hue:160, a3:'#90ff90', label:'bosque', speed: 1.5},
+  {id:'d', hue:280, a3:'#ff50ff', label:'cosmos', speed: 2.0},
+  {id:'e', hue:60,  a3:'#ffff80', label:'areia', speed: 1.1},
+  {id:'f', hue:340, a3:'#ff60b0', label:'crepúsculo', speed: 2.5}
+];
+
+class LiquidSoul {
+    constructor(cfg, container) {
+        this.cfg = cfg;
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.w = this.canvas.width = 400;
+        this.h = this.canvas.height = 400;
+        container.appendChild(this.canvas);
+        
+        // Células Líquidas (Metaballs)
+        this.blobs = Array.from({ length: 7 }, () => ({
+            x: Math.random() * this.w,
+            y: Math.random() * this.h,
+            vx: (Math.random() - 0.5) * cfg.speed * 1.5, // Mais agitado
+            vy: (Math.random() - 0.5) * cfg.speed * 1.5,
+            r: Math.random() * 60 + 50,
+            pulse: Math.random() * Math.PI
+        }));
+    }
+
+    draw() {
+        const { ctx, w, h, blobs, cfg } = this;
+        const t = performance.now() * 0.001;
+        const hb = Math.pow(Math.sin(t * cfg.speed * 1.5), 10); // Heartbeat dinâmico
+
+        // Limpeza com rastro suave (profundidade de movimento)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.fillRect(0, 0, w, h);
+
+        blobs.forEach((b, i) => {
+            b.x += b.vx + Math.sin(t + i) * 0.7;
+            b.y += b.vy + Math.cos(t + i) * 0.7;
+
+            // Rebote suave nas bordas
+            if (b.x < 50 || b.x > w - 50) b.vx *= -1;
+            if (b.y < 50 || b.y > h - 50) b.vy *= -1;
+
+            // O segredo do Feather: Múltiplas camadas de degradação
+            const currentR = b.r * (1 + hb * 0.4);
+
+            // Gradiente de Luminância (Mapa de Calor): 
+            // O branco puro ativa o Color Dodge no CSS para incandescência
+            const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, currentR);
+            // Centro incandescente (Luz pura)
+            g.addColorStop(0, `rgba(255, 255, 255, 1)`); 
+            // Feather suave (Zona de transição líquida)
+            g.addColorStop(0.3, `rgba(150, 150, 150, 0.6)`); 
+            // Dissolução (Falloff)
+            g.addColorStop(0.6, `rgba(80, 80, 80, 0.3)`); 
+            g.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, currentR, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        requestAnimationFrame(() => this.draw());
+    }
+}
+
+// Inicialização do Grid
+const grid = document.getElementById('main-grid');
+SOULS.forEach(cfg => {
+    const card = document.createElement('div');
+    card.className = 'soul-card';
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'sphere-wrapper';
+    
+    // Camada de Cor Neon Profunda (Color Grading)
+    // O degradê vai do tom principal saturado para o accent3 incandescente
+    const colorLayer = document.createElement('div');
+    colorLayer.className = 'color-layer';
+    colorLayer.style.background = `radial-gradient(circle at center, hsla(${cfg.hue}, 100%, 70%, 1.0) 0%, hsla(${cfg.hue + 40}, 100%, 55%, 0.6) 50%, ${cfg.a3} 80%, transparent 100%)`;
+    
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = cfg.label;
+
+    wrapper.appendChild(colorLayer);
+    card.appendChild(wrapper);
+    card.appendChild(label);
+    grid.appendChild(card);
+
+    new LiquidSoul(cfg, wrapper).draw();
+});
+</script>
+</body>
+</html>

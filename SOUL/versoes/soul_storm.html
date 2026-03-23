@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>✦ SOUL STORM ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #05010d;
+  --panel: #0d0820;
+  --border: rgba(255,255,255,0.07);
+  --gold:   #FFD426;
+  --blue:   #00D4FF;
+  --pink:   #FF3FA0;
+  --green:  #39FF14;
+  --orange: #FF6B00;
+  --purple: #C040FF;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* ── STARS BG ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 33% 72%, rgba(255,212,38,.7)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 58% 8%,  rgba(0,212,255,.6)  0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 55%, rgba(192,64,255,.7)  0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 5%  88%, rgba(57,255,20,.5)   0%, transparent 100%),
+    radial-gradient(1px 1px at 48% 45%, rgba(255,63,160,.4)  0%, transparent 100%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative; z-index: 10;
+  width: 100%; max-width: 900px;
+  padding: 22px 20px 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 4px;
+}
+
+.logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  letter-spacing: .08em;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 40%, var(--pink) 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(255,180,0,.5)) drop-shadow(0 0 40px rgba(255,63,160,.3));
+}
+
+.tagline {
+  font-size: .65rem; font-weight: 900; letter-spacing: .28em;
+  text-transform: uppercase; color: rgba(255,255,255,.3);
+}
+
+/* ── SOUL CANVAS ── */
+#soul-wrap {
+  position: relative; z-index: 5;
+  width: 100%; max-width: 900px;
+  padding: 0 16px;
+}
+
+#sg {
+  display: block; width: 100%;
+  border-radius: 16px 16px 0 0;
+  background: #000;
+}
+
+/* ── CONTROLS GRID ── */
+#controls {
+  position: relative; z-index: 5;
+  width: 100%; max-width: 900px;
+  padding: 0 16px 32px;
+}
+
+.controls-inner {
+  background: var(--panel);
+  border-radius: 0 0 16px 16px;
+  border: 1px solid var(--border);
+  border-top: none;
+  padding: 20px 18px 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── PARAM CARD ── */
+.param-card {
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px 14px 10px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: border-color .2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.param-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+  opacity: .6;
+}
+
+.param-card.active-card {
+  border-color: var(--accent-a);
+  box-shadow: 0 0 0 1px var(--accent-a),
+              inset 0 0 20px rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.06);
+}
+
+/* top row: icon + name + value badge */
+.param-top {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.param-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+  background: rgba(255,255,255,0.07);
+}
+
+.param-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.88rem, 2.4vw, 1.1rem);
+  color: #fff; letter-spacing: .04em; flex: 1;
+  line-height: 1.1;
+}
+
+.param-sub {
+  font-size: .6rem; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.28); margin-top: 2px;
+}
+
+.param-badge {
+  font-family: 'Fredoka One', cursive;
+  font-size: .85rem;
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.45);
+  transition: background .2s, color .2s, box-shadow .2s;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+.param-badge.lit {
+  color: #fff;
+}
+
+/* ── STEP BUTTONS (contraste alto) ── */
+.step-row {
+  display: flex; gap: 5px;
+}
+
+.step-btn {
+  flex: 1;
+  height: 40px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.7rem, 1.9vw, .88rem);
+  letter-spacing: .03em;
+  transition: transform .1s, background .15s, border-color .15s, box-shadow .2s;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.28);
+  position: relative; overflow: hidden;
+  padding: 0 2px;
+}
+
+.step-btn:active { transform: scale(.88); }
+
+/* SELECTED state — full contrast, glowing */
+.step-btn.sel {
+  color: #000;
+  font-size: clamp(.78rem, 2vw, .95rem);
+  border-color: transparent;
+}
+
+.step-btn.sel::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: inherit;
+  filter: blur(6px);
+  opacity: .5;
+  z-index: -1;
+}
+
+/* ripple */
+.ripple {
+  position: absolute; border-radius: 50%;
+  transform: scale(0);
+  animation: rpl .38s linear;
+  background: rgba(255,255,255,.4);
+  pointer-events: none;
+}
+@keyframes rpl { to { transform: scale(5); opacity: 0; } }
+
+/* ── SWITCH TOGGLE (abaixo de cada card) ── */
+.switch-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 2px;
+}
+
+.switch-label {
+  font-size: .62rem; font-weight: 900;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+}
+
+.switch-track {
+  width: 52px; height: 28px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.1);
+  border: 2px solid rgba(255,255,255,.12);
+  position: relative;
+  cursor: pointer;
+  transition: background .22s, border-color .22s, box-shadow .22s;
+  flex-shrink: 0;
+}
+
+.switch-track.on {
+  border-color: var(--accent-a);
+  box-shadow: 0 0 10px var(--accent-a), inset 0 0 8px rgba(255,255,255,.08);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.35);
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), background .22s, box-shadow .22s;
+}
+
+.switch-track.on .switch-thumb {
+  transform: translateX(24px);
+  box-shadow: 0 0 8px var(--accent-a);
+}
+
+/* ── ACCENT THEMES per param ── */
+.p-turb  { --accent-a:#C040FF; --accent-b:#FF3FA0; --accent-r:192; --accent-g:64;  --accent-b2:255; }
+.p-dens  { --accent-a:#00D4FF; --accent-b:#39FF14; --accent-r:0;   --accent-g:212; --accent-b2:255; }
+.p-drft  { --accent-a:#39FF14; --accent-b:#00D4FF; --accent-r:57;  --accent-g:255; --accent-b2:20;  }
+.p-halo  { --accent-a:#FFD426; --accent-b:#FF6B00; --accent-r:255; --accent-g:212; --accent-b2:38;  }
+.p-diss  { --accent-a:#FF3FA0; --accent-b:#C040FF; --accent-r:255; --accent-g:63;  --accent-b2:160; }
+.p-cent  { --accent-a:#FF6B00; --accent-b:#FFD426; --accent-r:255; --accent-g:107; --accent-b2:0;   }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  color: #000; font-family: 'Fredoka One', cursive; font-size: 1rem;
+  padding: 10px 26px; border-radius: 40px;
+  box-shadow: 0 4px 28px rgba(255,180,0,.5);
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999; white-space: nowrap; pointer-events: none;
+  letter-spacing: .05em;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 560px) {
+  .controls-inner { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ SOUL STORM ⚡</div>
+  <div class="tagline">✦ controla as almas da névoa ✦</div>
+</header>
+
+<div id="soul-wrap">
+  <canvas id="sg"></canvas>
+</div>
+
+<div id="controls">
+  <div class="controls-inner" id="panel"></div>
+</div>
+
+<div id="toast">✨ ativado!</div>
+
+<script>
+/* ════════════════════════════════════════════
+   PARAMS — com config visual Fortnite
+════════════════════════════════════════════ */
+const PARAMS = {
+  turbulence:  {
+    label:'Redemoinho', sub:'veias por dentro',
+    icon:'🌀', cls:'p-turb',
+    value:1, min:0, max:3, step:.5,
+    stepLabels:['💤','🌀','💫','⚡','🔥','☄️','💥'],
+    switchLabel:'ATIVO',
+  },
+  density: {
+    label:'Fumaça',     sub:'grossa ou fina',
+    icon:'💨', cls:'p-dens',
+    value:1, min:0, max:2, step:.5,
+    stepLabels:['🌫️','💨','🌊','🫧','🌪️'],
+    switchLabel:'ESPESSA',
+  },
+  drift: {
+    label:'Voar',       sub:'sobe ou afunda',
+    icon:'🪂', cls:'p-drft',
+    value:0, min:-1, max:1, step:.5,
+    stepLabels:['⬇️','↙️','⏸️','↗️','⬆️'],
+    switchLabel:'FLUTUANDO',
+  },
+  halo: {
+    label:'Brilho',     sub:'luz por dentro',
+    icon:'🌟', cls:'p-halo',
+    value:1, min:0, max:2, step:.5,
+    stepLabels:['🔦','✨','⭐','🌟','☀️'],
+    switchLabel:'ILUMINADO',
+  },
+  dissipation: {
+    label:'Borda',      sub:'some devagar ou rápido',
+    icon:'🫧', cls:'p-diss',
+    value:1, min:0, max:2, step:.5,
+    stepLabels:['🐢','🚶','🏃','💨','⚡'],
+    switchLabel:'SUMINDO',
+  },
+  centrifugal: {
+    label:'Expansão',   sub:'explode pra fora',
+    icon:'💥', cls:'p-cent',
+    value:1, min:0, max:3, step:.5,
+    stepLabels:['😴','🌀','💫','🌈','☄️','✨','🎆'],
+    switchLabel:'EXPLODINDO',
+  },
+};
+
+/* ════════════════════════════════════════════
+   BUILD PANEL
+════════════════════════════════════════════ */
+function buildPanel(){
+  const panel = document.getElementById('panel');
+  panel.innerHTML = '';
+
+  Object.entries(PARAMS).forEach(([key, p]) => {
+    const steps = [];
+    for(let v = p.min; v <= p.max + .001; v += p.step)
+      steps.push(Math.round(v * 10) / 10);
+
+    const curIdx = steps.findIndex(v => Math.abs(v - p.value) < .001);
+    const isOn = p.value > p.min;
+    const curLabel = p.stepLabels?.[curIdx] ?? p.value.toFixed(1);
+
+    const card = document.createElement('div');
+    card.className = `param-card ${p.cls}`;
+    if(isOn) card.classList.add('active-card');
+
+    /* accent color for badge */
+    const accentHex = getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent-a') || '#fff';
+
+    /* top row */
+    const topRow = document.createElement('div');
+    topRow.className = 'param-top';
+
+    const iconEl = document.createElement('div');
+    iconEl.className = 'param-icon';
+    iconEl.textContent = p.icon;
+
+    const nameWrap = document.createElement('div');
+    nameWrap.style.cssText = 'flex:1;min-width:0;';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'param-name';
+    nameEl.textContent = p.label;
+    const subEl = document.createElement('div');
+    subEl.className = 'param-sub';
+    subEl.textContent = p.sub;
+    nameWrap.append(nameEl, subEl);
+
+    const badge = document.createElement('div');
+    badge.className = 'param-badge' + (isOn ? ' lit' : '');
+    badge.textContent = curLabel;
+    if(isOn){
+      badge.style.background = `rgba(255,255,255,.12)`;
+    }
+
+    topRow.append(iconEl, nameWrap, badge);
+
+    /* step buttons */
+    const stepRow = document.createElement('div');
+    stepRow.className = 'step-row';
+
+    steps.forEach((v, idx) => {
+      const btn = document.createElement('button');
+      const sel = idx === curIdx;
+      btn.className = 'step-btn' + (sel ? ' sel' : '');
+      btn.textContent = p.stepLabels?.[idx] ?? (idx === 0 ? '—' : idx === steps.length-1 ? '+++' : v.toFixed(1));
+
+      /* color the selected button with accent gradient */
+      if(sel){
+        /* read CSS var via card's inline style hack */
+        const c1 = getCSSVar(card, '--accent-a');
+        const c2 = getCSSVar(card, '--accent-b');
+        btn.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+        btn.style.color = '#000';
+        btn.style.fontWeight = '900';
+        btn.style.boxShadow = `0 0 12px ${c1}`;
+      }
+
+      btn.addEventListener('click', e => {
+        addRipple(btn, e);
+        PARAMS[key].value = v;
+        buildPanel();
+        showToast(p.icon + ' ' + (p.stepLabels?.[idx] ?? v.toFixed(1)) + ' ' + p.label.toLowerCase() + '!');
+      });
+
+      stepRow.appendChild(btn);
+    });
+
+    /* switch row */
+    const switchRow = document.createElement('div');
+    switchRow.className = 'switch-row';
+
+    const switchLbl = document.createElement('div');
+    switchLbl.className = 'switch-label';
+    switchLbl.textContent = isOn ? p.switchLabel : 'DESLIGADO';
+
+    const track = document.createElement('div');
+    track.className = 'switch-track' + (isOn ? ' on' : '');
+
+    /* apply accent color to track when on */
+    if(isOn){
+      const c1 = getCSSVar(card, '--accent-a');
+      track.style.background = hexToRgba(c1, 0.25);
+      const thumb = document.createElement('div');
+      thumb.className = 'switch-thumb';
+      thumb.style.background = c1;
+      track.appendChild(thumb);
+    } else {
+      const thumb = document.createElement('div');
+      thumb.className = 'switch-thumb';
+      track.appendChild(thumb);
+    }
+
+    /* switch click: toggle between min and mid-value */
+    track.addEventListener('click', () => {
+      if(PARAMS[key].value > PARAMS[key].min){
+        PARAMS[key].value = PARAMS[key].min;
+        showToast(p.icon + ' ' + p.label + ' desligado');
+      } else {
+        /* snap to step nearest to 1 */
+        const steps2 = [];
+        for(let v = p.min; v <= p.max + .001; v += p.step) steps2.push(Math.round(v*10)/10);
+        const mid = steps2.find(v => v >= 1) ?? steps2[Math.ceil(steps2.length/2)];
+        PARAMS[key].value = mid;
+        showToast(p.icon + ' ' + p.label + ' ligado!');
+      }
+      buildPanel();
+    });
+
+    switchRow.append(switchLbl, track);
+    card.append(topRow, stepRow, switchRow);
+    panel.appendChild(card);
+  });
+}
+
+/* ── CSS var reader ── */
+function getCSSVar(el, name){
+  return getComputedStyle(el).getPropertyValue(name).trim() || '#ffffff';
+}
+
+/* ── hex to rgba ── */
+function hexToRgba(hex, alpha){
+  const r = parseInt(hex.slice(1,3),16)||255;
+  const g = parseInt(hex.slice(3,5),16)||255;
+  const b = parseInt(hex.slice(5,7),16)||255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/* ── ripple ── */
+function addRipple(btn, e){
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const rect = btn.getBoundingClientRect();
+  const s = Math.max(rect.width, rect.height);
+  r.style.width = r.style.height = s + 'px';
+  r.style.left = (e.clientX - rect.left - s/2) + 'px';
+  r.style.top  = (e.clientY - rect.top  - s/2) + 'px';
+  btn.appendChild(r);
+  r.addEventListener('animationend', () => r.remove());
+}
+
+/* ── toast ── */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = '✨ ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+buildPanel();
+
+/* ════════════════════════════════════════════
+   SMOKE ENGINE — original soul_smoke_lab_v2
+   (zero changes to logic, only wired to PARAMS above)
+════════════════════════════════════════════ */
+const C   = document.getElementById('sg');
+const ctx = C.getContext('2d');
+
+function resize(){
+  const wrap = document.getElementById('soul-wrap');
+  const w = wrap.offsetWidth - 32;
+  C.width  = w;
+  C.height = Math.round(w * 0.68);
+}
+resize();
+
+const SOULS = [
+  {id:'a',h:205,s:22,l:48,a3:[196,245,183],speed:0.0042,phase:0.00,label:'névoa',   bperiod:7800},
+  {id:'b',h:18, s:22,l:42,a3:[189,121,146],speed:0.0108,phase:1.30,label:'terra',   bperiod:8200},
+  {id:'c',h:150,s:18,l:40,a3:[205,158, 74],speed:0.0210,phase:2.70,label:'bosque',  bperiod:7400},
+  {id:'d',h:270,s:20,l:48,a3:[192,117,180],speed:0.0380,phase:4.10,label:'cosmos',  bperiod:8600},
+  {id:'e',h:38, s:22,l:44,a3:[128,138, 86],speed:0.0620,phase:5.50,label:'areia',   bperiod:7100},
+  {id:'f',h:320,s:18,l:45,a3:[126,200,192],speed:0.1040,phase:0.80,label:'crepúsculo',bperiod:9000},
+];
+const T = {};
+SOULS.forEach(s => { T[s.id] = s.phase; });
+
+function n2(t,f,p){
+  return 0.42*Math.sin(t*f+p)
+       + 0.28*Math.sin(t*f*1.618+p*1.3)
+       + 0.18*Math.sin(t*f*2.618+p*2.1)
+       + 0.12*Math.sin(t*f*4.236+p*3.4);
+}
+function hsl2rgb(h,s,l){
+  s/=100; l/=100;
+  const a = s*Math.min(l,1-l);
+  const f = (n,k=(n+h/30)%12) => l-a*Math.max(Math.min(k-3,9-k,1),-1);
+  return [Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)];
+}
+function breathwave(soul){
+  const ph=(performance.now()%soul.bperiod)/soul.bperiod;
+  return 0.5-0.5*Math.cos(ph*Math.PI*2);
+}
+const BASE_SPEED=0.0108, BASE_BPM=62;
+function heartbeat(soul){
+  const bpm=BASE_BPM*(soul.speed/BASE_SPEED);
+  const period=60000/bpm;
+  const ph=(performance.now()%period)/period;
+  const g=(x,mu,sig)=>Math.exp(-0.5*((x-mu)/sig)**2);
+  return Math.max(0,g(ph,0.10,0.045)+g(ph,0.22,0.055)*0.58);
+}
+
+function drawSmoke(oc,soul,W,H){
+  const pr=PARAMS;
+  const cx=W/2,cy=H/2,R=W*0.46;
+  const t=T[soul.id];
+  const HB=heartbeat(soul);
+  const BW=breathwave(soul);
+  const cfMul=pr.centrifugal.value;
+  const om=1+0.09*BW*cfMul;
+
+  oc.clearRect(0,0,W,H);
+  oc.save();
+  oc.beginPath();oc.arc(cx,cy,R,0,Math.PI*2);oc.clip();
+  oc.fillStyle='#020208';oc.fillRect(0,0,W,H);
+
+  const baseRGB=hsl2rgb(soul.h,Math.min(soul.s*2.8,72),52);
+  const a3=soul.a3;
+
+  const PUFFS=[
+    {seed:1,ox:Math.cos(t*.50)*R*.44*om,      oy:Math.sin(t*.40)*R*.40*om,      col:baseRGB,alpha:0.72},
+    {seed:2,ox:Math.cos(t*.70+2.1)*R*.42*om,  oy:Math.sin(t*.60+1.0)*R*.44*om,  col:baseRGB,alpha:0.58},
+    {seed:3,ox:Math.cos(t*.90+4.2)*R*.46*om,  oy:Math.sin(t*.80+3.0)*R*.42*om,  col:a3,      alpha:0.52},
+    {seed:4,ox:Math.cos(t*.38+3.1)*R*.48*om,  oy:Math.sin(t*.32+1.7)*R*.44*om,  col:a3,      alpha:0.40},
+    {seed:5,ox:Math.cos(t*.55+5.4)*R*.32*om,  oy:Math.sin(t*.48+4.2)*R*.30*om,  col:baseRGB,alpha:0.46},
+    {seed:6,ox:Math.cos(t*.60+1.5)*R*.34*om,  oy:Math.sin(t*1.00+2.5)*R*.34*om, col:baseRGB,alpha:0.42},
+    {seed:7,ox:Math.cos(t*1.10+0.8)*R*.30*om, oy:Math.sin(t*.85+3.8)*R*.32*om,  col:a3,      alpha:0.35},
+  ];
+
+  oc.globalCompositeOperation='screen';
+
+  PUFFS.forEach(p=>{
+    const s=p.seed;
+    const driftBias=pr.drift.value*0.18;
+    const ox=p.ox;
+    const oy=p.oy - R*driftBias*(1+s*0.12);
+    const sx=1+0.38*n2(t,0.13,s*1.3);
+    const sy=1+0.32*n2(t,0.11,s*2.1);
+    const rot=n2(t,0.17,s*0.7)*0.9;
+    const pSize=R*(0.30+0.18*n2(t,0.23,s*1.1))*(1+0.12*HB);
+    const LAYERS=5;
+    for(let i=0;i<LAYERS;i++){
+      const fi=i/LAYERS;
+      const fdx=pSize*0.45*n2(t,0.31+i*0.07,s*0.9+i*1.1);
+      const fdy=pSize*0.38*n2(t,0.29+i*0.05,s*1.7+i*0.9);
+      const fr=pSize*(0.55-fi*0.25)*(1+0.15*n2(t,0.19,s+i));
+      const densityMul=pr.density.value;
+      const dissipExp=0.5+pr.dissipation.value*0.6;
+      const fa=p.alpha*densityMul*(1-Math.pow(fi,dissipExp)*0.72)*(1+0.22*HB);
+      oc.save();
+      oc.translate(cx+ox,cy+oy);
+      oc.rotate(rot);
+      oc.scale(sx*(1-fi*0.12),sy*(1-fi*0.08));
+      const g=oc.createRadialGradient(fdx,fdy,0,fdx,fdy,fr);
+      const [r,gv,b]=p.col;
+      const haloStr=pr.halo.value;
+      const rl=Math.min(r+Math.round(50*haloStr),255);
+      const gl=Math.min(gv+Math.round(50*haloStr),255);
+      const bl=Math.min(b+Math.round(50*haloStr),255);
+      g.addColorStop(0,   `rgba(${r},${gv},${b},${Math.min(fa,0.95)})`);
+      g.addColorStop(0.18,`rgba(${rl},${gl},${bl},${fa*0.55*Math.min(haloStr,1.5)})`);
+      g.addColorStop(0.45,`rgba(${r},${gv},${b},${fa*0.28})`);
+      g.addColorStop(0.72,`rgba(${r},${gv},${b},${fa*0.08})`);
+      g.addColorStop(1,   `rgba(${r},${gv},${b},0)`);
+      oc.fillStyle=g;
+      oc.beginPath();oc.arc(fdx,fdy,fr,0,Math.PI*2);oc.fill();
+      oc.restore();
+    }
+  });
+
+  const turbMul=PARAMS.turbulence.value;
+  if(turbMul>0){
+    const nVeins=Math.round(4+turbMul*4);
+    for(let k=0;k<nVeins;k++){
+      const ka=k*(Math.PI*2/nVeins)+t*0.03;
+      const kn=n2(t,0.07+k*0.03,k*2.3);
+      const tx1=cx+R*0.7*Math.cos(ka)*kn;
+      const ty1=cy+R*0.7*Math.sin(ka)*kn;
+      const vr=R*(0.08+0.08*turbMul)*(0.6+0.4*Math.abs(kn));
+      const [r,gv,b]=baseRGB;
+      const vg=oc.createRadialGradient(tx1,ty1,0,tx1,ty1,vr);
+      vg.addColorStop(0,  `rgba(${r},${gv},${b},${0.14*turbMul*(1+HB*0.3)})`);
+      vg.addColorStop(0.4,`rgba(${r},${gv},${b},0.04)`);
+      vg.addColorStop(1,  `rgba(${r},${gv},${b},0)`);
+      oc.fillStyle=vg;
+      oc.beginPath();oc.arc(tx1,ty1,vr,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  oc.globalCompositeOperation='screen';
+  const lx=cx+Math.cos(t*.45+1)*R*.32, ly=cy+Math.sin(t*.55+.5)*R*.28;
+  const sh=oc.createRadialGradient(lx,ly,0,lx,ly,R*.28);
+  const [r,gv,b]=hsl2rgb(soul.h,48,82);
+  sh.addColorStop(0,  `rgba(${r},${gv},${b},${0.22+BW*0.08+HB*0.06})`);
+  sh.addColorStop(0.5,`rgba(${r},${gv},${b},0.06)`);
+  sh.addColorStop(1,  'rgba(0,0,0,0)');
+  oc.fillStyle=sh;oc.fillRect(0,0,W,H);
+
+  oc.globalCompositeOperation='source-over';
+  const vg2=oc.createRadialGradient(cx,cy,R*0.30,cx,cy,R);
+  vg2.addColorStop(0,'rgba(0,0,0,0)');
+  vg2.addColorStop(0.65,'rgba(1,1,7,0.50)');
+  vg2.addColorStop(1,'rgba(1,1,9,0.94)');
+  oc.fillStyle=vg2;oc.fillRect(0,0,W,H);
+  oc.restore();
+}
+
+function layout(){
+  const W=C.width, H=C.height;
+  const cols=3, rows=2, gap=Math.round(W*0.026);
+  const cellW=Math.floor((W-gap*(cols+1))/cols);
+  const cellH=Math.floor((H-gap*(rows+1))/rows);
+  const cells=[];
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++)
+    cells.push({x:gap+c*(cellW+gap), y:gap+r*(cellH+gap), w:cellW, h:cellH});
+  return cells;
+}
+
+const OFF=document.createElement('canvas');
+const octx=OFF.getContext('2d');
+
+function loop(){
+  const W=C.width, H=C.height;
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  const cells=layout();
+  SOULS.forEach((soul,i)=>{
+    T[soul.id]+=soul.speed;
+    const cell=cells[i];
+    OFF.width=cell.w; OFF.height=cell.h;
+    drawSmoke(octx,soul,cell.w,cell.h);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cell.x+cell.w/2, cell.y+cell.h/2, cell.w*0.46, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.lineWidth=1; ctx.stroke();
+    ctx.clip();
+    ctx.drawImage(OFF, cell.x, cell.y);
+    ctx.restore();
+    ctx.save();
+    ctx.font=`900 ${Math.round(cell.w*0.055)}px 'Fredoka One', cursive`;
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.28)';
+    ctx.fillText(soul.label.toUpperCase(), cell.x+cell.w/2, cell.y+cell.h+Math.round(cell.h*0.11));
+    ctx.restore();
+  });
+  requestAnimationFrame(loop);
+}
+loop();
+window.addEventListener('resize', () => { resize(); });
+</script>
+</body>
+</html>

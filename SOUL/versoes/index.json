@@ -1,0 +1,40 @@
+{
+  "project": "Soul Gradient — Concept",
+  "versions": [
+    {
+      "version": "v5",
+      "badge": "v5 · soul_grid",
+      "name": "Soul Grid",
+      "desc": "Versão atual — grid de almas com paletas e heartbeats independentes.",
+      "file": "soul_grid_v5.html"
+    },
+    {
+      "version": "v4",
+      "badge": "v4 · smoke lab",
+      "name": "Smoke Lab",
+      "desc": "Experiência com fumaça — tons de violeta dessaturado.",
+      "file": "soul_smoke_v4.html"
+    },
+    {
+      "version": "v3",
+      "badge": "v3 · avatar Siri",
+      "name": "Avatar Siri",
+      "desc": "Referência ao avatar da Siri — blobs verdes sobre escuro.",
+      "file": "soul_siri_v3.html"
+    },
+    {
+      "version": "v2",
+      "badge": "v2 · liquid",
+      "name": "Liquid",
+      "desc": "Fase líquida — tons rosados, movimento mais fluido.",
+      "file": "soul_liquid_v2.html"
+    },
+    {
+      "version": "v1",
+      "badge": "v1 · origin",
+      "name": "Origin",
+      "desc": "A primeira pergunta: como representar personalidade visualmente?",
+      "file": "soul_origin_v1.html"
+    }
+  ]
+}

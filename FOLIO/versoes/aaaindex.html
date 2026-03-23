@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" class="theme-dark">
 <head>
@@ -599,15 +598,14 @@ html.theme-light .hero-mini-soul canvas { filter: blur(18px) contrast(10) bright
 
 /* coluna direita — estado */
 
-
-
-
-
-
-
-
-  50%      { opacity: 0.7; transform: scale(0.85); box-shadow: 0 0 0 0.25rem rgba(255,77,77,0); }
+/* status dot pulsante */
+@keyframes pulse-status {
+  0%, 100% { opacity: 1;   transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,77,77,0.4); }
+  50%       { opacity: 0.7; transform: scale(0.85); box-shadow: 0 0 0 0.25rem rgba(255,77,77,0); }
 }
+
+
+
 
 
 .card-title {
@@ -1445,16 +1443,16 @@ body, nav, .lab-card, .card-body, .card-foot,
     </div>
   </div>
 
-  <!-- â”€â”€ 003 Trália â”€â”€ -->
+  <!-- â”€â”€ 003 Tralha â”€â”€ -->
   <div class="lab-card fade-up">
     <div class="card-thumb"
          onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
          role="button" tabindex="0"
-         aria-label="Ver preview Trália">
+         aria-label="Ver preview Tralha">
       <img
         class="thumb-visual"
         src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/tralia.jpg"
-        alt="Trália ”” preview"
+        alt="Tralha ”” preview"
         loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
       />
@@ -1499,13 +1497,13 @@ body, nav, .lab-card, .card-body, .card-foot,
     </div>
     <div class="card-body" style="display:grid;grid-template-columns:1fr auto;align-items:center;padding:1.6rem 1.854rem 1.348rem;gap:2.2rem;">
       <div>
-        <h3 class="card-title">Trália <em>”” Sistema de Tarefas</em></h3>
+        <h3 class="card-title">Tralha <em>”” Sistema de Tarefas</em></h3>
         <p class="card-desc">Kanban com múltiplos temas visuais ”” dark, Cyberpunk 2077, aqua. Como o design visual muda a relação com a produtividade?</p>
       </div>
       <div style="display:flex;align-items:center;justify-content:center;padding-left:2.2rem;">
         <button class="btn-circle-preview"
           onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
-          aria-label="Abrir preview Trália">
+          aria-label="Abrir preview Tralha">
           <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 15L15 5M15 5H7M15 5V13"
               stroke="currentColor" stroke-width="1.2"
@@ -1573,7 +1571,7 @@ body, nav, .lab-card, .card-body, .card-foot,
 
       <div class="tl-event fade-up">
         <div class="tl-lbl">Expansão</div>
-        <div class="tl-title">Persona AI e Trália</div>
+        <div class="tl-title">Persona AI e Tralha</div>
         <p class="tl-desc">A questão deixou de ser técnica e virou de design: como a interface muda a relação com o conteúdo? Dois novos projetos, dois novos ângulos da mesma curiosidade.</p>
       </div>
 
@@ -1590,523 +1588,7 @@ body, nav, .lab-card, .card-body, .card-foot,
       </div>
 
     </div>
-  </div>  g="pt-BR" class="theme-dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Labs ”” Design & IA</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;0,500;0,600;1,200;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-
-</head>
-<body>
-
-<!-- ════ NAV ════════════════════════════════ -->
-<nav>
-  <div class="nav-inner">
-    <span class="nav-logo">Labs</span>
-    <span class="nav-count">
-      <span class="nav-count-n">3</span>
-      <span class="nav-count-l">labs ativos</span>
-    </span>
-    <ul class="nav-links">
-      <li><a href="#sobre">Sobre</a></li>
-      <li><a href="#labs">Projetos</a></li>
-      <li><a href="#jornada">Jornada</a></li>
-    </ul>
-    <div class="nav-right">
-      <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
-        <div class="toggle-track"><div class="toggle-thumb"></div></div>
-        <span class="toggle-label" id="toggleLabel">Claro</span>
-      </button>
-      <a class="nav-gh" href="https://github.com" target="_blank">GitHub &#8599;</a>
-    </div>
   </div>
-</nav>
-
-<!-- ════ HERO ════════════════════════════════ -->
-<section class="hero" id="sobre">
-
-  <!-- Sol SVG — centro da composição visual, lado direito -->
-
-  <!-- Soul cluster — 4 esferas, preto como transparência -->
-  <div class="hero-soul" aria-hidden="true">
-    <div class="soul-cluster-wrap">
-      <div class="soul-cluster" id="soul-cluster">
-
-        <!-- Névoa — azul frio -->
-        
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="hero-text">
-    <div class="eyebrow">
-      <span class="eyebrow-line"></span>
-      <span class="eyebrow-text">Laboratório de design & IA</span>
-    </div>
-    <h1 class="hero-title">
-      Construindo<br>
-      <em>com curiosidade</em>,<br>
-      guiado por IA
-    </h1>
-    <div class="hero-body">
-      <p>Transição de carreira em curso ”” da gestão para o design de interfaces que vivem na fronteira entre código, linguagem e experiência humana.</p>
-      <p>A IA não substituiu o processo criativo ”” ela <b>ampliou o raio de alcance</b> do que é possível explorar sozinho.</p>
-    </div>
-
-    <!-- Mini soul fluido — mesmo efeito do botão, sem corte -->
-    <div class="hero-mini-soul" id="hero-mini-soul" aria-hidden="true"></div>
-
-  </div>
-
-  <div class="hero-scroll" aria-hidden="true">
-    <div class="scroll-line"></div>
-    <span class="scroll-l">scroll</span>
-  </div>
-</section>
-
-<!-- ════ PRIMITIVES — full-width ════════════════════════════════ -->
-<div class="primitives-section" aria-label="Formas primitivas do design">
-  <span class="primitive-strip-label">Primitivas — a base geométrica do design por prompt</span>
-  <div class="primitives">
-
-    <!-- PONTO -->
-    <div class="prim prim-dot">
-      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
-        <circle cx="18" cy="18" r="11" stroke="rgba(var(--ink-rgb),0.20)" stroke-width="0.6" fill="none"/>
-        <circle cx="18" cy="18" r="6"  stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.5" fill="none"/>
-        <circle class="core" cx="18" cy="18" r="3" fill="rgba(var(--ink-rgb),0.70)"/>
-      </svg>
-      <span class="prim-label">Ponto</span>
-    </div>
-
-    <!-- LINHA -->
-    <div class="prim prim-line">
-      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
-        <line x1="4" y1="14" x2="32" y2="14" stroke="rgba(var(--ink-rgb),0.22)" stroke-width="0.5" stroke-dasharray="6 4"/>
-        <line x1="4" y1="18" x2="32" y2="18" stroke="rgba(var(--ink-rgb),0.55)" stroke-width="0.7" stroke-dasharray="6 4" style="animation-delay:-0.6s"/>
-        <line x1="4" y1="22" x2="32" y2="22" stroke="rgba(var(--ink-rgb),0.22)" stroke-width="0.5" stroke-dasharray="6 4" style="animation-delay:-1.2s"/>
-        <circle cx="4" cy="18" r="1.4" fill="rgba(var(--ink-rgb),0.50)"/>
-        <circle cx="32" cy="18" r="1.4" fill="rgba(var(--ink-rgb),0.30)"/>
-      </svg>
-      <span class="prim-label">Linha</span>
-    </div>
-
-    <!-- CÍRCULO -->
-    <div class="prim prim-circle">
-      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
-        <circle cx="18" cy="18" r="15" stroke="rgba(var(--ink-rgb),0.18)" stroke-width="0.5" fill="none"/>
-        <g class="orbit-ring">
-          <circle cx="18" cy="18" r="10" stroke="rgba(var(--ink-rgb),0.32)" stroke-width="0.6" fill="none" stroke-dasharray="14 18"/>
-          <circle cx="18" cy="8" r="1.5" fill="rgba(var(--ink-rgb),0.65)"/>
-        </g>
-        <g class="orbit-ring-rev">
-          <circle cx="18" cy="18" r="6" stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.5" fill="none" stroke-dasharray="8 10"/>
-        </g>
-        <circle cx="18" cy="18" r="2" fill="rgba(var(--ink-rgb),0.60)"/>
-      </svg>
-      <span class="prim-label">Círculo</span>
-    </div>
-
-    <!-- TRIÂNGULO -->
-    <div class="prim prim-tri">
-      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
-        <g>
-          <polygon points="18,4 33,30 3,30" stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.6" fill="none" stroke-linejoin="round"/>
-          <polygon points="18,26 8,10 28,10" stroke="rgba(var(--ink-rgb),0.18)" stroke-width="0.4" fill="none" stroke-linejoin="round"/>
-          <circle cx="18" cy="20" r="1.5" fill="rgba(var(--ink-rgb),0.55)"/>
-          <circle cx="18" cy="4"  r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
-          <circle cx="33" cy="30" r="1.2" fill="rgba(var(--ink-rgb),0.30)"/>
-          <circle cx="3"  cy="30" r="1.2" fill="rgba(var(--ink-rgb),0.30)"/>
-        </g>
-      </svg>
-      <span class="prim-label">Triângulo</span>
-    </div>
-
-    <!-- QUADRADO -->
-    <div class="prim prim-rect">
-      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
-        <rect x="4" y="4" width="28" height="28" stroke="rgba(var(--ink-rgb),0.28)" stroke-width="0.6" fill="none"/>
-        <rect x="10" y="10" width="16" height="16" stroke="rgba(var(--ink-rgb),0.18)" stroke-width="0.4" fill="none"/>
-        <line class="scan" x1="5" y1="18" x2="31" y2="18" stroke="rgba(var(--ink-rgb),0.45)" stroke-width="0.5"/>
-        <circle cx="4"  cy="4"  r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
-        <circle cx="32" cy="4"  r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
-        <circle cx="4"  cy="32" r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
-        <circle cx="32" cy="32" r="1.2" fill="rgba(var(--ink-rgb),0.40)"/>
-      </svg>
-      <span class="prim-label">Quadrado</span>
-    </div>
-
-    <!-- GRID -->
-    <div class="prim prim-grid">
-      <svg width="63" height="63" viewBox="0 0 36 36" overflow="visible">
-        <line x1="4"  y1="4"  x2="4"  y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
-        <line x1="18" y1="4"  x2="18" y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
-        <line x1="32" y1="4"  x2="32" y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
-        <line x1="4"  y1="4"  x2="32" y2="4"  stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
-        <line x1="4"  y1="18" x2="32" y2="18" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
-        <line x1="4"  y1="32" x2="32" y2="32" stroke="rgba(var(--ink-rgb),0.14)" stroke-width="0.4"/>
-        <circle class="gc" cx="4"  cy="4"  r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="18" cy="4"  r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="32" cy="4"  r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="4"  cy="18" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="18" cy="18" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="32" cy="18" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="4"  cy="32" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="18" cy="32" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-        <circle class="gc" cx="32" cy="32" r="2" fill="rgba(var(--ink-rgb),0.55)"/>
-      </svg>
-      <span class="prim-label">Grid</span>
-    </div>
-
-  </div>
-</div>
-
-<!-- ════ MANIFESTO ════════════════════════════ -->
-<div class="sep" id="manifesto">
-  <div class="sep-inner">
-    <span class="sep-label">§ manifesto</span>
-    <span class="sep-n">02</span>
-  </div>
-</div>
-<div class="wrap manifesto">
-  <div class="m-row fade-up">
-    <div class="m-ix">01</div>
-    <div>
-      <h2 class="m-heading">A IA como <em>lanterna</em>, não como destino</h2>
-      <div class="m-text">
-        <p>Comecei sem saber escrever uma linha de CSS. A transição não foi planejada como um curso ”” foi uma série de perguntas que pediram ferramentas novas para serem respondidas.</p>
-        <p>O que a IA tornou possível não foi apenas "gerar código mais rápido". Foi poder levar uma ideia que existia só na cabeça até um protótipo funcional em horas ”” e então entender, depurar, refinar.</p>
-      </div>
-    </div>
-  </div>
-  <div class="m-row fade-up">
-    <div class="m-ix">02</div>
-    <div>
-      <h2 class="m-heading">Versionar é <em>contar a história</em></h2>
-      <div class="m-text">
-        <p>O GitHub aqui não é só repositório ”” é diário de desenvolvimento. Cada commit tem intenção. Cada pasta tem um README que contextualiza por que aquilo existe.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ LABS ══════════════════════════════════ -->
-<div class="sep" id="labs">
-  <div class="sep-inner">
-    <span class="sep-label">§ projetos</span>
-    <span class="sep-n">03</span>
-  </div>
-</div>
-<div class="wrap" style="padding-bottom:5.556rem">
-  <div class="labs-head fade-up">
-    <div class="labs-title">Os <em>experimentos</em></div>
-    <div class="labs-sub">Três perguntas ”” três projetos</div>
-  </div>
-
-  <!-- â”€â”€ 001 Soul Gradient â”€â”€ -->
-  <div class="lab-card fade-up">
-    <div class="card-thumb"
-         onclick="openModal('https://dev-teken.github.io/labs/SOUL/')"
-         role="button" tabindex="0"
-         aria-label="Ver preview Soul Gradient">
-      <!-- Mídia do Threads como capa -->
-      <img
-        class="thumb-visual"
-        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/soul-gradient.jpg"
-        alt="Soul Gradient ”” preview"
-        loading="lazy"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-      />
-      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
-        <defs>
-          <radialGradient id="g1" cx="30%" cy="50%" r="60%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#0a0a09" stop-opacity="0"/></radialGradient>
-          <radialGradient id="g2" cx="70%" cy="40%" r="50%"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#0a0a09" stop-opacity="0"/></radialGradient>
-          <radialGradient id="g3" cx="55%" cy="70%" r="45%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0a0a09" stop-opacity="0"/></radialGradient>
-        </defs>
-        <rect width="1600" height="480" fill="#0a0a09"/>
-        <rect width="1600" height="480" fill="url(#g1)" opacity="0.7"/>
-        <rect width="1600" height="480" fill="url(#g2)" opacity="0.6"/>
-        <rect width="1600" height="480" fill="url(#g3)" opacity="0.5"/>
-        <text x="800" y="256" font-family="Georgia,serif" font-size="22" fill="rgba(255,255,255,0.18)" text-anchor="middle" letter-spacing="6">SOUL GRADIENT ”” CONCEPT</text>
-      </svg>
-      <span class="thumb-num">001</span>
-      <span class="thumb-badge" id="soul-thumb-badge">v5 · soul_grid</span>
-    </div>
-    <div class="card-body">
-
-      <!-- col 1 — texto -->
-      <div>
-        <h3 class="card-title">Soul Gradient <em>"" Concept</em></h3>
-        <p class="card-desc">Gradientes orgânicos animados. Cada soul tem velocidade, paleta e heartbeat próprios "" metáfora visual para personalidade. Canvas API puro, zero dependências.</p>
-      </div>
-
-      <!-- col 2 — versões -->
-      <div class="card-versions-col">
-        <span class="card-versions-label">Histórico</span>
-        <div class="version-thumbs" id="soul-version-thumbs">
-
-          <div class="vtmb vtmb-latest active" data-version="v5" data-badge="v5 · soul_grid" onclick="soulSelectVersion(this)">
-            <svg viewBox="0 0 160 95" xmlns="http://www.w3.org/2000/svg">
-              <rect width="160" height="95" fill="#080809"/>
-              <defs>
-                <radialGradient id="tv5a" cx="32%" cy="52%" r="55%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#080809" stop-opacity="0"/></radialGradient>
-                <radialGradient id="tv5b" cx="68%" cy="42%" r="48%"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#080809" stop-opacity="0"/></radialGradient>
-                <radialGradient id="tv5c" cx="52%" cy="68%" r="44%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#080809" stop-opacity="0"/></radialGradient>
-              </defs>
-              <rect width="160" height="95" fill="url(#tv5a)" opacity="0.75"/>
-              <rect width="160" height="95" fill="url(#tv5b)" opacity="0.65"/>
-              <rect width="160" height="95" fill="url(#tv5c)" opacity="0.55"/>
-            </svg>
-            <span class="vtmb-label">v5</span>
-          </div>
-
-          <div class="vtmb" data-version="v4" data-badge="v4 · smoke lab" onclick="soulSelectVersion(this)">
-            <svg viewBox="0 0 160 95" xmlns="http://www.w3.org/2000/svg">
-              <rect width="160" height="95" fill="#06060a"/>
-              <defs>
-                <radialGradient id="tv4a" cx="45%" cy="50%" r="62%"><stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#06060a" stop-opacity="0"/></radialGradient>
-                <radialGradient id="tv4b" cx="60%" cy="38%" r="40%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#06060a" stop-opacity="0"/></radialGradient>
-              </defs>
-              <rect width="160" height="95" fill="url(#tv4a)" opacity="0.70"/>
-              <rect width="160" height="95" fill="url(#tv4b)" opacity="0.50"/>
-            </svg>
-            <span class="vtmb-label">v4</span>
-          </div>
-
-          <div class="vtmb" data-version="v3" data-badge="v3 · avatar Siri" onclick="soulSelectVersion(this)">
-            <svg viewBox="0 0 160 95" xmlns="http://www.w3.org/2000/svg">
-              <rect width="160" height="95" fill="#040a06"/>
-              <defs>
-                <radialGradient id="tv3a" cx="50%" cy="50%" r="58%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#040a06" stop-opacity="0"/></radialGradient>
-                <radialGradient id="tv3b" cx="35%" cy="40%" r="45%"><stop offset="0%" stop-color="#6ee7b7"/><stop offset="100%" stop-color="#040a06" stop-opacity="0"/></radialGradient>
-              </defs>
-              <rect width="160" height="95" fill="url(#tv3a)" opacity="0.72"/>
-              <rect width="160" height="95" fill="url(#tv3b)" opacity="0.48"/>
-            </svg>
-            <span class="vtmb-label">v3</span>
-          </div>
-
-          <div class="vtmb" data-version="v2" data-badge="v2 · liquid" onclick="soulSelectVersion(this)">
-            <svg viewBox="0 0 160 95" xmlns="http://www.w3.org/2000/svg">
-              <rect width="160" height="95" fill="#090608"/>
-              <defs>
-                <radialGradient id="tv2a" cx="40%" cy="55%" r="55%"><stop offset="0%" stop-color="#fb7185"/><stop offset="100%" stop-color="#090608" stop-opacity="0"/></radialGradient>
-                <radialGradient id="tv2b" cx="65%" cy="35%" r="42%"><stop offset="0%" stop-color="#fda4af"/><stop offset="100%" stop-color="#090608" stop-opacity="0"/></radialGradient>
-              </defs>
-              <rect width="160" height="95" fill="url(#tv2a)" opacity="0.68"/>
-              <rect width="160" height="95" fill="url(#tv2b)" opacity="0.45"/>
-            </svg>
-            <span class="vtmb-label">v2</span>
-          </div>
-
-          <div class="vtmb" data-version="v1" data-badge="v1 · origin" onclick="soulSelectVersion(this)">
-            <svg viewBox="0 0 160 95" xmlns="http://www.w3.org/2000/svg">
-              <rect width="160" height="95" fill="#0a090a"/>
-              <defs>
-                <radialGradient id="tv1a" cx="50%" cy="48%" r="50%"><stop offset="0%" stop-color="#e2e8f0"/><stop offset="100%" stop-color="#0a090a" stop-opacity="0"/></radialGradient>
-              </defs>
-              <rect width="160" height="95" fill="url(#tv1a)" opacity="0.55"/>
-            </svg>
-            <span class="vtmb-label">v1</span>
-          </div>
-
-        </div>
-      </div>
-
-          <div class="card-state-sub">Canvas API · zero deps</div>
-        </div>
-        <span class="card-status"><span class="status-dot"></span>Ativo agora</span>
-      </div>
-
-    </div>
-    <div class="card-foot">
-      <span class="foot-label">Versões</span>
-      <div class="foot-dots">
-        <div class="foot-dot on"></div><div class="foot-dot on"></div>
-        <div class="foot-dot on"></div><div class="foot-dot on"></div><div class="foot-dot on"></div>
-      </div>
-      <span class="foot-note">soul_grid · smoke lab · avatar Siri</span>
-    </div>
-  </div>
-
-  <!-- â”€â”€ 002 Persona AI â”€â”€ -->
-  <div class="lab-card fade-up">
-    <div class="card-thumb"
-         onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')"
-         role="button" tabindex="0"
-         aria-label="Ver preview Persona AI">
-      <img
-        class="thumb-visual"
-        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/persona-ai.jpg"
-        alt="Persona AI ”” preview"
-        loading="lazy"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-      />
-      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
-        <rect width="1600" height="480" fill="#e8e9e4"/>
-        <!-- newsprint grid lines -->
-        <line x1="0" y1="80" x2="1600" y2="80" stroke="#d0d1cb" stroke-width="0.8"/>
-        <line x1="0" y1="160" x2="1600" y2="160" stroke="#d8d9d3" stroke-width="0.5"/>
-        <line x1="0" y1="240" x2="1600" y2="240" stroke="#d0d1cb" stroke-width="0.8"/>
-        <line x1="0" y1="320" x2="1600" y2="320" stroke="#d8d9d3" stroke-width="0.5"/>
-        <line x1="0" y1="400" x2="1600" y2="400" stroke="#d0d1cb" stroke-width="0.8"/>
-        <line x1="400" y1="0" x2="400" y2="480" stroke="#d8d9d3" stroke-width="0.5"/>
-        <line x1="800" y1="0" x2="800" y2="480" stroke="#d8d9d3" stroke-width="0.5"/>
-        <line x1="1200" y1="0" x2="1200" y2="480" stroke="#d8d9d3" stroke-width="0.5"/>
-        <!-- radar circle -->
-        <circle cx="1280" cy="240" r="180" stroke="#c0c1bb" stroke-width="1" fill="none" opacity="0.6"/>
-        <circle cx="1280" cy="240" r="130" stroke="#c0c1bb" stroke-width="0.7" fill="none" opacity="0.5"/>
-        <circle cx="1280" cy="240" r="80"  stroke="#c0c1bb" stroke-width="0.5" fill="none" opacity="0.4"/>
-        <!-- radar fill -->
-        <polygon points="1280,80 1420,180 1380,350 1180,350 1140,180" fill="#1c1c18" fill-opacity="0.08" stroke="#1c1c18" stroke-width="1" stroke-opacity="0.25"/>
-        <!-- masthead text -->
-        <text x="60" y="56" font-family="Georgia,serif" font-size="42" fill="#1c1c18" font-weight="700" letter-spacing="-1">Persona AI</text>
-        <text x="60" y="80" font-family="monospace" font-size="9" fill="#888880" letter-spacing="3">MODEL PERSONALITY ARCHITECTURE</text>
-        <!-- sliders representation -->
-        <rect x="60" y="110" width="680" height="1" fill="#c8c9c3"/>
-        <rect x="60" y="110" width="420" height="1" fill="#1c1c18"/>
-        <circle cx="480" cy="110" r="4" fill="#1c1c18"/>
-        <rect x="60" y="135" width="680" height="1" fill="#c8c9c3"/>
-        <rect x="60" y="135" width="540" height="1" fill="#1c1c18"/>
-        <circle cx="600" cy="135" r="4" fill="#1c1c18"/>
-        <rect x="60" y="160" width="680" height="1" fill="#c8c9c3"/>
-        <rect x="60" y="160" width="280" height="1" fill="#1c1c18"/>
-        <circle cx="340" cy="160" r="4" fill="#1c1c18"/>
-        <text x="80" y="430" font-family="monospace" font-size="11" fill="rgba(0,0,0,0.18)" letter-spacing="3">PERSONA AI ”” INTERFACE · EXPORTAÇÃO PROMPTS</text>
-      </svg>
-      <div class="thumb-overlay">
-        <div class="thumb-play">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="#111110"/></svg>
-        </div>
-      </div>
-      <span class="thumb-num">002</span>
-      <span class="thumb-badge">v3 · persona_ai</span>
-    </div>
-    <div class="card-body">
-      <div>
-        <h3 class="card-title">Persona AI <em>”” Model Architecture</em></h3>
-        <p class="card-desc">Configure personalidades de IAs via 20 atributos inspirados em Westworld. Radar animado, arquétipos automáticos, export para Claude / ChatGPT / Gemini.</p>
-      </div>
-      <div class="card-actions">
-        <div style="display:flex;flex-direction:column;align-items:flex-end;">
-          <span class="card-status"><span class="status-dot"></span>Em evolução</span>
-          <button class="card-cta" onclick="openModal('https://dev-teken.github.io/labs/PERSONAAI/')">
-            Abrir preview
-            <span class="cta-arrow">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 8L8 2M8 2H3.5M8 2V6.5" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="card-foot">
-      <span class="foot-label">Versões</span>
-      <div class="foot-dots">
-        <div class="foot-dot on"></div><div class="foot-dot on"></div><div class="foot-dot on"></div>
-      </div>
-      <span class="foot-note">newsprint · radar · export 3 plataformas</span>
-    </div>
-  </div>
-
-  <!-- â”€â”€ 003 Trália â”€â”€ -->
-  <div class="lab-card fade-up">
-    <div class="card-thumb"
-         onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')"
-         role="button" tabindex="0"
-         aria-label="Ver preview Trália">
-      <img
-        class="thumb-visual"
-        src="https://raw.githubusercontent.com/dev-teken/labs/main/screenshots/tralia.jpg"
-        alt="Trália ”” preview"
-        loading="lazy"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-      />
-      <svg class="thumb-visual" viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="display:none">
-        <rect width="1600" height="480" fill="#080d10"/>
-        <!-- topbar -->
-        <rect x="0" y="0" width="1600" height="52" fill="#0c1215"/>
-        <rect x="24" y="18" width="80" height="16" rx="2" fill="#1a2830"/>
-        <rect x="120" y="18" width="60" height="16" rx="2" fill="#1a2830"/>
-        <rect x="196" y="18" width="60" height="16" rx="2" fill="#1a2830"/>
-        <!-- sidebar -->
-        <rect x="0" y="52" width="200" height="428" fill="#0a1214"/>
-        <rect x="20" y="80" width="160" height="28" rx="3" fill="rgba(255,255,255,0.05)"/>
-        <rect x="20" y="118" width="120" height="20" rx="2" fill="rgba(255,255,255,0.03)"/>
-        <rect x="20" y="148" width="140" height="20" rx="2" fill="rgba(255,255,255,0.03)"/>
-        <rect x="20" y="178" width="100" height="20" rx="2" fill="rgba(255,255,255,0.03)"/>
-        <!-- kanban columns -->
-        <rect x="220" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
-        <rect x="540" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
-        <rect x="860" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
-        <rect x="1180" y="72" width="300" height="360" rx="4" fill="rgba(255,255,255,0.025)"/>
-        <!-- cards inside columns -->
-        <rect x="232" y="100" width="276" height="80" rx="3" fill="#111a1f"/>
-        <rect x="232" y="192" width="276" height="60" rx="3" fill="#111a1f"/>
-        <rect x="232" y="264" width="276" height="72" rx="3" fill="#111a1f"/>
-        <rect x="552" y="100" width="276" height="68" rx="3" fill="#111a1f"/>
-        <rect x="552" y="180" width="276" height="80" rx="3" fill="#111a1f"/>
-        <rect x="872" y="100" width="276" height="56" rx="3" fill="#111a1f"/>
-        <rect x="1192" y="100" width="276" height="64" rx="3" fill="#111a1f"/>
-        <!-- teal accent -->
-        <rect x="232" y="100" width="3" height="80" rx="1" fill="#2a8080" opacity="0.7"/>
-        <rect x="552" y="100" width="3" height="68" rx="1" fill="#2a8080" opacity="0.5"/>
-        <text x="240" y="432" font-family="monospace" font-size="11" fill="rgba(255,255,255,0.12)" letter-spacing="3">TRÁLIA ”” SISTEMA DE TAREFAS · KANBAN</text>
-      </svg>
-      <div class="thumb-overlay">
-        <div class="thumb-play">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z" fill="#111110"/></svg>
-        </div>
-      </div>
-      <span class="thumb-num">003</span>
-      <span class="thumb-badge">v2 · trália</span>
-    </div>
-    <div class="card-body">
-      <div>
-        <h3 class="card-title">Trália <em>”” Sistema de Tarefas</em></h3>
-        <p class="card-desc">Kanban com múltiplos temas visuais ”” dark, Cyberpunk 2077, aqua. Como o design visual muda a relação com a produtividade?</p>
-      </div>
-      <div class="card-actions">
-        <div style="display:flex;flex-direction:column;align-items:flex-end;">
-          <span class="card-status"><span class="status-dot"></span>Em evolução</span>
-          <button class="card-cta" onclick="openModal('https://dev-teken.github.io/labs/QUEUE/')">
-            Abrir preview
-            <span class="cta-arrow">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 8L8 2M8 2H3.5M8 2V6.5" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="card-foot">
-      <span class="foot-label">Versões</span>
-      <div class="foot-dots">
-        <div class="foot-dot on"></div><div class="foot-dot on"></div>
-      </div>
-      <span class="foot-note">dark · cyberpunk · aqua · kanban completo</span>
-    </div>
-  </div>
-</div>
-
-<!-- ════ JORNADA ══════════════════════════════ -->
-<div class="sep" id="jornada">
-  <div class="sep-inner">
-    <span class="sep-label">§ jornada</span>
-    <span class="sep-n">04</span>
-  </div>
-</div>
-<div class="wrap">
-  <div class="labs-head fade-up" style="margin-bottom:2.407rem">
-    <div class="labs-title">A <em>linha do tempo</em></div>
-  </div>
-    
 </div>
 
 <!-- ════ FOOTER ═══════════════════════════════ -->
@@ -2132,13 +1614,10 @@ body, nav, .lab-card, .card-body, .card-foot,
 <script>
 /* â”€â”€ Intensity slider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/* ── Soul cluster — leve (-50% CPU), vivo permanente ── */
+/* ── Soul cluster — pausa fora da viewport para não pesar o scroll ── */
 (function () {
-
-  const SOULS = [{ id: 'soul-a', speed: 1.10, hb_speed: 1.6 }];
-
-  // 1 seno por eixo — substitui rnd() de 3 senos (-66% senos por blob)
-  const MIN_SPEED = 0.18;
+  const SOULS = [{ id: 'soul-a', speed: 1.0, hb_speed: 1.4 }];
+  const MIN_SPEED = 0.15;
   function clamp(v) { return Math.abs(v) < MIN_SPEED ? (v>=0?1:-1)*MIN_SPEED : v; }
 
   function createSoul(cfg) {
@@ -2147,92 +1626,77 @@ body, nav, .lab-card, .card-body, .card-foot,
 
     const canvas = document.createElement('canvas');
     const ctx    = canvas.getContext('2d');
-    // Canvas 50% menor — pixels processados reduzem ao quadrado: 360→180 = 75% menos pixels
-    const W = canvas.width  = 180;
-    const H = canvas.height = 180;
+    const W = canvas.width  = 120;
+    const H = canvas.height = 120;
     node.appendChild(canvas);
 
-    // 3 blobs em vez de 6 — metade dos gradients por frame
-    const blobs = Array.from({ length: 3 }, (_, i) => ({
-      x:  W * 0.25 + Math.random() * W * 0.5,
-      y:  H * 0.25 + Math.random() * H * 0.5,
-      vx: (Math.random() - 0.5) * cfg.speed * 2,
-      vy: (Math.random() - 0.5) * cfg.speed * 2,
-      r:  Math.random() * 36 + 32,       // raios proporcionais ao canvas menor
-      pulse:  Math.random() * Math.PI * 2,
-      phase:  i * (Math.PI * 2 / 3) + Math.random(),
-      drift:  Math.random() * 100,
-      nextJolt: performance.now() + Math.random() * 4000,
+    const blobs = Array.from({ length: 2 }, (_, i) => ({
+      x:  W * 0.3 + Math.random() * W * 0.4,
+      y:  H * 0.3 + Math.random() * H * 0.4,
+      vx: (Math.random() - 0.5) * cfg.speed,
+      vy: (Math.random() - 0.5) * cfg.speed,
+      r:  Math.random() * 24 + 22,
+      pulse: Math.random() * Math.PI * 2,
+      phase: i * Math.PI + Math.random(),
+      nextJolt: performance.now() + Math.random() * 5000,
     }));
 
-    // Gradiente reutilizável — recriado só quando posição muda >0.5px
-    // (evita createRadialGradient toda frame quando blob quase parado)
     let frame = 0;
+    let rafId = null;
+    let visible = true;
 
     function tick() {
+      frame++;
+      if (frame % 3 !== 0) { rafId = requestAnimationFrame(tick); return; }
+
       const now = performance.now();
       const t   = now * 0.001;
-
-      // Heartbeat: 1 seno simples — organ suficiente, metade do custo
-      const hb = 0.5 + 0.45 * Math.sin(t * cfg.hb_speed * 1.5);
-
-      // Throttle: renderizar a cada 2 frames (~30fps) — visual indistinguível a 60fps
-      // para animação lenta como esta, 30fps é imperceptível
-      frame++;
-      if (frame % 2 !== 0) { requestAnimationFrame(tick); return; }
-
+      const hb  = 0.5 + 0.4 * Math.sin(t * cfg.hb_speed);
       ctx.clearRect(0, 0, W, H);
-
-      const cx = W / 2, cy = H / 2, maxD = W * 0.44;
+      const cx = W / 2, cy = H / 2, maxD2 = (W * 0.42) ** 2;
 
       blobs.forEach(b => {
-        // Jolt periódico
         if (now > b.nextJolt) {
-          b.vx += (Math.random() - 0.5) * cfg.speed * 1.8;
-          b.vy += (Math.random() - 0.5) * cfg.speed * 1.8;
-          b.nextJolt = now + 2000 + Math.random() * 4000;
+          b.vx += (Math.random() - 0.5) * cfg.speed * 1.5;
+          b.vy += (Math.random() - 0.5) * cfg.speed * 1.5;
+          b.nextJolt = now + 3000 + Math.random() * 5000;
         }
-
-        // 1 seno por eixo — aleatoriedade mantida, custo ~1/3 do rnd()
-        b.x += b.vx + Math.sin(t * 0.8 + b.phase) * 0.7;
-        b.y += b.vy + Math.sin(t * 0.65 + b.drift) * 0.7;
-
-        b.vx = clamp(b.vx * 0.992);
-        b.vy = clamp(b.vy * 0.992);
-
-        // Contenção — dist² evita Math.sqrt quando dentro do limite
-        const dx = b.x - cx, dy = b.y - cy;
-        const dist2 = dx*dx + dy*dy, maxD2 = maxD*maxD;
+        b.x += b.vx + Math.sin(t * 0.7 + b.phase) * 0.5;
+        b.y += b.vy + Math.sin(t * 0.55 + b.phase) * 0.5;
+        b.vx = clamp(b.vx * 0.991);
+        b.vy = clamp(b.vy * 0.991);
+        const dx = b.x - cx, dy = b.y - cy, dist2 = dx*dx + dy*dy;
         if (dist2 > maxD2) {
-          const dist = Math.sqrt(dist2);
-          const over = dist - maxD;
-          b.vx -= (dx/dist) * over * 0.018;
-          b.vy -= (dy/dist) * over * 0.018;
+          const dist = Math.sqrt(dist2), over = dist - Math.sqrt(maxD2);
+          b.vx -= (dx/dist) * over * 0.02;
+          b.vy -= (dy/dist) * over * 0.02;
         }
-
-        // Respiração simples — 1 seno
-        const r = b.r * (1 + hb * 0.30 + Math.sin(t * 1.8 + b.pulse) * 0.08);
-
-        // 2 stops em vez de 4 — metade das operações do gradiente
+        const r = b.r * (1 + hb * 0.25);
         const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        g.addColorStop(0,   'rgba(140,115,165,0.88)'); // violeta COSMOS
-        g.addColorStop(0.5, 'rgba(70,55,100,0.38)');   // índigo escuro
-        g.addColorStop(1,   'rgba(0,0,0,0)');
-
+        g.addColorStop(0, 'rgba(140,115,165,0.85)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     }
 
-    tick();
+    /* pausa assim que o usuário scrollar qualquer pixel, retoma ao topo */
+    function syncScroll() {
+      const atTop = window.scrollY < 10;
+      if (atTop && !rafId)  { rafId = requestAnimationFrame(tick); }
+      if (!atTop && rafId)  { cancelAnimationFrame(rafId); rafId = null; }
+    }
+    window.addEventListener('scroll', syncScroll, { passive: true });
+    syncScroll();
+
+    rafId = requestAnimationFrame(tick);
   }
 
   SOULS.forEach(cfg => createSoul(cfg));
-
 })();
 
 
@@ -2348,139 +1812,140 @@ document.querySelectorAll('.card-thumb[role="button"]').forEach(el => {
   });
 });
 
-/* ── Mini soul hero — fluido, transparente, sem corte ── */
+/* ── Mini soul hero — pausa fora da viewport ── */
 (function() {
   const node = document.getElementById('hero-mini-soul');
   if (!node) return;
 
   const canvas = document.createElement('canvas');
   const ctx    = canvas.getContext('2d');
-  // Canvas grande para blobs nunca chegarem na borda visível
-  canvas.width  = 1400;
-  canvas.height = 400;
+  canvas.width  = 700;
+  canvas.height = 200;
   node.appendChild(canvas);
   const W = canvas.width, H = canvas.height;
 
-  // 5 blobs com cores das 4 almas + âmbar
   const BLOBS = [
-    { h: 200, s: 80, l: 65 }, // névoa
-    { h: 38,  s: 85, l: 68 }, // areia-âmbar
-    { h: 148, s: 70, l: 58 }, // bosque
-    { h: 340, s: 75, l: 62 }, // crepúsculo
-    { h: 260, s: 70, l: 65 }, // violeta
+    { h: 200, s: 75, l: 62 },
+    { h: 148, s: 65, l: 55 },
+    { h: 260, s: 65, l: 62 },
   ];
 
   const blobs = BLOBS.map((col, i) => ({
-    x:     W * 0.15 + Math.random() * W * 0.70,
-    y:     H * 0.3  + Math.random() * H * 0.40,
-    vx:    (Math.random() - 0.5) * 0.8,
-    vy:    (Math.random() - 0.5) * 0.4,
-    r:     55 + Math.random() * 50,
+    x:  W * 0.2  + Math.random() * W * 0.60,
+    y:  H * 0.35 + Math.random() * H * 0.30,
+    vx: (Math.random() - 0.5) * 0.6,
+    vy: (Math.random() - 0.5) * 0.3,
+    r:  30 + Math.random() * 28,
     col,
-    pulse:  Math.random() * Math.PI * 2,
-    phase:  i * (Math.PI * 2 / 5) + Math.random(),
-    drift:  Math.random() * 80,
+    pulse: Math.random() * Math.PI * 2,
+    phase: i * (Math.PI * 2 / 3) + Math.random(),
     nextJolt: performance.now() + Math.random() * 3000,
   }));
 
-  const MIN_VX = 0.12;
+  const MIN_VX = 0.10;
+  let frame = 0;
+  let rafId  = null;
 
   function tick() {
+    frame++;
+    if (frame % 3 !== 0) { rafId = requestAnimationFrame(tick); return; }
     const now = performance.now();
     const t   = now * 0.0007;
-
     ctx.clearRect(0, 0, W, H);
 
-    blobs.forEach((b, i) => {
-      // Jolt aleatório periódico
+    blobs.forEach(b => {
       if (now > b.nextJolt) {
-        b.vx += (Math.random() - 0.5) * 1.2;
-        b.vy += (Math.random() - 0.5) * 0.5;
-        b.nextJolt = now + 2000 + Math.random() * 4000;
+        b.vx += (Math.random() - 0.5) * 0.9;
+        b.vy += (Math.random() - 0.5) * 0.4;
+        b.nextJolt = now + 2500 + Math.random() * 4000;
       }
-
-      // Deriva orgânica horizontal dominante (flui na faixa)
-      b.x += b.vx + Math.sin(t * 0.75 + b.phase) * 0.9;
-      b.y += b.vy + Math.cos(t * 0.60 + b.drift)  * 0.4;
-
-      // Viscosidade — garantia de velocidade mínima horizontal
-      b.vx *= 0.993;
-      b.vy *= 0.993;
+      b.x += b.vx + Math.sin(t * 0.75 + b.phase) * 0.6;
+      b.y += b.vy + Math.cos(t * 0.60 + b.phase) * 0.3;
+      b.vx *= 0.993; b.vy *= 0.993;
       if (Math.abs(b.vx) < MIN_VX) b.vx = (b.vx >= 0 ? 1 : -1) * MIN_VX;
-
-      // Contenção suave — mantém blobs na faixa horizontal larga
       const cx = W * 0.5, cy = H * 0.5;
       const dx = b.x - cx, dy = b.y - cy;
       if (Math.abs(dx) > W * 0.38) b.vx -= dx * 0.004;
-      if (Math.abs(dy) > H * 0.32) b.vy -= dy * 0.012;
-
-      // Respiração
-      const r = b.r * (1 + 0.18 * Math.sin(t * 1.6 + b.pulse));
-
-      // Gradiente de cor direta (não luminância) — cor vem do canvas, não de camadas CSS
+      if (Math.abs(dy) > H * 0.30) b.vy -= dy * 0.012;
+      const r = b.r * (1 + 0.15 * Math.sin(t * 1.4 + b.pulse));
       const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-      g.addColorStop(0,    `hsla(${b.col.h},${b.col.s}%,${b.col.l}%,1)`);
-      g.addColorStop(0.45, `hsla(${b.col.h},${b.col.s}%,${b.col.l * 0.7}%,0.45)`);
-      g.addColorStop(1,    'rgba(0,0,0,0)');
-
+      g.addColorStop(0, `hsla(${b.col.h},${b.col.s}%,${b.col.l}%,1)`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   }
 
-  tick();
+  /* pausa ao scrollar, retoma ao topo */
+  function syncScroll() {
+    const atTop = window.scrollY < 10;
+    if (atTop  && !rafId) rafId = requestAnimationFrame(tick);
+    if (!atTop && rafId)  { cancelAnimationFrame(rafId); rafId = null; }
+  }
+  window.addEventListener('scroll', syncScroll, { passive: true });
+  syncScroll();
+  rafId = requestAnimationFrame(tick);
 })();
 
-/* ── Mini soul nos botões de preview ─────────────────── */
+/* ── Mini soul nos botões — para ao scrollar ── */
 (function() {
   function createMiniSoul(btn) {
     const canvas = document.createElement('canvas');
     const ctx    = canvas.getContext('2d');
-    canvas.width = canvas.height = 200;
+    canvas.width = canvas.height = 100;
     btn.insertBefore(canvas, btn.firstChild);
 
-    // 3 blobs com cores dos cards das almas
-    const hues = [200, 280, 38]; // névoa-azul, violeta, âmbar
+    const hues = [200, 260];
     const blobs = hues.map((h, i) => ({
-      x: 80 + Math.random() * 40,
-      y: 80 + Math.random() * 40,
-      vx: (Math.random() - 0.5) * 0.7,
-      vy: (Math.random() - 0.5) * 0.7,
-      r:  38 + Math.random() * 26,
-      h:  h,
+      x: 44 + Math.random() * 12,
+      y: 44 + Math.random() * 12,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      r:  22 + Math.random() * 14,
+      h,
       pulse: Math.random() * Math.PI * 2,
     }));
 
+    let frame = 0;
+    let rafId  = null;
+
     function tick() {
+      frame++;
+      if (frame % 2 !== 0) { rafId = requestAnimationFrame(tick); return; }
       const t = performance.now() * 0.0007;
-      ctx.clearRect(0, 0, 200, 200);
-
+      ctx.clearRect(0, 0, 100, 100);
       blobs.forEach((b, i) => {
-        b.x += b.vx + Math.sin(t * 0.9 + i * 1.4) * 0.45;
-        b.y += b.vy + Math.cos(t * 0.8 + i * 1.2) * 0.45;
-        // contenção
-        const dx = b.x - 80, dy = b.y - 80;
+        b.x += b.vx + Math.sin(t * 0.9 + i * 1.4) * 0.35;
+        b.y += b.vy + Math.cos(t * 0.8 + i * 1.2) * 0.35;
+        const dx = b.x - 50, dy = b.y - 50;
         const d = Math.sqrt(dx*dx + dy*dy);
-        if (d > 68) { b.vx -= dx/d * 0.06; b.vy -= dy/d * 0.06; }
+        if (d > 38) { b.vx -= dx/d * 0.05; b.vy -= dy/d * 0.05; }
         b.vx *= 0.994; b.vy *= 0.994;
-
-        const r = b.r * (1 + Math.sin(t*2.1 + b.pulse) * 0.14);
+        const r = b.r * (1 + Math.sin(t*1.8 + b.pulse) * 0.10);
         const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        g.addColorStop(0,   `hsla(${b.h},80%,70%,1)`);
-        g.addColorStop(0.5, `hsla(${b.h},60%,45%,0.4)`);
-        g.addColorStop(1,   'rgba(0,0,0,0)');
+        g.addColorStop(0, `hsla(${b.h},75%,68%,1)`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(b.x, b.y, r, 0, Math.PI*2);
         ctx.fill();
       });
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     }
-    tick();
+
+    /* pausa ao scrollar, retoma ao topo */
+    function syncScroll() {
+      const atTop = window.scrollY < 10;
+      if (atTop  && !rafId) rafId = requestAnimationFrame(tick);
+      if (!atTop && rafId)  { cancelAnimationFrame(rafId); rafId = null; }
+    }
+    window.addEventListener('scroll', syncScroll, { passive: true });
+    syncScroll();
+    rafId = requestAnimationFrame(tick);
   }
 
   document.querySelectorAll('.btn-circle-preview').forEach(createMiniSoul);
