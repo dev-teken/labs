@@ -300,5 +300,6 @@ function endGame(){const a1=p1Deck.filter(c=>c.energy>0).length,a2=p2Deck.filter
 function init(){clearTimeout(nextTimer);$('tap-hint').classList.remove('on');p1Deck=makeDeck();p2Deck=makeDeck();p1Pick=p2Pick=p1PPR=p2PPR=null;prevW1=prevW2=null;roundNum=1;$('gameover').classList.remove('show');$('ppr-overlay').classList.remove('show');stopSparks();setGlow(null);updHUD();resetArena();curPlayer='p1';renderHand(p1Deck,'p1');$('dz1').classList.add('lit');setPhase('p1-pick');}
 init();
 </script>
+<script src="../version-widget.js"></script>
 </body>
 </html>
