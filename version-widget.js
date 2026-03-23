@@ -523,26 +523,27 @@
     placeholder.style.display = 'flex';
     iframe.classList.remove('loaded');
 
-    // Limpa src anterior para forçar novo onload
-    iframe.src = '';
+    const targetSrc = 'versoes/' + v.file;
 
     function onIframeReady() {
       placeholder.style.display = 'none';
       iframe.classList.add('loaded');
     }
 
-    // Fallback: se onload não disparar em 4s, mostra de qualquer forma
-    const fallback = setTimeout(onIframeReady, 4000);
+    // Fallback: se onload não disparar em 5s, mostra de qualquer forma
+    let fallback = setTimeout(onIframeReady, 5000);
 
+    // onload com guarda — só reage quando o src bate com o alvo
     iframe.onload = () => {
+      // ignora disparos de about:blank ou src vazio
+      const current = iframe.src || '';
+      if (!current.includes(v.file)) return;
       clearTimeout(fallback);
       setTimeout(onIframeReady, 80);
     };
 
-    // Seta src depois de registrar onload
-    requestAnimationFrame(() => {
-      iframe.src = 'versoes/' + v.file;
-    });
+    // Troca direto para o alvo sem passar por src vazio
+    iframe.src = targetSrc;
   }
 
   /* ── Montar timeline ─────────────────────────────────────────── */
