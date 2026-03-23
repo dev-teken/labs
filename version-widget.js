@@ -181,10 +181,13 @@
   function loadVersion(index) {
     const v = versions[index];
     verDisplay.textContent = v.badge || v.version;
-    iframe.src = 'versoes/' + v.file;
+    
+    // O './' garante que ele procure a pasta 'versoes' no mesmo local do index.html
+    iframe.src = './versoes/' + v.file; 
+    
     viewer.classList.add('vw-active');
     panel.classList.remove('vw-open');
-  }
+}
 
   /* ── Fetch do Manifesto ──────────────────────────────────────── */
   fetch(MANIFEST)
