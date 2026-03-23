@@ -146,16 +146,19 @@
   trigger.onclick = openUI;
   sidebar.querySelector('#vw-close').onclick = closeUI;
 
-  function loadVersion(v, element) {
+function loadVersion(v, element) {
     document.querySelectorAll('.vw-item').forEach(el => el.classList.remove('active'));
     element.classList.add('active');
     
-    // Caminho relativo para a subpasta versoes
-    const path = './versoes/' + v.file;
-    if (iframe.src.indexOf(v.file) === -1) {
+    // encodeURI limpa espaços e caracteres especiais para o formato que o navegador entende
+    const fileNameSafe = encodeURI(v.file);
+    const path = './versoes/' + fileNameSafe;
+    
+    if (iframe.src.indexOf(fileNameSafe) === -1) {
         iframe.src = path;
     }
-  }
+}
+ 
 
   /* ── Inicialização ───────────────────────────────────────────── */
   fetch(MANIFEST)
