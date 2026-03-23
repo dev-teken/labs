@@ -1,126 +1,89 @@
 /*!
- * version-widget.js — v2.0 (Otimizado)
- * Foco: Carregamento instantâneo e bypass de cache
+ * version-widget.js — v3.0 (Sidebar Edition)
+ * Estilo: Minimalista, Ancorado à Esquerda
  */
 
 (function () {
   'use strict';
 
-  // O "?t=" + Date.now() impede que o navegador use uma versão velha do JSON
-  const MANIFEST = 'versoes/index.json?t=' + Date.now();
+  const MANIFEST = './versoes/index.json?t=' + Date.now();
 
-  /* ── Injetar CSS Otimizado ───────────────────────────────────── */
+  /* ── Injetar CSS v3 (Sidebar) ────────────────────────────────── */
   const css = `
+    :root { --vw-accent: #3b82f6; --vw-bg: #0e0e0c; --vw-border: rgba(255,255,255,0.08); }
+
+    /* Gatilho Discreto na Esquerda */
     #vw-trigger {
       position: fixed;
-      bottom: 1.6rem;
-      right: 1.6rem;
+      left: 1rem;
+      bottom: 1rem;
       z-index: 2147483647;
+      width: 2.8rem;
+      height: 2.8rem;
+      background: var(--vw-bg);
+      border: 1px solid var(--vw-border);
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 0.55rem;
-      background: rgba(14,14,12,0.85);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 999px;
-      padding: 0.5rem 1rem;
+      justify-content: center;
       cursor: pointer;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      color: #888;
+      backdrop-filter: blur(10px);
       transition: all 0.2s ease;
-      /* Fonte nativa para evitar delay de download */
-      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      user-select: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
-    #vw-trigger:hover {
-      background: rgba(25,25,22,0.95);
-      transform: translateY(-2px);
-      border-color: rgba(255,255,255,0.25);
-    }
-    #vw-trigger svg { opacity: 0.7; }
-    #vw-count {
-      background: #3b82f6;
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.1rem 0.4rem;
-      border-radius: 6px;
-      min-width: 1.2rem;
-      text-align: center;
-    }
-    #vw-panel {
-      position: fixed;
-      inset: 0;
-      z-index: 2147483646;
-      display: none;
-      background: rgba(7,7,5,0.6);
-      backdrop-filter: blur(4px);
-      justify-content: flex-end;
-    }
-    #vw-panel.vw-open { display: flex; }
+    #vw-trigger:hover { color: #fff; transform: scale(1.1); border-color: rgba(255,255,255,0.2); }
+    #vw-trigger.active { left: 260px; transform: rotate(90deg); opacity: 0; pointer-events: none; }
+
+    /* Sidebar de Navegação */
     #vw-sidebar {
-      width: 100%;
-      max-width: 340px;
-      background: #0e0e0c;
-      height: 100%;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: 280px;
+      background: var(--vw-bg);
+      border-right: 1px solid var(--vw-border);
+      z-index: 2147483646;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
-      border-left: 1px solid rgba(255,255,255,0.08);
-      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-      animation: vw-slide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: ui-monospace, monospace;
     }
-    @keyframes vw-slide { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    
+    #vw-sidebar.open { transform: translateX(0); }
+
     #vw-header {
       padding: 1.5rem;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    #vw-project-name { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
-    #vw-timeline {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem 0;
-    }
-    .vw-item {
-      padding: 1rem 1.5rem;
-      cursor: pointer;
-      display: flex;
-      gap: 1rem;
-      transition: background 0.2s;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-    }
-    .vw-item:hover { background: rgba(255,255,255,0.03); }
-    .vw-item-badge {
-      font-size: 0.65rem;
-      background: rgba(255,255,255,0.08);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      color: #aaa;
-    }
-    .vw-item-name { color: #eee; font-size: 0.95rem; margin-top: 0.3rem; font-weight: 500; }
-    
-    #vw-viewer {
-      position: fixed;
-      inset: 0;
-      z-index: 2147483647;
-      background: #000;
-      display: none;
-      flex-direction: column;
-    }
-    #vw-viewer.vw-active { display: flex; }
-    #vw-viewer-bar {
-      height: 44px;
-      background: #111;
       display: flex;
       align-items: center;
-      padding: 0 1rem;
       justify-content: space-between;
-      border-bottom: 1px solid #222;
+      border-bottom: 1px solid var(--vw-border);
     }
-    #vw-iframe { border: none; flex: 1; background: #fff; }
-    .vw-close-btn { color: #888; cursor: pointer; font-size: 0.8rem; border: 1px solid #333; padding: 4px 10px; border-radius: 4px; }
-    .vw-close-btn:hover { color: #fff; background: #222; }
+    #vw-header span { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; }
+    #vw-close-sidebar { cursor: pointer; color: #555; font-size: 1.2rem; }
+    #vw-close-sidebar:hover { color: #fff; }
+
+    #vw-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .vw-item {
+      padding: 0.8rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      transition: all 0.2s;
+    }
+    .vw-item:hover { background: rgba(255,255,255,0.03); }
+    .vw-item.active { border-left: 3px solid var(--vw-accent); background: rgba(59,130,246,0.05); }
+    .vw-item-badge { font-size: 0.6rem; color: var(--vw-accent); display: block; margin-bottom: 2px; }
+    .vw-item-name { color: #ccc; font-size: 0.85rem; }
+
+    /* Área do Iframe (Ocupa o resto da tela) */
+    #vw-main-viewer {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483640;
+      background: #000;
+      transition: padding-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #vw-main-viewer.sidebar-open { padding-left: 280px; }
+    #vw-iframe { width: 100%; height: 100%; border: none; background: #fff; }
   `;
 
   const styleTag = document.createElement('style');
@@ -130,89 +93,75 @@
   /* ── Elementos da UI ─────────────────────────────────────────── */
   const trigger = document.createElement('div');
   trigger.id = 'vw-trigger';
-  trigger.style.display = 'none'; // Escondido até carregar
-  trigger.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-    <span>Labs</span>
-    <span id="vw-count">0</span>
-  `;
+  trigger.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>`;
 
-  const panel = document.createElement('div');
-  panel.id = 'vw-panel';
-  panel.innerHTML = `
-    <div id="vw-sidebar">
-      <div id="vw-header">
-        <div id="vw-project-name">Carregando...</div>
-      </div>
-      <div id="vw-timeline"></div>
+  const sidebar = document.createElement('div');
+  sidebar.id = 'vw-sidebar';
+  sidebar.innerHTML = `
+    <div id="vw-header">
+      <span id="vw-proj-title">Versions</span>
+      <div id="vw-close-sidebar">×</div>
     </div>
+    <div id="vw-list"></div>
   `;
 
   const viewer = document.createElement('div');
-  viewer.id = 'vw-viewer';
-  viewer.innerHTML = `
-    <div id="vw-viewer-bar">
-      <span id="vw-current-ver" style="color:#aaa; font-size:0.8rem; font-family:monospace;"></span>
-      <div class="vw-close-btn" id="vw-close-viewer">Fechar Visualização</div>
-    </div>
-    <iframe id="vw-iframe"></iframe>
-  `;
+  viewer.id = 'vw-main-viewer';
+  viewer.innerHTML = `<iframe id="vw-iframe" src="about:blank"></iframe>`;
 
   document.body.appendChild(trigger);
-  document.body.appendChild(panel);
+  document.body.appendChild(sidebar);
   document.body.appendChild(viewer);
 
-  const timeline = panel.querySelector('#vw-timeline');
-  const projDisplay = panel.querySelector('#vw-project-name');
+  const listContainer = sidebar.querySelector('#vw-list');
   const iframe = viewer.querySelector('#vw-iframe');
-  const verDisplay = viewer.querySelector('#vw-current-ver');
 
-  let versions = [];
-
-  /* ── Lógica de Ações ─────────────────────────────────────────── */
-  trigger.onclick = () => panel.classList.add('vw-open');
-  panel.onclick = (e) => { if(e.target === panel) panel.classList.remove('vw-open'); };
-  
-  document.getElementById('vw-close-viewer').onclick = () => {
-    viewer.classList.remove('vw-active');
-    iframe.src = 'about:blank';
+  /* ── Lógica ─────────────────────────────────────────────────── */
+  const openSidebar = () => {
+    sidebar.classList.add('open');
+    viewer.classList.add('sidebar-open');
+    trigger.classList.add('active');
   };
 
-  function loadVersion(index) {
-    const v = versions[index];
-    verDisplay.textContent = v.badge || v.version;
-    
-    // O './' garante que ele procure a pasta 'versoes' no mesmo local do index.html
-    iframe.src = './versoes/' + v.file; 
-    
-    viewer.classList.add('vw-active');
-    panel.classList.remove('vw-open');
-}
+  const closeSidebar = () => {
+    sidebar.classList.remove('open');
+    viewer.classList.remove('sidebar-open');
+    trigger.classList.remove('active');
+  };
 
-  /* ── Fetch do Manifesto ──────────────────────────────────────── */
+  trigger.onclick = openSidebar;
+  sidebar.querySelector('#vw-close-sidebar').onclick = closeSidebar;
+
+  function loadVersion(v, element) {
+    // Marcar ativo na lista
+    document.querySelectorAll('.vw-item').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Atualizar Iframe
+    iframe.src = './versoes/' + v.file;
+  }
+
   fetch(MANIFEST)
     .then(r => r.json())
     .then(data => {
-      projDisplay.textContent = data.project || 'LABS';
-      versions = data.versions || [];
-      document.getElementById('vw-count').textContent = versions.length;
+      document.getElementById('vw-proj-title').textContent = data.project || 'LABS';
       
-      timeline.innerHTML = '';
-      versions.forEach((v, i) => {
+      data.versions.forEach((v, i) => {
         const item = document.createElement('div');
         item.className = 'vw-item';
+        if (i === 0) item.classList.add('active'); // Primeira versão ativa por padrão
+
         item.innerHTML = `
-          <div>
-            <div class="vw-item-badge">${v.badge || v.version}</div>
-            <div class="vw-item-name">${v.name}</div>
-          </div>
+          <span class="vw-item-badge">${v.badge || v.version}</span>
+          <span class="vw-item-name">${v.name}</span>
         `;
-        item.onclick = () => loadVersion(i);
-        timeline.appendChild(item);
+        
+        item.onclick = () => loadVersion(v, item);
+        listContainer.appendChild(item);
+        
+        // Carrega a primeira versão automaticamente ao iniciar
+        if (i === 0) iframe.src = './versoes/' + v.file;
       });
-      
-      trigger.style.display = 'flex';
-    })
-    .catch(err => console.error('Erro ao carregar versões:', err));
+    });
 
 })();
