@@ -446,7 +446,7 @@
         <div class="vw-iframe-placeholder" id="vw-placeholder">
           <p>Selecione uma versão</p>
         </div>
-        <iframe id="vw-iframe" src="" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy"></iframe>
+        <iframe id="vw-iframe" src="" allow="autoplay; fullscreen" loading="lazy"></iframe>
       </div>
     </div>
   `;
