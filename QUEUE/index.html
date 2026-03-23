@@ -4573,14 +4573,14 @@ document.addEventListener('keydown', e => {
 // ═══════════════════════════════════════
 loadState();
 // Force demo reset if no boards or first load
-if (!localStorage.getItem('grelio_demo_v19')) {
+if (!localStorage.getItem('grelio_demo_v20')) {
   localStorage.removeItem('grelio_state');
   localStorage.removeItem('grelio_clients');
-  localStorage.removeItem('grelio_demo_v18');
+  localStorage.removeItem('grelio_demo_v19');
   localStorage.removeItem('grelio_demo_v18b');
   localStorage.removeItem('grelio_demo_v18c');
   state = { boards: [], activeBoardId: null, clients: [] };
-  localStorage.setItem('grelio_demo_v19', '1');
+  localStorage.setItem('grelio_demo_v20', '1');
 }
 loadDismissed();
 loadSeqOrder();
@@ -4589,21 +4589,291 @@ loadClients();
 applyTheme();
 
 if (state.boards.length === 0) {
-  // Clientes pré-cadastrados
-  const cFacil    = { id: uid(), name: 'Fácil Resultado', color: '#00d4b8' };
-  const cTeken    = { id: uid(), name: 'Teken',           color: '#8b5cf6' };
-  const cPessoal  = { id: uid(), name: 'Pessoal',         color: '#ff8c42' };
-  const cPredial  = { id: uid(), name: 'Predialtech',     color: '#4fc3f7' };
-  state.clients = [cFacil, cTeken, cPessoal, cPredial];
+  // ── Utilitário de data relativa ──────────────────────────────────────
+  function dPlus(n) {
+    if (!n && n !== 0) return '';
+    const d = new Date(); d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
 
-  // Board inicial limpo
-  const board1 = { id: uid(), name: 'Geral', color: '#00d4b8', columns: [
-    { id: uid(), name: 'A Fazer',  color: '#00d4b8', cards: [] },
-    { id: uid(), name: 'Fazendo',  color: '#ff8c42', cards: [] },
-    { id: uid(), name: 'Feito',    color: '#43d9ad', cards: [] }
+  // ── Fábrica de card ──────────────────────────────────────────────────
+  function mkCard(title, tpl, clientId, priority, due, items, desc) {
+    const tmpl = TEMPLATES[tpl] || TEMPLATES.free;
+    return {
+      id: uid(), title,
+      template: tpl,
+      tags: tmpl.tag ? [tmpl.tag] : [],
+      checklist: (items || []).map(t => ({ text: t, done: false, dismissCount: 0 })),
+      description: desc || '',
+      dueDate: due || '',
+      priority: priority || null,
+      clientId: clientId || null,
+      imageData: null, imageLabel: '',
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  // ── Clientes / contextos ─────────────────────────────────────────────
+  const cCasa  = { id: uid(), name: 'Casa',     color: '#ff8c42' };
+  const cSaude = { id: uid(), name: 'Saúde',    color: '#43d9ad' };
+  const cTrab  = { id: uid(), name: 'Trabalho', color: '#4fc3f7' };
+  const cEstu  = { id: uid(), name: 'Estudos',  color: '#ffd644' };
+  const cPess  = { id: uid(), name: 'Pessoal',  color: '#ec407a' };
+  state.clients = [cCasa, cSaude, cTrab, cEstu, cPess];
+
+  // ════════════════════════════════════════════════════════════════════
+  // 🏠  CASA & ROTINA
+  // ════════════════════════════════════════════════════════════════════
+  const bCasa = { id: uid(), name: '🏠 Casa & Rotina', color: '#ff8c42', columns: [
+    { id: uid(), name: '📋 A Fazer', color: '#ff8c42', cards: [
+      mkCard('Compras do mês', 'free', cCasa.id, 'alta', dPlus(2),
+        ['Feira: frutas e legumes', 'Proteínas: frango, ovos, atum', 'Laticínios e iogurte',
+         'Grãos: arroz, feijão, macarrão', 'Limpeza: sabão, desinfetante, esponja',
+         'Higiene pessoal'],
+        'Feira na quinta, supermercado no sábado.'),
+      mkCard('Pagar contas do mês', 'free', cPess.id, 'alta', dPlus(5),
+        ['Aluguel / condomínio', 'Energia elétrica', 'Internet e celular',
+         'Cartão de crédito (venc. dia 15)', 'Streaming: Netflix, Spotify']),
+      mkCard('Limpar apartamento', 'free', cCasa.id, 'media', dPlus(3),
+        ['Aspirar sala e quartos', 'Limpar banheiro: vaso, pia, chão',
+         'Cozinha: fogão, pia, geladeira por fora', 'Tirar pó das prateleiras', 'Lavar tapete']),
+      mkCard('Revisão do carro', 'free', cCasa.id, 'media', dPlus(14),
+        ['Agendar na oficina', 'Troca de óleo (último: 3 meses atrás)',
+         'Verificar pneus e calibragem', 'Checar freios', 'Lavar e polir']),
+    ]},
+    { id: uid(), name: '🔄 Fazendo', color: '#ffd644', cards: [
+      mkCard('Lavar e dobrar roupas', 'free', cCasa.id, 'media', dPlus(0),
+        ['Separar por cor', 'Colocar máquina — carga 1', 'Carga 2 (roupas escuras)',
+         'Estender ou secar na máquina', 'Dobrar e guardar no armário']),
+      mkCard('Reorganizar o quarto', 'free', cCasa.id, 'baixa', dPlus(7),
+        ['Esvaziar gavetas e descartar', 'Organizar roupas por categoria',
+         'Limpar prateleiras', 'Reorganizar cabeceira']),
+    ]},
+    { id: uid(), name: '✅ Feito', color: '#43d9ad', cards: [
+      mkCard('Pagar IPTU parcela out.', 'free', cPess.id, null, null,
+        ['Emitir boleto ✓', 'Pagar no app ✓', 'Guardar comprovante ✓']),
+      mkCard('Troca do filtro do ar-condicionado', 'free', cCasa.id, null, null,
+        ['Comprar filtro 14x14 ✓', 'Desligar equipamento ✓', 'Instalar filtro novo ✓']),
+    ]}
   ]};
-  state.boards.push(board1);
-  state.activeBoardId = board1.id;
+
+  // ════════════════════════════════════════════════════════════════════
+  // 💪  SAÚDE & BEM-ESTAR
+  // ════════════════════════════════════════════════════════════════════
+  const bSaude = { id: uid(), name: '💪 Saúde & Bem-estar', color: '#43d9ad', columns: [
+    { id: uid(), name: '📅 Esta Semana', color: '#4fc3f7', cards: [
+      mkCard('Treino A — Peito & Tríceps', 'free', cSaude.id, 'alta', dPlus(1),
+        ['Aquecimento 10 min', 'Supino reto: 4 × 10 (60 kg)',
+         'Supino inclinado: 3 × 12', 'Crucifixo cabos: 3 × 15',
+         'Tríceps pulley: 4 × 12', 'Paralelas: 3 × falha'],
+        'Carga supino atual: 60 kg. Meta: 70 kg até fim do mês.'),
+      mkCard('Treino B — Costas & Bíceps', 'free', cSaude.id, 'alta', dPlus(3),
+        ['Puxada frontal: 4 × 10', 'Remada curvada: 4 × 10 (50 kg)',
+         'Remada unilateral: 3 × 12', 'Rosca direta barra: 4 × 12',
+         'Rosca alternada: 3 × 12', 'Rosca martelo: 3 × 10']),
+      mkCard('30 min cardio — corrida leve', 'free', cSaude.id, 'media', dPlus(0),
+        ['Aquecimento 5 min caminhada', 'Corrida 20 min (6–7 km/h)',
+         'Trote 5 min', 'Alongamento']),
+      mkCard('Consulta — check-up anual', 'free', cSaude.id, 'alta', dPlus(10),
+        ['Hemograma completo', 'Glicemia em jejum', 'Colesterol total e frações',
+         'Vitamina D e B12', 'Ferritina e TSH', 'Levar exames anteriores'],
+        'Agendar com Dr. Marcos. Clínica São Lucas, tel. 11 9999-0000.'),
+    ]},
+    { id: uid(), name: '🌿 Hábitos', color: '#43d9ad', cards: [
+      mkCard('Plano alimentar semanal', 'free', cSaude.id, 'media', dPlus(2),
+        ['Calcular TDEE + déficit 300 kcal', 'Macros: 40 % ptn / 35 % carb / 25 % gord',
+         'Planejar café × 5 dias', 'Planejar almoços × 5', 'Lista de compras fitness']),
+      mkCard('Meditação diária — 10 min', 'free', cPess.id, 'baixa', null,
+        ['Insight Timer — meditação guiada', 'Respiração 4-7-8 (2 rodadas)',
+         'Body scan 5 min', 'Definir intenção do dia'],
+        'Streak atual: 4 dias. Horário fixo: 7 h antes do café.'),
+      mkCard('Tomar 2 L de água / dia', 'free', cSaude.id, 'baixa', null,
+        ['Copo ao acordar (em jejum)', 'Garrafa 500 ml no trabalho × 4',
+         'Chá ou suco natural no jantar']),
+    ]},
+    { id: uid(), name: '🏅 Conquistado', color: '#ffd644', cards: [
+      mkCard('Comprar tênis de corrida', 'free', cSaude.id, null, null,
+        ['Pesquisar modelos ✓', 'Testar na loja ✓', 'Asics Gel-Nimbus 25 comprado ✓']),
+      mkCard('Consulta com nutricionista', 'free', cSaude.id, null, null,
+        ['Agendar ✓', 'Fazer bioimpedância ✓', 'Plano alimentar em mãos ✓']),
+    ]}
+  ]};
+
+  // ════════════════════════════════════════════════════════════════════
+  // 🚀  TRABALHO & PROJETOS
+  // ════════════════════════════════════════════════════════════════════
+  const bWork = { id: uid(), name: '🚀 Trabalho & Projetos', color: '#4fc3f7', columns: [
+    { id: uid(), name: '🗂 Backlog', color: '#8b5cf6', cards: [
+      mkCard('Refatorar autenticação — JWT', 'dev', cTrab.id, 'alta', dPlus(12),
+        ['Mapear fluxo atual', 'Implementar JWT + refresh token',
+         'Adicionar 2FA opcional', 'Testes unitários (Jest)',
+         'Deploy em staging', 'Code review com time'],
+        'Migrar de sessions para JWT. Referência: PR #134.'),
+      mkCard('Campanha Black Friday', 'marketing', cTrab.id, 'alta', dPlus(18),
+        ['Briefing com cliente', 'Definir mecânica de desconto',
+         'Copys de anúncio (Meta + Google)', 'Produzir criativos 6 formatos',
+         'Subir campanhas', 'Monitorar e otimizar diariamente']),
+      mkCard('Redesign da landing page', 'ux', cTrab.id, 'media', dPlus(25),
+        ['Análise de heatmap', 'Benchmark de 5 concorrentes',
+         'Wireframe baixa fidelidade', 'Design no Figma', 'Handoff', 'Testes A/B']),
+    ]},
+    { id: uid(), name: '⚡ Sprint', color: '#4fc3f7', cards: [
+      mkCard('Relatório mensal — out/24', 'free', cTrab.id, 'alta', dPlus(2),
+        ['Exportar dados do Analytics', 'Compilar métricas de conversão',
+         'Montar slides (Google Slides)', 'Revisão com gestor', 'Enviar para cliente'],
+        'Prazo: quinta às 18 h. Usar template azul.'),
+      mkCard('Onboarding — novo dev', 'free', cTrab.id, 'media', dPlus(4),
+        ['Criar acessos: e-mail, GitHub, Slack', 'Reunião de alinhamento (1 h)',
+         'Compartilhar docs de arquitetura', 'Definir primeiras tarefas', 'Check-in fim de semana 1']),
+      mkCard('Newsletter outubro — copy', 'marketing', cTrab.id, 'media', dPlus(1),
+        ['Tema: case de sucesso ✓', 'Escrever corpo ✓',
+         'Selecionar imagens ✓', 'Revisar links', 'Aprovação do cliente']),
+    ]},
+    { id: uid(), name: '🔍 Revisão', color: '#ffd644', cards: [
+      mkCard('Proposta comercial — cliente novo', 'free', cTrab.id, 'alta', dPlus(1),
+        ['Precificação aprovada ✓', 'Escopo detalhado ✓',
+         'Revisão jurídica', 'Aprovação da diretoria']),
+    ]},
+    { id: uid(), name: '✅ Entregue', color: '#43d9ad', cards: [
+      mkCard('Atualizar README do repo', 'dev', cTrab.id, null, null,
+        ['Setup local ✓', 'Variáveis de ambiente ✓', 'Screenshots ✓', 'Badge de CI ✓']),
+      mkCard('Workshop equipe — Figma básico', 'ux', cTrab.id, null, null,
+        ['Roteiro da aula ✓', 'Arquivo de exercícios ✓', 'Apresentação ✓']),
+    ]}
+  ]};
+
+  // ════════════════════════════════════════════════════════════════════
+  // 📚  ESTUDOS & CURSOS
+  // ════════════════════════════════════════════════════════════════════
+  const bStudy = { id: uid(), name: '📚 Estudos & Cursos', color: '#ffd644', columns: [
+    { id: uid(), name: '🗃 Fila', color: '#8b5cf6', cards: [
+      mkCard('Next.js 14 — do zero ao avançado', 'study_code', cEstu.id, 'alta', null,
+        ['M1: App Router e File-based routing', 'M2: Server Components vs Client',
+         'M3: Data fetching e cache', 'M4: Auth com NextAuth.js',
+         'M5: Deploy na Vercel', 'Projeto final: e-commerce'],
+        'Udemy — 22 h. Meta: 1 h/dia, 3 semanas.'),
+      mkCard('Inglês B2 → C1 em 90 dias', 'study_lang', cEstu.id, 'alta', dPlus(90),
+        ['15 palavras novas / dia (Anki)', 'Gramática: conditionals + subjunctive',
+         'Shadowing com série (Succession)', 'Diário em inglês 1 parágrafo',
+         'iTalki: 2 aulas / semana']),
+      mkCard('Atomic Habits — James Clear', 'free', cPess.id, 'media', dPlus(30),
+        ['P1: O poder dos hábitos compostos', 'P2: Tornar óbvio e atraente',
+         'P3: Tornar fácil e satisfatório', 'Fichamento com 10 insights']),
+    ]},
+    { id: uid(), name: '📖 Estudando', color: '#ffd644', cards: [
+      mkCard('TypeScript — Generics & Utility Types', 'study_code', cEstu.id, 'alta', dPlus(8),
+        ['Generics básicos ✓', 'Constraints e extends ✓',
+         'Utility Types: Partial, Pick, Omit', 'Conditional Types',
+         'Mapped Types', 'Template Literal Types', 'Exercícios no TS Playground'],
+        'Matt Pocock + docs oficiais. 2 h / dia.'),
+      mkCard('Design System — fundamentos', 'ux', cEstu.id, 'media', dPlus(15),
+        ['Tokens de design (cores, tipografia, espaçamento)',
+         'Atomic Design na prática', 'Componentes no Figma com variantes',
+         'Documentação com Storybook']),
+      mkCard('SQL avançado — Window Functions', 'study_code', cEstu.id, 'media', dPlus(10),
+        ['ROW_NUMBER, RANK, DENSE_RANK', 'LEAD e LAG', 'SUM / AVG OVER PARTITION',
+         'CTEs recursivas', 'Exercícios no PostgreSQL']),
+    ]},
+    { id: uid(), name: '🎓 Concluído', color: '#43d9ad', cards: [
+      mkCard('Git & GitHub — fluxo profissional', 'study_code', cEstu.id, null, null,
+        ['Git flow ✓', 'Pull requests e code review ✓',
+         'GitHub Actions CI básico ✓', 'Conventional Commits ✓']),
+      mkCard('Figma — do básico ao componente', 'ux', cEstu.id, null, null,
+        ['Auto layout ✓', 'Variantes e props ✓', 'Prototipagem interativa ✓']),
+    ]}
+  ]};
+
+  // ════════════════════════════════════════════════════════════════════
+  // 🎯  METAS PESSOAIS
+  // ════════════════════════════════════════════════════════════════════
+  const bMetas = { id: uid(), name: '🎯 Metas Pessoais', color: '#ec407a', columns: [
+    { id: uid(), name: '🧭 Q4 Objetivos', color: '#ec407a', cards: [
+      mkCard('Reserva de emergência — 6 meses', 'free', cPess.id, 'alta', dPlus(90),
+        ['Calcular custo mensal real (R$ 3.400)', 'Meta: R$ 20.400',
+         'Abrir Tesouro Selic ou CDB 100 % CDI', 'Aportar R$ 700 / mês',
+         'Automatizar débito no dia 5'],
+        'Saldo atual: R$ 8.200. Falta: R$ 12.200. Prazo: junho/25.'),
+      mkCard('Viagem — Buenos Aires, nov/24', 'free', cPess.id, 'alta', dPlus(48),
+        ['Passagens: GOL GRU→EZE ✓ (R$ 1.850)', 'Airbnb Palermo ✓ (USD 420 / 5 noites)',
+         'Câmbio: comprar pesos (blue rate)',
+         'Roteiro: La Boca, MALBA, San Telmo, Recoleta', 'Seguro viagem', 'Packing list'],
+        'Orçamento total: R$ 5.500. Datas: 14–19/11.'),
+      mkCard('Aprender 5 pratos novos', 'free', cCasa.id, 'baixa', dPlus(60),
+        ['Risoto de camarão', 'Frango ao molho de maracujá',
+         'Massa fresca à carbonara', 'Cheesecake NY sem forno',
+         'Pão de fermentação natural']),
+    ]},
+    { id: uid(), name: '⚡ Em Progresso', color: '#ffd644', cards: [
+      mkCard('Organizar finanças — planilha', 'free', cPess.id, 'media', dPlus(7),
+        ['Categorias: moradia, alimentação, transporte, lazer, saúde ✓',
+         'Importar extratos 3 últimos meses ✓',
+         'Dashboard: receita vs despesa', 'Definir orçamento por categoria',
+         'Automatizar com script OFX'],
+        'Google Sheets + Apps Script. Meta: ver o mês cheio em 1 tela.'),
+      mkCard('Streak de leitura — 1 livro/mês', 'free', cPess.id, 'media', dPlus(28),
+        ['Out: Atomic Habits (pág. 120 de 320)', 'Nov: Thinking Fast and Slow',
+         'Dez: The Psychology of Money']),
+      mkCard('Organizar fotos dos últimos 3 anos', 'free', cPess.id, 'baixa', dPlus(20),
+        ['Baixar do Google Fotos', 'Separar por ano / evento',
+         'Deletar duplicatas e descartáveis', 'Backup em HD externo + nuvem']),
+    ]},
+    { id: uid(), name: '🏆 Realizado', color: '#43d9ad', cards: [
+      mkCard('Tirar CNH categoria B', 'free', cPess.id, null, null,
+        ['Auto escola ✓', 'Prova teórica ✓', 'Aulas práticas 25 h ✓',
+         'Prova prática ✓', 'CNH em mãos ✓']),
+      mkCard('Criar conta no Tesouro Direto', 'free', cPess.id, null, null,
+        ['Conta na corretora ✓', 'Primeiro aporte R$ 100 ✓',
+         'Aporte mensal programado ✓']),
+    ]}
+  ]};
+
+  // ════════════════════════════════════════════════════════════════════
+  // ✈️  VIAGENS & LAZER
+  // ════════════════════════════════════════════════════════════════════
+  const bViagem = { id: uid(), name: '✈️ Viagens & Lazer', color: '#8b5cf6', columns: [
+    { id: uid(), name: '🗺 Próximas', color: '#8b5cf6', cards: [
+      mkCard('Buenos Aires — nov/24', 'free', cPess.id, 'alta', dPlus(48),
+        ['Passagens compradas ✓', 'Airbnb Palermo confirmado ✓',
+         'Restaurantes: La Brigada, Don Julio, El Federal',
+         'Pontos: La Boca, Caminito, MALBA, Recoleta',
+         'Tango show (reservar com antecedência)',
+         'Câmbio blue — levar dólares em espécie',
+         'Packing list: roupas para 5 dias + frio à noite'],
+        'Moeda: pesos. 1 USD ≈ 1.000 pesos (blue). Não usar cartão no câmbio oficial.'),
+      mkCard('Chapada Diamantina — jul/25', 'free', cPess.id, 'media', null,
+        ['Definir grupo (4–6 pessoas)', 'Melhor época: maio–agosto (seco)',
+         'Agência de trekking em Lençóis', 'Trilha: Vale do Pati (3 dias)',
+         'Pousadas: Canto das Águas ou Villa Serrano',
+         'Equipamentos: mochila 45 L, bastão, headlamp']),
+    ]},
+    { id: uid(), name: '🌍 Planejando', color: '#ffd644', cards: [
+      mkCard('Road trip — Ouro Preto + Tiradentes', 'free', cPess.id, 'baixa', null,
+        ['Rota: SP → Ouro Preto (6 h) → Tiradentes (45 min) → SP',
+         'Aluguel de carro (Movida ou Localiza)', '3 noites / pousada histórica',
+         'Ouro Preto: Igreja São Francisco, Museu da Inconfidência',
+         'Tiradentes: centro histórico, cachaçaria']),
+      mkCard('Fim de semana — Mantiqueira', 'free', cPess.id, 'baixa', null,
+        ['Campos do Jordão ou Monte Verde', 'Pousada com lareira e café colonial',
+         'Trilha do Pico do Itapeva (1 h, fácil)', 'Fondue + vinho tinto']),
+      mkCard('Europa 2025 — Lisboa + Madrid', 'free', cPess.id, 'media', null,
+        ['Período: set ou out/25 (baixa temporada)', 'Voo TAP ou Ibéria',
+         'Lisboa 4 noites: Alfama, Belém, Sintra', 'Madrid 3 noites: Prado, Retiro, Bernabéu',
+         'Orçamento estimado: R$ 14.000 / pessoa']),
+    ]},
+    { id: uid(), name: '📸 Memórias', color: '#43d9ad', cards: [
+      mkCard('Lisboa & Porto — set/24', 'free', cPess.id, null, null,
+        ['Alfama + elétrico 28 ✓', 'Pastéis de Belém quentinhos ✓',
+         'Livraria Lello (Porto) ✓', 'Vinho verde + francesinha ✓',
+         'Praia de Cascais ✓'],
+        'Viagem incrível. Próxima parada: Madrid + Sevilha em 2025.'),
+      mkCard('Gramado & Canela — jul/24', 'free', cPess.id, null, null,
+        ['Snowland ✓', 'Parque Caracol — cascata ✓',
+         'Fondue no Castelinho ✓', 'Chocolates Prawer ✓']),
+    ]}
+  ]};
+
+  state.boards.push(bCasa, bSaude, bWork, bStudy, bMetas, bViagem);
+  state.activeBoardId = bCasa.id;
   saveState();
 }
 render();
