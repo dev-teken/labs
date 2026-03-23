@@ -333,12 +333,15 @@
     #vw-iframe {
       flex: 1;
       border: none;
-      display: block;
+      display: none;
       background: #080807;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    #vw-iframe.loaded { opacity: 1; }
+    #vw-iframe.loaded {
+      display: block;
+      opacity: 1;
+    }
 
     .vw-iframe-placeholder {
       flex: 1;
@@ -481,7 +484,6 @@
         iframe.src = '';
         iframe.classList.remove('loaded');
         placeholder.style.display = 'flex';
-        iframe.style.display = 'none';
         labelName.textContent = '—';
         openBtn.href = '#';
         activeIdx = null;
@@ -516,16 +518,28 @@
     // Mostrar spinner, esconder iframe
     placeholder.innerHTML = '<div class="vw-spinner"></div>';
     placeholder.style.display = 'flex';
-    iframe.style.display = 'none';
     iframe.classList.remove('loaded');
 
-    // Carregar iframe
-    iframe.onload = () => {
+    // Limpa src anterior para forçar novo onload
+    iframe.src = '';
+
+    function onIframeReady() {
       placeholder.style.display = 'none';
-      iframe.style.display = 'block';
-      requestAnimationFrame(() => iframe.classList.add('loaded'));
+      iframe.classList.add('loaded');
+    }
+
+    // Fallback: se onload não disparar em 4s, mostra de qualquer forma
+    const fallback = setTimeout(onIframeReady, 4000);
+
+    iframe.onload = () => {
+      clearTimeout(fallback);
+      setTimeout(onIframeReady, 80);
     };
-    iframe.src = 'versoes/' + v.file;
+
+    // Seta src depois de registrar onload
+    requestAnimationFrame(() => {
+      iframe.src = 'versoes/' + v.file;
+    });
   }
 
   /* ── Montar timeline ─────────────────────────────────────────── */
