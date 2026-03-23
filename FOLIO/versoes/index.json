@@ -1,0 +1,15 @@
+{
+  "project": "FOLIO",
+  "versions": [
+    {"version":"v1","badge":"v1 - 23-03-index","name":"23-03-index","desc":"","file":"23-03-index.html"},
+    {"version":"v2","badge":"v2 - 22-03-index","name":"22-03-index","desc":"","file":"22-03-index.html"},
+    {"version":"v3","badge":"v3 - ASDASindex","name":"ASDASindex","desc":"","file":"ASDASindex.html"},
+    {"version":"v4","badge":"v4 - aaaaaindex","name":"aaaaaindex","desc":"","file":"aaaaaindex.html"},
+    {"version":"v5","badge":"v5 - 21-03-index","name":"21-03-index","desc":"","file":"21-03-index.html"},
+    {"version":"v6","badge":"v6 - Aindex","name":"Aindex","desc":"","file":"Aindex.html"},
+    {"version":"v7","badge":"v7 - 2index","name":"2index","desc":"","file":"2index.html"},
+    {"version":"v8","badge":"v8 - index","name":"index","desc":"","file":"index.html"},
+    {"version":"v9","badge":"v9 - index (37) - Copia","name":"index (37) - Copia","desc":"","file":"index (37) - Copia.html"},
+    {"version":"v10","badge":"v10 - index (36)","name":"index (36)","desc":"","file":"index (36).html"}
+  ]
+}

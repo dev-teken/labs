@@ -530,20 +530,19 @@
       iframe.classList.add('loaded');
     }
 
-    // Fallback: se onload não disparar em 5s, mostra de qualquer forma
-    let fallback = setTimeout(onIframeReady, 5000);
+    // Fallback reduzido: 1.2s em vez de 5s
+    let fallback = setTimeout(onIframeReady, 1200);
 
-    // onload com guarda — só reage quando o src bate com o alvo
     iframe.onload = () => {
-      // ignora disparos de about:blank ou src vazio
       const current = iframe.src || '';
-      if (!current.includes(v.file)) return;
+      if (!current || current === 'about:blank') return;
       clearTimeout(fallback);
-      setTimeout(onIframeReady, 80);
+      onIframeReady();
     };
 
-    // Troca direto para o alvo sem passar por src vazio
-    iframe.src = targetSrc;
+    // Reseta src para forçar onload mesmo trocando pra mesma versão
+    iframe.src = '';
+    requestAnimationFrame(() => { iframe.src = targetSrc; });
   }
 
   /* ── Montar timeline ─────────────────────────────────────────── */
