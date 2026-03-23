@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ SOUL WARRIORS ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink:   #FF4FA3;
+    --purple: #A855F7;
+    --cyan:   #00E5FF;
+    --yellow: #FFE000;
+    --green:  #39FF14;
+    --orange: #FF6B1A;
+    --bg:     #0a0010;
+    --card-bg: rgba(255,255,255,0.05);
+    --glow: #FF4FA3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, white 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 15%, white 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 80% 60%, white 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 70%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 85%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 50%, rgba(255,79,163,.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 25%, rgba(0,229,255,.6) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 28px 16px 8px;
+  }
+
+  .title-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 45%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(168,85,247,.6));
+    letter-spacing: .04em;
+  }
+
+  .star-deco {
+    font-size: 2rem;
+    animation: spin 4s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .subtitle {
+    color: rgba(255,255,255,.55);
+    font-size: clamp(.75rem, 2.5vw, 1rem);
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ── GRID DE GUERREIRAS ── */
+  #grid {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 20px 12px 8px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .warrior-card {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: transform .2s, border-color .3s;
+    cursor: pointer;
+  }
+
+  .warrior-card:hover { transform: scale(1.03); }
+
+  .warrior-card.active {
+    border-color: var(--glow-color);
+    box-shadow: 0 0 22px var(--glow-color), 0 0 6px var(--glow-color);
+  }
+
+  .warrior-canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 16px 16px 0 0;
+    background: #000;
+  }
+
+  .warrior-footer {
+    background: rgba(0,0,0,.7);
+    padding: 6px 10px 8px;
+    text-align: center;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .warrior-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(.85rem, 2.8vw, 1.15rem);
+    color: #fff;
+    letter-spacing: .06em;
+  }
+
+  .warrior-power {
+    font-size: clamp(.6rem, 1.8vw, .78rem);
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .crown-badge {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 1.4rem;
+    opacity: 0;
+    transition: opacity .3s;
+    filter: drop-shadow(0 0 6px gold);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .warrior-card.active .crown-badge { opacity: 1; }
+
+  /* ── PAINEL DE PODERES v2 ── */
+  #powers-panel {
+    position: relative;
+    z-index: 5;
+    max-width: 860px;
+    margin: 18px auto 40px;
+    padding: 0 16px;
+  }
+
+  .panel-title {
+    font-family: 'Fredoka One', cursive;
+    color: #fff;
+    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: .06em;
+  }
+
+  .panel-title span {
+    display: inline-block;
+    animation: wobble 2.5s ease-in-out infinite;
+  }
+  @keyframes wobble {
+    0%,100% { transform: rotate(-2deg); }
+    50%      { transform: rotate(2deg); }
+  }
+
+  /* ── POWER ITEM ── */
+  #powers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .power-item {
+    padding: 14px 0 18px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    position: relative;
+  }
+  .power-item:last-child { border-bottom: none; }
+
+  .power-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .power-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .power-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(.9rem, 2.8vw, 1.1rem);
+    color: #fff;
+    letter-spacing: .04em;
+  }
+
+  .power-desc {
+    font-size: clamp(.58rem, 1.7vw, .7rem);
+    font-weight: 800;
+    color: rgba(255,255,255,.28);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .power-val-badge {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(.7rem, 2vw, .88rem);
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.07);
+    color: rgba(255,255,255,.5);
+    transition: background .3s, color .3s, box-shadow .3s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .power-val-badge.lit {
+    color: #fff;
+  }
+
+  /* ── LIGHTNING SLIDER ── */
+  .slider-wrap {
+    position: relative;
+    height: 48px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .slider-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* track base */
+  .track-base {
+    stroke: rgba(255,255,255,.08);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  /* filled track */
+  .track-fill {
+    fill: none;
+    stroke-linecap: round;
+    stroke-width: 3;
+    transition: stroke-dasharray .05s;
+  }
+
+  /* lightning bolt */
+  .bolt-path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity .25s;
+  }
+
+  /* thumb */
+  .thumb-outer {
+    transition: r .15s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+  }
+  .thumb-inner {
+    transition: r .15s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  /* node dots */
+  .node-dot {
+    cursor: pointer;
+    transition: r .12s, opacity .2s;
+  }
+
+  /* snap label */
+  .snap-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 10px;
+    fill: rgba(255,255,255,.22);
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    transition: fill .2s, font-size .15s;
+  }
+
+  .snap-label.active-label {
+    fill: #fff;
+    font-size: 11px;
+  }
+
+  /* spark burst */
+  @keyframes spark-out {
+    0%   { stroke-dashoffset: 0; opacity: 1; }
+    100% { stroke-dashoffset: -30; opacity: 0; }
+  }
+
+  .spark-line {
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 8 30;
+    animation: spark-out .4s ease-out forwards;
+  }
+
+  /* elastic bounce on thumb */
+  @keyframes thumb-snap {
+    0%   { transform: scale(1.6); }
+    40%  { transform: scale(.85); }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  .thumb-snap {
+    animation: thumb-snap .35s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    padding: 10px 28px;
+    border-radius: 40px;
+    box-shadow: 0 4px 24px rgba(168,85,247,.5);
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) {
+    .power-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-wrap">
+    <span class="star-deco">⭐</span>
+    <h1>SOUL WARRIORS</h1>
+    <span class="star-deco" style="animation-direction:reverse">⭐</span>
+  </div>
+  <p class="subtitle">✦ as guerreiras da névoa ✦</p>
+</header>
+
+<div id="grid"></div>
+<div id="powers-panel">
+  <p class="panel-title"><span>🎮</span> PODERES DAS GUERREIRAS</p>
+  <div id="powers-list"></div>
+</div>
+
+<div id="toast">✨ Poder ativado!</div>
+
+<script>
+/* ── WARRIORS ── */
+const WARRIORS = [
+  { id:'a', name:'LUNA',   power:'Névoa Lunar',     emoji:'🌙', h:205, s:22, l:48, a3:[196,245,183], speed:.0042, phase:0.00, bperiod:7800, glow:'#00E5FF' },
+  { id:'b', name:'RUBY',   power:'Fogo do Coração', emoji:'❤️‍🔥',h:18,  s:22, l:42, a3:[189,121,146], speed:.0108, phase:1.30, bperiod:8200, glow:'#FF4FA3' },
+  { id:'c', name:'IVY',    power:'Bosque Mágico',   emoji:'🌿', h:150, s:18, l:40, a3:[205,158, 74], speed:.0210, phase:2.70, bperiod:7400, glow:'#39FF14' },
+  { id:'d', name:'VEGA',   power:'Cosmo Infinito',  emoji:'💜', h:270, s:20, l:48, a3:[192,117,180], speed:.0380, phase:4.10, bperiod:8600, glow:'#A855F7' },
+  { id:'e', name:'SANDY',  power:'Areia Dourada',   emoji:'✨', h:38,  s:22, l:44, a3:[128,138, 86], speed:.0620, phase:5.50, bperiod:7100, glow:'#FFE000' },
+  { id:'f', name:'AURORA', power:'Crepúsculo Rosa', emoji:'🌸', h:320, s:18, l:45, a3:[126,200,192], speed:.1040, phase:0.80, bperiod:9000, glow:'#FF6B1A' },
+];
+
+const POWERS = {
+  turbulence:  { emoji:'🌀', label:'Redemoinho',  desc:'faíscas e veias por dentro', value:1,  min:0, max:3,  step:.5,
+    btnLabels: ['off','sim','forte','MAX'] },
+  density:     { emoji:'💨', label:'Fumaça',       desc:'grossa ou fininha',          value:1,  min:0, max:2,  step:.5,
+    btnLabels: ['fim','ok','gross','super','MAX'] },
+  drift:       { emoji:'🪂', label:'Voar',          desc:'sobe ou desce no ar',        value:0,  min:-1,max:1,  step:.5,
+    btnLabels: ['↓','↗','fica','↗','UP'] },
+  halo:        { emoji:'🌟', label:'Brilho',        desc:'luz que vem de dentro',      value:1,  min:0, max:2,  step:.5,
+    btnLabels: ['off','sim','mais','MAX','GOD'] },
+  dissipation: { emoji:'🫧', label:'Sumir',         desc:'borda some rápido ou devagar',value:1, min:0, max:2,  step:.5,
+    btnLabels: ['lento','ok','rápido','flash','ZAP'] },
+  centrifugal: { emoji:'💫', label:'Girar',          desc:'faz tudo se afastar pro lado',value:1, min:0, max:3,  step:.5,
+    btnLabels: ['quieto','ok','voa','épico','max','GOD'] },
+};
+
+/* ── STATE ── */
+const T = {};
+WARRIORS.forEach(w => T[w.id] = w.phase);
+let selectedWarrior = null;
+
+/* ── CANVAS OFFSCREEN ── */
+const offscreens = {};
+WARRIORS.forEach(w => {
+  const oc = document.createElement('canvas');
+  offscreens[w.id] = { canvas: oc, ctx: oc.getContext('2d') };
+});
+
+/* ── BUILD GRID ── */
+const gridEl = document.getElementById('grid');
+const canvasMap = {};
+
+WARRIORS.forEach(w => {
+  const card = document.createElement('div');
+  card.className = 'warrior-card';
+  card.id = 'card_' + w.id;
+  card.style.setProperty('--glow-color', w.glow);
+
+  const crown = document.createElement('span');
+  crown.className = 'crown-badge';
+  crown.textContent = '👑';
+
+  const cnv = document.createElement('canvas');
+  cnv.className = 'warrior-canvas';
+  cnv.id = 'cnv_' + w.id;
+  canvasMap[w.id] = cnv;
+
+  const footer = document.createElement('div');
+  footer.className = 'warrior-footer';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'warrior-name';
+  nameEl.textContent = w.emoji + ' ' + w.name;
+  nameEl.style.color = w.glow;
+
+  const powerEl = document.createElement('div');
+  powerEl.className = 'warrior-power';
+  powerEl.style.color = w.glow;
+  powerEl.textContent = w.power;
+
+  footer.appendChild(nameEl);
+  footer.appendChild(powerEl);
+  card.appendChild(crown);
+  card.appendChild(cnv);
+  card.appendChild(footer);
+
+  card.addEventListener('click', () => selectWarrior(w.id));
+  gridEl.appendChild(card);
+});
+
+selectWarrior('b');
+
+/* ══════════════════════════════════════════════
+   LIGHTNING SLIDER BUILDER
+══════════════════════════════════════════════ */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function makeSVGEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+
+function getWarriorGlow() {
+  const w = WARRIORS.find(w => w.id === selectedWarrior);
+  return w ? w.glow : '#FF4FA3';
+}
+
+/* generate a lightning-bolt path between two x positions on a horizontal line */
+function boltPath(x1, x2, cy, intensity = 1) {
+  const span = x2 - x1;
+  if (span < 4) return '';
+  const segs = Math.max(3, Math.round(span / 18));
+  let d = `M ${x1} ${cy}`;
+  for (let i = 1; i < segs; i++) {
+    const px = x1 + (span * i / segs);
+    const jitter = (Math.random() - .5) * 10 * intensity;
+    d += ` L ${px} ${cy + jitter}`;
+  }
+  d += ` L ${x2} ${cy}`;
+  return d;
+}
+
+/* generate spark lines radiating from a point */
+function makeSparks(svg, cx, cy, color, count = 5) {
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.random() * Math.PI * 2);
+    const len = 8 + Math.random() * 16;
+    const x2 = cx + Math.cos(angle) * len;
+    const y2 = cy + Math.sin(angle) * len;
+    const spark = makeSVGEl('line', {
+      x1: cx, y1: cy, x2, y2,
+      class: 'spark-line',
+      stroke: color,
+      'stroke-dasharray': '6 20',
+    });
+    svg.appendChild(spark);
+    setTimeout(() => spark.remove(), 500);
+  }
+}
+
+function buildPowersPanel() {
+  const list = document.getElementById('powers-list');
+  list.innerHTML = '';
+  const glow = getWarriorGlow();
+
+  Object.entries(POWERS).forEach(([key, p]) => {
+    const steps = [];
+    for (let v = p.min; v <= p.max + .001; v += p.step)
+      steps.push(Math.round(v * 10) / 10);
+    const totalSteps = steps.length - 1;
+    const currentIdx = steps.findIndex(v => Math.abs(v - p.value) < .001);
+
+    // ── container
+    const item = document.createElement('div');
+    item.className = 'power-item';
+
+    // ── meta row
+    const meta = document.createElement('div');
+    meta.className = 'power-meta';
+
+    const icon = document.createElement('span');
+    icon.className = 'power-icon';
+    icon.textContent = p.emoji;
+
+    const label = document.createElement('span');
+    label.className = 'power-label';
+    label.textContent = p.label;
+
+    const desc = document.createElement('span');
+    desc.className = 'power-desc';
+    desc.textContent = p.desc;
+
+    const currentLabel = p.btnLabels ? (p.btnLabels[currentIdx] || steps[currentIdx]) : steps[currentIdx];
+    const badge = document.createElement('span');
+    badge.className = 'power-val-badge' + (currentIdx > 0 ? ' lit' : '');
+    badge.style.background = currentIdx > 0 ? `${glow}33` : '';
+    badge.style.color = currentIdx > 0 ? glow : '';
+    badge.style.boxShadow = currentIdx > 0 ? `0 0 10px ${glow}55` : '';
+    badge.textContent = currentLabel;
+
+    meta.appendChild(icon);
+    meta.appendChild(label);
+    meta.appendChild(desc);
+    meta.appendChild(badge);
+
+    // ── slider wrap
+    const wrap = document.createElement('div');
+    wrap.className = 'slider-wrap';
+
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'slider-svg');
+    svg.setAttribute('viewBox', '0 0 300 48');
+    svg.setAttribute('preserveAspectRatio', 'none');
+
+    const PAD = 14;
+    const CY = 24;
+    const trackW = 300 - PAD * 2;
+
+    // track bg
+    const trackBg = makeSVGEl('line', {
+      x1: PAD, y1: CY, x2: 300 - PAD, y2: CY,
+      class: 'track-base',
+    });
+    svg.appendChild(trackBg);
+
+    // filled track
+    const fillX2 = PAD + (trackW * (currentIdx / totalSteps));
+    const trackFill = makeSVGEl('line', {
+      x1: PAD, y1: CY, x2: fillX2, y2: CY,
+      class: 'track-fill',
+      stroke: glow,
+      'stroke-width': currentIdx > 0 ? 3 : 0,
+    });
+    svg.appendChild(trackFill);
+
+    // lightning overlay (hidden by default, shown on hover/drag)
+    const boltEl = makeSVGEl('path', {
+      d: '',
+      class: 'bolt-path',
+      stroke: glow,
+      'stroke-width': '1.5',
+    });
+    svg.appendChild(boltEl);
+
+    // node dots + labels
+    steps.forEach((v, idx) => {
+      const nx = PAD + (trackW * (idx / totalSteps));
+      const isActive = idx === currentIdx;
+
+      const dotGroup = makeSVGEl('g', { style: 'cursor:pointer' });
+
+      const hitArea = makeSVGEl('circle', {
+        cx: nx, cy: CY, r: 16,
+        fill: 'transparent',
+      });
+
+      const dot = makeSVGEl('circle', {
+        cx: nx, cy: CY,
+        r: isActive ? 7 : 4,
+        class: 'node-dot',
+        fill: isActive ? glow : 'rgba(255,255,255,.18)',
+        style: isActive ? `filter:drop-shadow(0 0 6px ${glow})` : '',
+      });
+
+      const lbl = p.btnLabels ? (p.btnLabels[idx] || String(v)) : String(v);
+      const labelEl = makeSVGEl('text', {
+        x: nx, y: isActive ? CY - 14 : CY + 14,
+        class: 'snap-label' + (isActive ? ' active-label' : ''),
+        fill: isActive ? glow : 'rgba(255,255,255,.22)',
+      });
+      labelEl.textContent = lbl;
+
+      dotGroup.appendChild(hitArea);
+      dotGroup.appendChild(dot);
+      dotGroup.appendChild(labelEl);
+      svg.appendChild(dotGroup);
+
+      // click on node
+      hitArea.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (Math.abs(v - p.value) < .001) return;
+        doSnap(key, p, v, idx, nx, CY, svg, glow);
+      });
+    });
+
+    wrap.appendChild(svg);
+
+    // ── click on wrap (click anywhere on track)
+    wrap.addEventListener('click', (e) => {
+      const rect = wrap.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const px = PAD + ratio * (300 - PAD * 2); // svg coords approx
+      // find closest step
+      let closestIdx = 0;
+      let closestDist = Infinity;
+      steps.forEach((v, idx) => {
+        const nx = PAD + (trackW * (idx / totalSteps));
+        const d = Math.abs(px - nx);
+        if (d < closestDist) { closestDist = d; closestIdx = idx; }
+      });
+      const newVal = steps[closestIdx];
+      if (Math.abs(newVal - p.value) < .001) return;
+      const nx = PAD + (trackW * (closestIdx / totalSteps));
+      doSnap(key, p, newVal, closestIdx, nx, CY, svg, glow);
+    });
+
+    // hover: show bolt
+    let boltInterval = null;
+    wrap.addEventListener('mouseenter', () => {
+      const fillX = PAD + (trackW * (currentIdx / totalSteps));
+      boltInterval = setInterval(() => {
+        boltEl.setAttribute('d', boltPath(PAD, fillX, CY, .6));
+        boltEl.style.opacity = '.35';
+      }, 60);
+    });
+    wrap.addEventListener('mouseleave', () => {
+      clearInterval(boltInterval);
+      boltEl.style.opacity = '0';
+    });
+
+    item.appendChild(meta);
+    item.appendChild(wrap);
+    list.appendChild(item);
+  });
+}
+
+/* ── SNAP ACTION ── */
+function doSnap(key, p, newVal, newIdx, nx, cy, svg, glow) {
+  const steps = [];
+  for (let v = p.min; v <= p.max + .001; v += p.step)
+    steps.push(Math.round(v * 10) / 10);
+  const totalSteps = steps.length - 1;
+  const oldIdx = steps.findIndex(v => Math.abs(v - p.value) < .001);
+
+  // flash bolt from old to new
+  const oldX = PAD + (300 - PAD*2) * (oldIdx / totalSteps);
+  const svg2 = svg; // capture
+  let bFlash = 0;
+  const flashInterval = setInterval(() => {
+    svg2.querySelectorAll('.bolt-flash').forEach(el => el.remove());
+    const bp = makeSVGEl('path', {
+      d: boltPath(Math.min(oldX, nx), Math.max(oldX, nx), cy, 1.2),
+      class: 'bolt-path bolt-flash',
+      stroke: glow,
+      'stroke-width': '2',
+      opacity: '.9',
+    });
+    svg2.appendChild(bp);
+    bFlash++;
+    if (bFlash >= 3) {
+      clearInterval(flashInterval);
+      setTimeout(() => bp.remove(), 200);
+    }
+  }, 55);
+
+  // sparks
+  const wrap = svg.parentElement;
+  const wRect = wrap.getBoundingClientRect();
+  // sparks in svg-space; just inject into svg
+  makeSparks(svg, nx, cy, glow, 6);
+
+  POWERS[key].value = newVal;
+  buildPowersPanel();
+
+  const lbl = p.btnLabels ? (p.btnLabels[newIdx] || newVal) : newVal;
+  showToast(p.emoji + ' ' + lbl + ' ativado!');
+}
+
+const PAD = 14;
+
+/* ── SELECT WARRIOR ── */
+function selectWarrior(id) {
+  selectedWarrior = id;
+  document.querySelectorAll('.warrior-card').forEach(c => c.classList.remove('active'));
+  const card = document.getElementById('card_' + id);
+  if (card) card.classList.add('active');
+  buildPowersPanel();
+  const w = WARRIORS.find(w => w.id === id);
+  if (w) showToast(w.emoji + ' ' + w.name + ' selecionada!');
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✨ ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ══════════════════════════════════════════════
+   SMOKE RENDER
+══════════════════════════════════════════════ */
+function n2(t, f, p) {
+  return .42 * Math.sin(t * f + p)
+       + .28 * Math.sin(t * f * 1.618 + p * 1.3)
+       + .18 * Math.sin(t * f * 2.618 + p * 2.1)
+       + .12 * Math.sin(t * f * 4.236 + p * 3.4);
+}
+
+function hsl2rgb(h, s, l) {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n, k = (n + h / 30) % 12) => l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+  return [Math.round(f(0)*255), Math.round(f(8)*255), Math.round(f(4)*255)];
+}
+
+function breathwave(soul) {
+  const ph = (performance.now() % soul.bperiod) / soul.bperiod;
+  return .5 - .5 * Math.cos(ph * Math.PI * 2);
+}
+
+const BASE_SPEED = .0108, BASE_BPM = 62;
+function heartbeat(soul) {
+  const bpm = BASE_BPM * (soul.speed / BASE_SPEED);
+  const period = 60000 / bpm;
+  const ph = (performance.now() % period) / period;
+  const g = (x, mu, sig) => Math.exp(-.5 * ((x - mu) / sig) ** 2);
+  return Math.max(0, g(ph, .10, .045) + g(ph, .22, .055) * .58);
+}
+
+function drawSmoke(oc, soul, W, H) {
+  const pr = POWERS;
+  const cx = W / 2, cy = H / 2, R = W * .46;
+  const t = T[soul.id];
+  const HB = heartbeat(soul);
+  const BW = breathwave(soul);
+
+  const cfMul = pr.centrifugal.value;
+  const om = 1 + .09 * BW * cfMul;
+
+  oc.clearRect(0, 0, W, H);
+  oc.save();
+  oc.beginPath(); oc.arc(cx, cy, R, 0, Math.PI * 2); oc.clip();
+  oc.fillStyle = '#020208'; oc.fillRect(0, 0, W, H);
+
+  const baseRGB = hsl2rgb(soul.h, Math.min(soul.s * 2.8, 72), 52);
+  const a3 = soul.a3;
+
+  const PUFFS = [
+    { seed:1, ox:Math.cos(t*.50)*R*.44*om,      oy:Math.sin(t*.40)*R*.40*om,      col:baseRGB, alpha:.72 },
+    { seed:2, ox:Math.cos(t*.70+2.1)*R*.42*om,  oy:Math.sin(t*.60+1.0)*R*.44*om,  col:baseRGB, alpha:.58 },
+    { seed:3, ox:Math.cos(t*.90+4.2)*R*.46*om,  oy:Math.sin(t*.80+3.0)*R*.42*om,  col:a3,      alpha:.52 },
+    { seed:4, ox:Math.cos(t*.38+3.1)*R*.48*om,  oy:Math.sin(t*.32+1.7)*R*.44*om,  col:a3,      alpha:.40 },
+    { seed:5, ox:Math.cos(t*.55+5.4)*R*.32*om,  oy:Math.sin(t*.48+4.2)*R*.30*om,  col:baseRGB, alpha:.46 },
+    { seed:6, ox:Math.cos(t*.60+1.5)*R*.34*om,  oy:Math.sin(t*1.00+2.5)*R*.34*om, col:baseRGB, alpha:.42 },
+    { seed:7, ox:Math.cos(t*1.10+0.8)*R*.30*om, oy:Math.sin(t*.85+3.8)*R*.32*om,  col:a3,      alpha:.35 },
+  ];
+
+  oc.globalCompositeOperation = 'screen';
+
+  PUFFS.forEach(p => {
+    const s = p.seed;
+    const driftBias = pr.drift.value * .18;
+    const ox = p.ox;
+    const oy = p.oy - R * driftBias * (1 + s * .12);
+    const sx = 1 + .38 * n2(t, .13, s*1.3);
+    const sy = 1 + .32 * n2(t, .11, s*2.1);
+    const rot = n2(t, .17, s*.7) * .9;
+    const pSize = R * (.30 + .18 * n2(t, .23, s*1.1)) * (1 + .12 * HB);
+
+    for (let i = 0; i < 5; i++) {
+      const fi = i / 5;
+      const fdx = pSize * .45 * n2(t, .31 + i*.07, s*.9 + i*1.1);
+      const fdy = pSize * .38 * n2(t, .29 + i*.05, s*1.7 + i*.9);
+      const fr  = pSize * (.55 - fi*.25) * (1 + .15 * n2(t, .19, s + i));
+      const densityMul = pr.density.value;
+      const dissipExp  = .5 + pr.dissipation.value * .6;
+      const fa = p.alpha * densityMul * (1 - Math.pow(fi, dissipExp) * .72) * (1 + .22 * HB);
+
+      oc.save();
+      oc.translate(cx + ox, cy + oy);
+      oc.rotate(rot);
+      oc.scale(sx * (1 - fi*.12), sy * (1 - fi*.08));
+
+      const grad = oc.createRadialGradient(fdx, fdy, 0, fdx, fdy, fr);
+      const [r, gv, b] = p.col;
+      const hs = pr.halo.value;
+      const rl = Math.min(r + Math.round(50*hs), 255);
+      const gl = Math.min(gv + Math.round(50*hs), 255);
+      const bl = Math.min(b + Math.round(50*hs), 255);
+
+      grad.addColorStop(0,    `rgba(${r},${gv},${b},${Math.min(fa,.95)})`);
+      grad.addColorStop(.18,  `rgba(${rl},${gl},${bl},${fa*.55*Math.min(hs,1.5)})`);
+      grad.addColorStop(.45,  `rgba(${r},${gv},${b},${fa*.28})`);
+      grad.addColorStop(.72,  `rgba(${r},${gv},${b},${fa*.08})`);
+      grad.addColorStop(1,    `rgba(${r},${gv},${b},0)`);
+
+      oc.fillStyle = grad;
+      oc.beginPath(); oc.arc(fdx, fdy, fr, 0, Math.PI*2); oc.fill();
+      oc.restore();
+    }
+  });
+
+  const turbMul = pr.turbulence.value;
+  if (turbMul > 0) {
+    const nVeins = Math.round(4 + turbMul * 4);
+    for (let k = 0; k < nVeins; k++) {
+      const ka = k * (Math.PI * 2 / nVeins) + t * .03;
+      const kn = n2(t, .07 + k*.03, k*2.3);
+      const tx1 = cx + R*.7 * Math.cos(ka) * kn;
+      const ty1 = cy + R*.7 * Math.sin(ka) * kn;
+      const vr = R * (.08 + .08*turbMul) * (.6 + .4*Math.abs(kn));
+      const [r, gv, b] = baseRGB;
+      const vg = oc.createRadialGradient(tx1, ty1, 0, tx1, ty1, vr);
+      vg.addColorStop(0,   `rgba(${r},${gv},${b},${.14*turbMul*(1+HB*.3)})`);
+      vg.addColorStop(.4,  `rgba(${r},${gv},${b},0.04)`);
+      vg.addColorStop(1,   `rgba(${r},${gv},${b},0)`);
+      oc.fillStyle = vg;
+      oc.beginPath(); oc.arc(tx1, ty1, vr, 0, Math.PI*2); oc.fill();
+    }
+  }
+
+  oc.globalCompositeOperation = 'screen';
+  const lx = cx + Math.cos(t*.45+1)*R*.32;
+  const ly = cy + Math.sin(t*.55+.5)*R*.28;
+  const sh = oc.createRadialGradient(lx, ly, 0, lx, ly, R*.28);
+  const [r, gv, b] = hsl2rgb(soul.h, 48, 82);
+  sh.addColorStop(0,   `rgba(${r},${gv},${b},${.22+BW*.08+HB*.06})`);
+  sh.addColorStop(.5,  `rgba(${r},${gv},${b},0.06)`);
+  sh.addColorStop(1,   'rgba(0,0,0,0)');
+  oc.fillStyle = sh; oc.fillRect(0, 0, W, H);
+
+  oc.globalCompositeOperation = 'source-over';
+  const vg2 = oc.createRadialGradient(cx, cy, R*.30, cx, cy, R);
+  vg2.addColorStop(0,    'rgba(0,0,0,0)');
+  vg2.addColorStop(.65,  'rgba(1,1,7,0.50)');
+  vg2.addColorStop(1,    'rgba(1,1,9,0.94)');
+  oc.fillStyle = vg2; oc.fillRect(0, 0, W, H);
+  oc.restore();
+}
+
+/* ── LOOP ── */
+function syncCanvasSizes() {
+  WARRIORS.forEach(w => {
+    const cnv = canvasMap[w.id];
+    if (!cnv) return;
+    const rect = cnv.getBoundingClientRect();
+    const s = Math.round(rect.width);
+    if (cnv.width !== s) { cnv.width = s; cnv.height = s; }
+    const oc = offscreens[w.id];
+    if (oc.canvas.width !== s) { oc.canvas.width = s; oc.canvas.height = s; }
+  });
+}
+
+function loop() {
+  syncCanvasSizes();
+  WARRIORS.forEach(w => {
+    T[w.id] += w.speed;
+    const cnv = canvasMap[w.id];
+    const off = offscreens[w.id];
+    if (!cnv || cnv.width < 1) return;
+    const W = cnv.width, H = cnv.height;
+    drawSmoke(off.ctx, w, W, H);
+    const ctx2 = cnv.getContext('2d');
+    ctx2.clearRect(0, 0, W, H);
+    ctx2.drawImage(off.canvas, 0, 0);
+  });
+  requestAnimationFrame(loop);
+}
+loop();
+
+window.addEventListener('resize', syncCanvasSizes);
+</script>
+</body>
+</html>

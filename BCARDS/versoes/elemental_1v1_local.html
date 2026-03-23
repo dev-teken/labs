@@ -1,0 +1,500 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Fredoka One', 'Arial Rounded MT Bold', Arial, sans-serif; background: #1a1a2e; min-height: 100vh; }
+#game { max-width: 480px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 100vh; }
+
+/* TELA DE PASSAGEM */
+#pass-screen {
+  display: none; position: fixed; inset: 0; background: #0d0d1a;
+  align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 20px;
+}
+#pass-screen.show { display: flex; }
+#pass-player-label { font-size: 13px; letter-spacing: 3px; text-transform: uppercase; }
+#pass-title { font-size: 28px; font-weight: 700; color: #fff; text-align: center; line-height: 1.3; padding: 0 24px; }
+#pass-btn { font-size: 20px; font-weight: 700; border: none; border-radius: 18px; padding: 16px 36px; cursor: pointer; font-family: inherit; text-transform: uppercase; transition: transform 0.1s; }
+#pass-btn:active { transform: scale(0.96); }
+
+/* TELA DE RESOLUÇÃO */
+#resolve-screen {
+  display: none; position: fixed; inset: 0; background: #0d0d1a;
+  align-items: flex-start; justify-content: center; z-index: 200; flex-direction: column; gap: 12px;
+  padding: 16px; overflow-y: auto;
+}
+#resolve-screen.show { display: flex; }
+#resolve-title { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #FFD700; text-align: center; width: 100%; }
+#resolve-cards { display: flex; gap: 12px; width: 100%; justify-content: center; }
+.resolve-card { flex: 1; max-width: 180px; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; border: 3px solid transparent; }
+.resolve-card.winner { border-color: #FFD700; box-shadow: 0 0 0 3px rgba(255,215,0,0.3); }
+.resolve-card .r-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.resolve-card .r-emoji { font-size: 48px; }
+.resolve-card .r-name { font-size: 17px; font-weight: 700; text-transform: uppercase; }
+.resolve-card .r-stats { display: flex; gap: 8px; }
+.resolve-card .stat-badge { display: flex; flex-direction: column; align-items: center; border-radius: 8px; padding: 3px 8px; }
+.resolve-card .stat-badge.atk { background: rgba(226,75,74,0.3); border: 1px solid #E24B4A; }
+.resolve-card .stat-badge.def { background: rgba(55,138,221,0.3); border: 1px solid #378ADD; }
+.resolve-card .stat-label { font-size: 8px; color: #ccc; letter-spacing: 1px; }
+.resolve-card .stat-val { font-size: 18px; font-weight: 700; color: #fff; line-height: 1; }
+.resolve-card .card-hearts { display: flex; gap: 2px; }
+.resolve-card .heart { font-size: 13px; }
+.resolve-card .heart.empty { filter: grayscale(1) opacity(0.25); }
+
+#resolve-result { width: 100%; text-align: center; border-radius: 14px; padding: 10px 16px; font-size: 20px; font-weight: 700; line-height: 1.4; }
+#resolve-result.win1 { background: rgba(74,222,128,0.15); color: #4ade80; border: 2px solid #4ade80; }
+#resolve-result.win2 { background: rgba(251,146,60,0.15); color: #fb923c; border: 2px solid #fb923c; }
+#resolve-result.draw  { background: rgba(255,215,0,0.15); color: #FFD700; border: 2px solid #FFD700; }
+
+#resolve-hp-row { display: flex; justify-content: space-between; width: 100%; gap: 10px; }
+.hp-box { flex: 1; background: rgba(255,255,255,0.06); border-radius: 12px; padding: 8px 12px; text-align: center; }
+.hp-box-label { font-size: 10px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
+.hp-box-val { font-size: 28px; font-weight: 700; color: #fff; }
+.hp-box-delta { font-size: 13px; margin-top: 2px; }
+
+#resolve-next-btn { background: #FFD700; color: #1a1a2e; font-size: 19px; font-weight: 700; border: none; border-radius: 16px; padding: 13px; width: 100%; cursor: pointer; font-family: inherit; text-transform: uppercase; }
+#resolve-next-btn:active { transform: scale(0.97); }
+
+/* JOGO PRINCIPAL */
+#rules-panel { background: #16213e; border-radius: 14px; padding: 10px 12px; border: 1.5px solid #0f3460; }
+#rules-title { color: #FFD700; font-size: 11px; font-weight: 700; text-align: center; margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
+#rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.rule-row { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #ccc; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 3px 6px; }
+.beats { color: #4ade80; font-weight: 700; }
+
+#scorebar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.score-side { display: flex; flex-direction: column; gap: 3px; }
+.score-label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.score-label.p1 { color: #60a5fa; }
+.score-label.p2 { color: #fb923c; text-align: right; }
+.life-bar-bg { background: rgba(255,255,255,0.1); border-radius: 20px; height: 16px; overflow: hidden; }
+.life-bar-fill { height: 100%; border-radius: 20px; transition: width 0.5s; background: #4ade80; }
+.life-bar-fill.low { background: #E24B4A; }
+.life-number { font-size: 20px; font-weight: 700; color: #fff; }
+.life-number.p2 { text-align: right; }
+#vs-badge { background: #FFD700; color: #1a1a2e; font-size: 14px; font-weight: 700; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+#chosen-area { display: flex; gap: 10px; justify-content: center; }
+.chosen-slot { flex: 1; max-width: 160px; min-height: 90px; background: rgba(255,255,255,0.04); border-radius: 14px; border: 2px dashed rgba(255,255,255,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; }
+.chosen-slot .slot-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #888; }
+.chosen-slot .slot-emoji { font-size: 32px; }
+.chosen-slot .slot-name { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.chosen-slot.ready { border-style: solid; border-color: #4ade80; background: rgba(74,222,128,0.07); }
+.chosen-slot .slot-check { font-size: 16px; }
+
+#current-turn { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 0; }
+
+#hand { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.hand-card {
+  width: 76px; height: 118px; border-radius: 12px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; cursor: pointer; border: 3px solid transparent;
+  transition: transform 0.15s, box-shadow 0.15s; position: relative; flex-shrink: 0;
+}
+.hand-card:active { transform: scale(0.95); }
+.hand-card.selected { border-color: #FFD700 !important; box-shadow: 0 0 0 3px rgba(255,215,0,0.4); transform: translateY(-6px); }
+.hand-card .card-emoji { font-size: 27px; }
+.hand-card .card-name { font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.hand-card .card-stats { display: flex; gap: 4px; }
+.hand-card .stat-badge { display: flex; flex-direction: column; align-items: center; border-radius: 6px; padding: 1px 4px; min-width: 23px; }
+.hand-card .stat-badge.atk { background: rgba(226,75,74,0.3); border: 1px solid #E24B4A; }
+.hand-card .stat-badge.def { background: rgba(55,138,221,0.3); border: 1px solid #378ADD; }
+.hand-card .stat-label { font-size: 7px; color: #ccc; letter-spacing: 1px; }
+.hand-card .stat-val { font-size: 13px; font-weight: 700; color: #fff; line-height: 1; }
+.hand-card .card-hearts { display: flex; gap: 1px; }
+.hand-card .heart { font-size: 9px; }
+.hand-card .heart.empty { filter: grayscale(1) opacity(0.25); }
+.hand-card .card-life-bar { width: 100%; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.1); margin-top: 2px; overflow: hidden; }
+.hand-card .card-life-fill { height: 100%; border-radius: 3px; background: #4ade80; transition: width 0.4s; }
+.hand-card .card-life-fill.mid { background: #FFD700; }
+.hand-card .card-life-fill.low { background: #E24B4A; }
+
+#action-btn {
+  font-size: 19px; font-weight: 700; border: none; border-radius: 16px; padding: 13px;
+  width: 100%; cursor: pointer; font-family: inherit; text-transform: uppercase;
+  transition: transform 0.1s, opacity 0.2s; background: #FFD700; color: #1a1a2e;
+}
+#action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+#action-btn:active:not(:disabled) { transform: scale(0.97); }
+
+#deck-count { text-align: center; font-size: 10px; color: #666; }
+
+#gameover { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; z-index: 300; }
+#gameover.show { display: flex; }
+#gameover-box { background: #16213e; border-radius: 20px; padding: 30px 26px; text-align: center; border: 3px solid #FFD700; max-width: 300px; width: 90%; }
+#gameover-title { font-size: 32px; font-weight: 700; color: #FFD700; margin-bottom: 6px; }
+#gameover-sub { font-size: 14px; color: #ccc; margin-bottom: 18px; line-height: 1.5; }
+#restart-btn { background: #FFD700; color: #1a1a2e; font-size: 17px; font-weight: 700; border: none; border-radius: 12px; padding: 11px 26px; cursor: pointer; font-family: inherit; text-transform: uppercase; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+
+<div id="game">
+  <div id="rules-panel">
+    <div id="rules-title">⚔️ Vantagens — quem vence quem</div>
+    <div id="rules-grid">
+      <div class="rule-row">🔥 Fogo <span class="beats">✓</span> 🌍 Terra, 🌀 Ar</div>
+      <div class="rule-row">💧 Água <span class="beats">✓</span> 🔥 Fogo, 🌍 Terra</div>
+      <div class="rule-row">🌍 Terra <span class="beats">✓</span> ⚡ Raio, 💧 Água</div>
+      <div class="rule-row">🌀 Ar <span class="beats">✓</span> 💧 Água, 🔥 Fogo</div>
+      <div class="rule-row">⚡ Raio <span class="beats">✓</span> 💧 Água, 🌀 Ar</div>
+      <div class="rule-row" style="font-size:9px;color:#777;grid-column:span 2">💔 Carta com vida 0 = some. Sem cartas = derrota!</div>
+    </div>
+  </div>
+
+  <div id="scorebar">
+    <div class="score-side">
+      <div class="score-label p1">⚔️ Jogador 1</div>
+      <div class="life-bar-bg"><div class="life-bar-fill" id="p1-bar" style="width:100%"></div></div>
+      <div class="life-number" id="p1-hp">20</div>
+    </div>
+    <div id="vs-badge">VS</div>
+    <div class="score-side">
+      <div class="score-label p2">Jogador 2 ⚔️</div>
+      <div class="life-bar-bg"><div class="life-bar-fill" id="p2-bar" style="width:100%"></div></div>
+      <div class="life-number p2" id="p2-hp">20</div>
+    </div>
+  </div>
+
+  <div id="chosen-area">
+    <div class="chosen-slot" id="slot-p1">
+      <div class="slot-label">Jogador 1</div>
+      <div class="slot-emoji">❓</div>
+      <div class="slot-name" style="color:#555">Aguardando</div>
+    </div>
+    <div class="chosen-slot" id="slot-p2">
+      <div class="slot-label">Jogador 2</div>
+      <div class="slot-emoji">❓</div>
+      <div class="slot-name" style="color:#555">Aguardando</div>
+    </div>
+  </div>
+
+  <div id="current-turn"></div>
+  <div id="hand"></div>
+  <div id="deck-count"></div>
+  <button id="action-btn" disabled></button>
+</div>
+
+<!-- TELA DE PASSAGEM -->
+<div id="pass-screen">
+  <div id="pass-player-label"></div>
+  <div id="pass-title"></div>
+  <button id="pass-btn" onclick="onPassBtn()"></button>
+</div>
+
+<!-- TELA DE RESOLUÇÃO -->
+<div id="resolve-screen">
+  <div id="resolve-title">⚔️ RESULTADO DA BATALHA</div>
+  <div id="resolve-cards">
+    <div class="resolve-card" id="rc1">
+      <div class="r-label p1" style="color:#60a5fa">Jogador 1</div>
+      <div class="r-emoji" id="rc1-emoji"></div>
+      <div class="r-name" id="rc1-name"></div>
+      <div class="r-stats">
+        <div class="stat-badge atk"><div class="stat-label">ATK</div><div class="stat-val" id="rc1-atk"></div></div>
+        <div class="stat-badge def"><div class="stat-label">DEF</div><div class="stat-val" id="rc1-def"></div></div>
+      </div>
+      <div class="card-hearts" id="rc1-hearts"></div>
+      <div id="rc1-delta" style="font-size:12px;margin-top:2px;"></div>
+    </div>
+    <div class="resolve-card" id="rc2">
+      <div class="r-label" style="color:#fb923c">Jogador 2</div>
+      <div class="r-emoji" id="rc2-emoji"></div>
+      <div class="r-name" id="rc2-name"></div>
+      <div class="r-stats">
+        <div class="stat-badge atk"><div class="stat-label">ATK</div><div class="stat-val" id="rc2-atk"></div></div>
+        <div class="stat-badge def"><div class="stat-label">DEF</div><div class="stat-val" id="rc2-def"></div></div>
+      </div>
+      <div class="card-hearts" id="rc2-hearts"></div>
+      <div id="rc2-delta" style="font-size:12px;margin-top:2px;"></div>
+    </div>
+  </div>
+  <div id="resolve-result"></div>
+  <div id="resolve-hp-row">
+    <div class="hp-box">
+      <div class="hp-box-label" style="color:#60a5fa">Jogador 1</div>
+      <div class="hp-box-val" id="rh1"></div>
+      <div class="hp-box-delta" id="rhd1"></div>
+    </div>
+    <div class="hp-box">
+      <div class="hp-box-label" style="color:#fb923c">Jogador 2</div>
+      <div class="hp-box-val" id="rh2"></div>
+      <div class="hp-box-delta" id="rhd2"></div>
+    </div>
+  </div>
+  <button id="resolve-next-btn" onclick="nextRound()"></button>
+</div>
+
+<div id="gameover">
+  <div id="gameover-box">
+    <div id="gameover-title"></div>
+    <div id="gameover-sub"></div>
+    <button id="restart-btn" onclick="initGame()">🔄 Jogar de novo</button>
+  </div>
+</div>
+
+<script>
+const ELEMENTS = [
+  { id:'fire',  name:'Fogo',  emoji:'🔥', atk:5, def:1, color:'#E24B4A', bg:'rgba(226,75,74,0.18)',  beats:['earth','air'] },
+  { id:'water', name:'Água',  emoji:'💧', atk:2, def:4, color:'#378ADD', bg:'rgba(55,138,221,0.18)', beats:['fire','earth'] },
+  { id:'earth', name:'Terra', emoji:'🌍', atk:1, def:5, color:'#639922', bg:'rgba(99,153,34,0.18)',  beats:['lightning','water'] },
+  { id:'air',   name:'Ar',   emoji:'🌀', atk:4, def:2, color:'#9E9E9E', bg:'rgba(158,158,158,0.18)', beats:['water','fire'] },
+  { id:'lightning', name:'Raio', emoji:'⚡', atk:6, def:0, color:'#FBBF24', bg:'rgba(251,191,36,0.18)', beats:['water','air'] },
+];
+const MAX_HP = 20, MAX_CARD_HP = 5;
+
+let p1HP, p2HP, p1Deck, p2Deck;
+let p1Choice, p2Choice; // índices
+let phase; // 'p1-pass' | 'p1-pick' | 'p2-pass' | 'p2-pick' | 'resolve'
+let currentPlayerDeck, currentSelectedIdx;
+
+function makeCard(b){ return {...b, hp: MAX_CARD_HP}; }
+function aliveDeck(deck){ return deck.filter(c=>c.hp>0); }
+
+function hearts(hp, max=MAX_CARD_HP){
+  let h=''; for(let i=0;i<max;i++) h+=`<span class="heart${i<hp?'':' empty'}">❤️</span>`; return h;
+}
+function lifeBar(hp,max=MAX_CARD_HP){
+  const p=Math.round(hp/max*100);
+  const c=p<=40?'low':p<=70?'mid':'';
+  return `<div class="card-life-bar"><div class="card-life-fill ${c}" style="width:${p}%"></div></div>`;
+}
+
+function initGame(){
+  p1HP=MAX_HP; p2HP=MAX_HP;
+  p1Deck=ELEMENTS.map(makeCard);
+  p2Deck=ELEMENTS.map(makeCard);
+  p1Choice=null; p2Choice=null;
+  document.getElementById('gameover').classList.remove('show');
+  document.getElementById('resolve-screen').classList.remove('show');
+  updateScorebar();
+  resetSlots();
+  showPassScreen('p1');
+}
+
+function updateScorebar(){
+  const h1=Math.max(0,p1HP), h2=Math.max(0,p2HP);
+  document.getElementById('p1-hp').textContent=h1;
+  document.getElementById('p2-hp').textContent=h2;
+  const b1=document.getElementById('p1-bar');
+  b1.style.width=(h1/MAX_HP*100)+'%'; b1.className='life-bar-fill'+(h1<=6?' low':'');
+  const b2=document.getElementById('p2-bar');
+  b2.style.width=(h2/MAX_HP*100)+'%'; b2.className='life-bar-fill'+(h2<=6?' low':'');
+}
+
+function resetSlots(){
+  setSlot('slot-p1','❓','Aguardando','#555',false);
+  setSlot('slot-p2','❓','Aguardando','#555',false);
+}
+
+function setSlot(id, emoji, name, color, ready){
+  const s=document.getElementById(id);
+  s.className='chosen-slot'+(ready?' ready':'');
+  s.innerHTML=`<div class="slot-label">${id==='slot-p1'?'Jogador 1':'Jogador 2'}</div>
+    <div class="slot-emoji">${emoji}</div>
+    <div class="slot-name" style="color:${color}">${name}</div>
+    ${ready?'<div class="slot-check">✅</div>':''}`;
+}
+
+/* ---- TELA DE PASSAGEM ---- */
+function showPassScreen(player){
+  phase = player+'-pass';
+  const ps=document.getElementById('pass-screen');
+  const lbl=document.getElementById('pass-player-label');
+  const title=document.getElementById('pass-title');
+  const btn=document.getElementById('pass-btn');
+  const isP1 = player==='p1';
+  lbl.style.color = isP1?'#60a5fa':'#fb923c';
+  lbl.textContent = isP1?'⚔️ VEZ DO JOGADOR 1':'⚔️ VEZ DO JOGADOR 2';
+  title.textContent = 'Passe o celular e toque para ver sua mão 👇';
+  btn.style.background = isP1?'#60a5fa':'#fb923c';
+  btn.style.color = '#fff';
+  btn.textContent = isP1?'👁️ VER MINHA MÃO (P1)':'👁️ VER MINHA MÃO (P2)';
+  ps.classList.add('show');
+  // esconde o jogo embaixo
+  document.getElementById('hand').innerHTML='';
+  document.getElementById('current-turn').textContent='';
+  document.getElementById('deck-count').textContent='';
+  document.getElementById('action-btn').disabled=true;
+  document.getElementById('action-btn').textContent='';
+}
+
+function onPassBtn(){
+  document.getElementById('pass-screen').classList.remove('show');
+  if(phase==='p1-pass') startPick('p1');
+  else startPick('p2');
+}
+
+/* ---- PICK ---- */
+function startPick(player){
+  phase = player+'-pick';
+  const isP1 = player==='p1';
+  currentPlayerDeck = isP1 ? p1Deck : p2Deck;
+  currentSelectedIdx = null;
+
+  const turnEl = document.getElementById('current-turn');
+  turnEl.style.color = isP1?'#60a5fa':'#fb923c';
+  turnEl.textContent = isP1?'Jogador 1 — escolha sua carta':'Jogador 2 — escolha sua carta';
+
+  renderHand(currentPlayerDeck);
+
+  const btn=document.getElementById('action-btn');
+  btn.style.background = isP1?'#60a5fa':'#fb923c';
+  btn.style.color='#fff';
+  btn.textContent = isP1?'✅ CONFIRMAR (P1)':'✅ CONFIRMAR (P2)';
+  btn.disabled=true;
+  btn.onclick = confirmPick;
+}
+
+function renderHand(deck){
+  const hand=document.getElementById('hand');
+  hand.innerHTML='';
+  deck.forEach((card,idx)=>{
+    if(card.hp<=0) return;
+    const div=document.createElement('div');
+    div.className='hand-card'+(currentSelectedIdx===idx?' selected':'');
+    div.style.background=card.bg;
+    div.style.borderColor=currentSelectedIdx===idx?'#FFD700':card.color;
+    div.innerHTML=`
+      <div class="card-emoji">${card.emoji}</div>
+      <div class="card-name" style="color:${card.color}">${card.name}</div>
+      <div class="card-stats">
+        <div class="stat-badge atk"><div class="stat-label">ATK</div><div class="stat-val">${card.atk}</div></div>
+        <div class="stat-badge def"><div class="stat-label">DEF</div><div class="stat-val">${card.def}</div></div>
+      </div>
+      <div class="card-hearts">${hearts(card.hp)}</div>
+      ${lifeBar(card.hp)}`;
+    div.onclick=()=>{ currentSelectedIdx=idx; renderHand(deck); document.getElementById('action-btn').disabled=false; };
+    hand.appendChild(div);
+  });
+  const alive=deck.filter(c=>c.hp>0).length;
+  document.getElementById('deck-count').textContent=`${alive} carta${alive!==1?'s':''} restante${alive!==1?'s':''}`;
+}
+
+function confirmPick(){
+  if(currentSelectedIdx===null) return;
+  const isP1 = phase==='p1-pick';
+  const card = currentPlayerDeck[currentSelectedIdx];
+
+  if(isP1){
+    p1Choice = p1Deck.indexOf(card);
+    setSlot('slot-p1', card.emoji, card.name, card.color, true);
+    // limpa tela
+    document.getElementById('hand').innerHTML='';
+    document.getElementById('current-turn').textContent='';
+    document.getElementById('deck-count').textContent='';
+    document.getElementById('action-btn').disabled=true;
+    currentSelectedIdx=null;
+    showPassScreen('p2');
+  } else {
+    p2Choice = p2Deck.indexOf(card);
+    setSlot('slot-p2', card.emoji, card.name, card.color, true);
+    document.getElementById('hand').innerHTML='';
+    document.getElementById('current-turn').textContent='';
+    document.getElementById('deck-count').textContent='';
+    document.getElementById('action-btn').disabled=true;
+    currentSelectedIdx=null;
+    // ambos escolheram — resolver!
+    setTimeout(showResolve, 300);
+  }
+}
+
+/* ---- RESOLUÇÃO ---- */
+function showResolve(){
+  const c1 = p1Deck[p1Choice];
+  const c2 = p2Deck[p2Choice];
+
+  const p1beats = c1.beats.includes(c2.id);
+  const p2beats = c2.beats.includes(c1.id);
+
+  const dmgTo1 = Math.max(1, c2.atk - c1.def);
+  const dmgTo2 = Math.max(1, c1.atk - c2.def);
+
+  // desgaste nas cartas — sempre
+  const c1hpBefore = c1.hp, c2hpBefore = c2.hp;
+  c1.hp = Math.max(0, c1.hp - dmgTo1);
+  c2.hp = Math.max(0, c2.hp - dmgTo2);
+
+  // HP dos jogadores — só perde quem perdeu o duelo
+  let p1hpDelta=0, p2hpDelta=0;
+  if(p1beats && !p2beats){
+    p2HP = Math.max(0, p2HP - dmgTo2);
+    p2hpDelta = -dmgTo2;
+  } else if(p2beats && !p1beats){
+    p1HP = Math.max(0, p1HP - dmgTo1);
+    p1hpDelta = -dmgTo1;
+  }
+  // empate: ninguém perde HP mas cartas se desgastam
+
+  // preenche tela de resolução
+  document.getElementById('rc1-emoji').textContent=c1.emoji;
+  document.getElementById('rc1-name').style.color=c1.color;
+  document.getElementById('rc1-name').textContent=c1.name;
+  document.getElementById('rc1-atk').textContent=c1.atk;
+  document.getElementById('rc1-def').textContent=c1.def;
+  document.getElementById('rc1-hearts').innerHTML=hearts(c1.hp);
+  document.getElementById('rc1-delta').innerHTML=`<span style="color:#ff6b6b">💔 -${dmgTo1} vida da carta</span>${c1.hp===0?'<br><span style="color:#E24B4A">💀 Carta destruída!</span>':''}`;
+
+  document.getElementById('rc2-emoji').textContent=c2.emoji;
+  document.getElementById('rc2-name').style.color=c2.color;
+  document.getElementById('rc2-name').textContent=c2.name;
+  document.getElementById('rc2-atk').textContent=c2.atk;
+  document.getElementById('rc2-def').textContent=c2.def;
+  document.getElementById('rc2-hearts').innerHTML=hearts(c2.hp);
+  document.getElementById('rc2-delta').innerHTML=`<span style="color:#ff6b6b">💔 -${dmgTo2} vida da carta</span>${c2.hp===0?'<br><span style="color:#E24B4A">💀 Carta destruída!</span>':''}`;
+
+  const rc1=document.getElementById('rc1'), rc2=document.getElementById('rc2');
+  rc1.style.background=c1.bg; rc1.style.borderColor=c1.color;
+  rc2.style.background=c2.bg; rc2.style.borderColor=c2.color;
+  rc1.classList.remove('winner'); rc2.classList.remove('winner');
+
+  const res=document.getElementById('resolve-result');
+  if(p1beats && !p2beats){
+    res.textContent='🏆 Jogador 1 venceu este turno!';
+    res.className='resolve-result win1';
+    rc1.classList.add('winner');
+  } else if(p2beats && !p1beats){
+    res.textContent='🏆 Jogador 2 venceu este turno!';
+    res.className='resolve-result win2';
+    rc2.classList.add('winner');
+  } else {
+    res.textContent='🤝 Empate! Nenhum HP perdido — cartas se desgastam.';
+    res.className='resolve-result draw';
+  }
+
+  document.getElementById('rh1').textContent=Math.max(0,p1HP);
+  document.getElementById('rh1').style.color=p1HP<=6?'#E24B4A':'#fff';
+  document.getElementById('rhd1').innerHTML=p1hpDelta<0?`<span style="color:#E24B4A">${p1hpDelta} HP</span>`:`<span style="color:#4ade80">sem dano</span>`;
+  document.getElementById('rh2').textContent=Math.max(0,p2HP);
+  document.getElementById('rh2').style.color=p2HP<=6?'#E24B4A':'#fff';
+  document.getElementById('rhd2').innerHTML=p2hpDelta<0?`<span style="color:#E24B4A">${p2hpDelta} HP</span>`:`<span style="color:#4ade80">sem dano</span>`;
+
+  const nextBtn=document.getElementById('resolve-next-btn');
+  const p1a=aliveDeck(p1Deck).length, p2a=aliveDeck(p2Deck).length;
+  const gameOver = p1HP<=0||p2HP<=0||p1a===0||p2a===0;
+  nextBtn.textContent = gameOver?'🏁 Ver resultado final':'▶️ Próxima rodada';
+
+  updateScorebar();
+  document.getElementById('resolve-screen').classList.add('show');
+}
+
+function nextRound(){
+  document.getElementById('resolve-screen').classList.remove('show');
+  p1Choice=null; p2Choice=null;
+  resetSlots();
+  const p1a=aliveDeck(p1Deck).length, p2a=aliveDeck(p2Deck).length;
+  if(p1HP<=0||p1a===0||p2HP<=0||p2a===0){
+    endGame(); return;
+  }
+  showPassScreen('p1');
+}
+
+function endGame(){
+  let title='', sub='';
+  if(p1HP<=0&&p2HP<=0){ title='🤝 Empate!'; sub='Os dois jogadores foram derrotados ao mesmo tempo!'; }
+  else if(p2HP<=0||aliveDeck(p2Deck).length===0){ title='🏆 Jogador 1 Venceu!'; sub=p2HP<=0?'HP do Jogador 2 chegou a zero!':'Jogador 2 ficou sem cartas!'; }
+  else { title='🏆 Jogador 2 Venceu!'; sub=p1HP<=0?'HP do Jogador 1 chegou a zero!':'Jogador 1 ficou sem cartas!'; }
+  document.getElementById('gameover-title').textContent=title;
+  document.getElementById('gameover-sub').textContent=sub;
+  document.getElementById('gameover').classList.add('show');
+}
+
+initGame();
+</script>

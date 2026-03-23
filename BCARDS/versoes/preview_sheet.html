@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avatar System — Behavioral Archetypes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #f5f2ec;
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  header h1 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #000;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: #666;
+    text-transform: uppercase;
+  }
+
+  .rule {
+    width: 48px;
+    height: 1px;
+    background: #000;
+    margin: 16px auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    max-width: 900px;
+    margin: 0 auto;
+    border: 1px solid #ccc;
+  }
+
+  .avatar-cell {
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding: 28px 20px 20px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .avatar-cell:hover {
+    background: #f8f8f8;
+  }
+
+  .avatar-cell:nth-child(4n) {
+    border-right: none;
+  }
+
+  .avatar-cell:nth-last-child(-n+4) {
+    border-bottom: none;
+  }
+
+  /* last row - center the remaining 3 */
+  .avatar-cell.filler {
+    background: #f5f2ec;
+    border: none;
+  }
+
+  .avatar-wrap {
+    width: 120px;
+    height: 120px;
+    position: relative;
+  }
+
+  .avatar-wrap img,
+  .avatar-wrap svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .avatar-number {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #999;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .avatar-name {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #000;
+    text-align: center;
+  }
+
+  .avatar-desc {
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    color: #888;
+    text-align: center;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    color: #bbb;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 700px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .avatar-cell:nth-child(2n) { border-right: none; }
+    .avatar-cell:nth-child(4n) { border-right: 1px solid #ccc; }
+    .avatar-cell:nth-last-child(-n+2) { border-bottom: none; }
+    .avatar-cell:nth-last-child(-n+4) { border-bottom: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Behavioral Avatar System</h1>
+  <div class="rule"></div>
+  <p>7 archetypes — attitude over identity</p>
+</header>
+
+<div class="grid">
+
+  <!-- 01 ANALYTICAL -->
+  <div class="avatar-cell">
+    <div class="avatar-wrap">
+      <span class="avatar-number">01</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <defs>
+          <filter id="ink-a1"><feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" seed="5" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink-a1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 90 390 C 95 340 130 310 160 295 L 175 285" stroke-width="3.5"/>
+          <path d="M 310 390 C 305 340 270 310 245 295 L 228 285" stroke-width="3.5"/>
+          <path d="M 160 295 C 175 305 200 310 200 310 C 200 310 225 305 245 295" stroke-width="3"/>
+          <path d="M 175 285 C 178 270 182 258 185 248" stroke-width="3"/>
+          <path d="M 228 285 C 224 270 220 258 217 248" stroke-width="3"/>
+          <path d="M 185 248 C 175 225 168 200 170 175 C 172 145 178 128 192 115 C 206 102 224 98 240 100 C 258 103 272 115 278 132 C 285 152 283 178 276 202 C 270 222 260 238 248 248 C 235 258 220 262 217 248" stroke-width="3.2"/>
+          <path d="M 170 175 C 163 178 159 185 160 193 C 161 201 166 206 172 203" stroke-width="2.5"/>
+          <path d="M 278 168 C 285 171 288 178 287 186 C 286 194 281 198 276 196" stroke-width="2.5"/>
+          <path d="M 185 115 C 188 98 198 88 215 85 C 232 82 248 90 258 105 C 264 115 266 128 265 138" stroke-width="3"/>
+          <path d="M 185 115 C 183 108 183 100 186 94" stroke-width="2.5"/>
+          <path d="M 195 92 C 210 86 228 87 242 95" stroke-width="1.8"/>
+          <path d="M 190 100 C 207 92 228 92 245 101" stroke-width="1.5"/>
+          <path d="M 194 170 C 198 166 205 164 211 165 C 217 166 221 169 222 173" stroke-width="2.8"/>
+          <path d="M 194 170 C 198 174 205 176 211 175 C 217 174 221 172 222 173" stroke-width="2.2"/>
+          <ellipse cx="208" cy="170" rx="3.5" ry="3.8" fill="#000"/>
+          <path d="M 204 167 C 206 165 210 165 212 167" stroke-width="1.2"/>
+          <path d="M 238 168 C 242 164 249 162 255 163 C 261 164 265 167 266 171" stroke-width="2.8"/>
+          <path d="M 238 168 C 242 172 249 174 255 173 C 261 172 265 170 266 171" stroke-width="2.2"/>
+          <ellipse cx="252" cy="168" rx="3.5" ry="3.8" fill="#000"/>
+          <path d="M 248 165 C 250 163 254 163 256 165" stroke-width="1.2"/>
+          <path d="M 192 160 C 198 157 208 156 218 158" stroke-width="2.5"/>
+          <path d="M 236 158 C 242 155 251 154 262 156" stroke-width="2.5"/>
+          <path d="M 224 158 C 226 155 228 156 227 159" stroke-width="1.2"/>
+          <path d="M 225 178 C 224 188 222 196 218 202 C 215 206 211 208 207 207" stroke-width="2.2"/>
+          <path d="M 207 207 C 210 209 215 210 220 208 C 225 206 228 208 229 207" stroke-width="1.8"/>
+          <path d="M 206 228 C 212 227 220 226 228 227 C 234 228 238 229 238 231" stroke-width="2.2"/>
+          <path d="M 207 230 C 212 232 220 233 228 232" stroke-width="1.5"/>
+          <path d="M 192 238 C 198 246 208 250 218 250 C 228 250 236 246 242 240" stroke-width="2.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="avatar-name">Analytical</div>
+    <div class="avatar-desc">Calm · Focused<br>Concentrated</div>
+  </div>
+
+  <!-- 02 VISIONARY -->
+  <div class="avatar-cell">
+    <div class="avatar-wrap">
+      <span class="avatar-number">02</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <defs>
+          <filter id="ink-v1"><feTurbulence type="turbulence" baseFrequency="0.035" numOctaves="3" seed="8" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink-v1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 78 390 C 85 338 122 305 158 290 L 175 280" stroke-width="3.5"/>
+          <path d="M 322 390 C 315 338 278 305 242 290 L 228 280" stroke-width="3.5"/>
+          <path d="M 158 290 C 175 300 200 306 200 306 C 200 306 225 300 242 290" stroke-width="3"/>
+          <path d="M 175 280 C 177 265 180 252 183 242" stroke-width="3"/>
+          <path d="M 228 280 C 226 265 222 252 219 242" stroke-width="3"/>
+          <path d="M 183 242 C 172 220 166 196 168 170 C 170 140 178 122 194 110 C 210 98 228 95 245 99 C 263 103 276 118 280 138 C 285 160 282 186 274 208 C 267 228 255 242 242 248 C 229 255 219 255 219 242" stroke-width="3.2"/>
+          <path d="M 168 170 C 161 173 157 181 158 190 C 159 199 165 204 171 200" stroke-width="2.5"/>
+          <path d="M 280 160 C 287 163 291 171 290 180 C 289 189 284 193 279 191" stroke-width="2.5"/>
+          <path d="M 183 110 C 184 92 194 80 213 78 C 232 76 250 85 260 100 C 267 112 268 126 266 138" stroke-width="3"/>
+          <path d="M 183 110 C 180 103 179 95 181 87" stroke-width="2.5"/>
+          <path d="M 210 78 C 208 68 210 60 215 58 C 220 56 223 62 221 72" stroke-width="2"/>
+          <path d="M 222 80 C 224 70 228 64 233 65 C 237 68 236 76 232 82" stroke-width="1.8"/>
+          <path d="M 198 82 C 196 73 197 66 201 65 C 205 66 206 74 203 82" stroke-width="1.8"/>
+          <path d="M 188 172 C 192 166 200 163 207 163 C 215 163 220 166 222 170" stroke-width="2.8"/>
+          <path d="M 188 172 C 192 177 200 179 207 178 C 215 177 220 174 222 170" stroke-width="2.2"/>
+          <ellipse cx="205" cy="167" rx="4" ry="4.5" fill="#000"/>
+          <circle cx="207" cy="165" r="1.2" fill="white"/>
+          <path d="M 238 170 C 242 164 250 161 257 161 C 265 161 270 164 272 168" stroke-width="2.8"/>
+          <path d="M 238 170 C 242 175 250 177 257 176 C 265 175 270 172 272 168" stroke-width="2.2"/>
+          <ellipse cx="255" cy="165" rx="4" ry="4.5" fill="#000"/>
+          <circle cx="257" cy="163" r="1.2" fill="white"/>
+          <path d="M 186 160 C 193 155 203 153 215 155" stroke-width="2.5"/>
+          <path d="M 236 153 C 243 150 253 149 265 151" stroke-width="2.5"/>
+          <path d="M 225 182 C 223 192 220 200 216 206 C 212 210 208 211 205 210" stroke-width="2.2"/>
+          <path d="M 205 210 C 209 213 215 214 221 212 C 226 210 230 211 231 210" stroke-width="1.8"/>
+          <path d="M 204 232 C 210 229 218 228 226 229 C 233 230 238 233 238 236" stroke-width="2.2"/>
+          <path d="M 204 232 C 208 236 216 238 224 237 C 231 236 236 234 238 236" stroke-width="1.8"/>
+          <path d="M 215 234 C 218 234 222 234 226 233" stroke-width="1.0" stroke-dasharray="2,3"/>
+          <path d="M 188 240 C 195 250 208 255 220 255 C 232 255 242 249 248 241" stroke-width="2.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="avatar-name">Visionary</div>
+    <div class="avatar-desc">Upward · Curious<br>Expansive</div>
+  </div>
+
+  <!-- 03 EXECUTOR -->
+  <div class="avatar-cell">
+    <div class="avatar-wrap">
+      <span class="avatar-number">03</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <defs>
+          <filter id="ink-e1"><feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="3" seed="12" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="0.9" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink-e1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 72 390 C 80 332 120 298 162 284 L 180 275" stroke-width="4.5"/>
+          <path d="M 328 390 C 320 332 280 298 238 284 L 222 275" stroke-width="4.5"/>
+          <path d="M 162 284 C 178 294 200 298 200 298 C 200 298 222 294 238 284" stroke-width="3.5"/>
+          <path d="M 180 275 C 180 260 182 248 184 238" stroke-width="3.5"/>
+          <path d="M 222 275 C 222 260 220 248 218 238" stroke-width="3.5"/>
+          <path d="M 184 238 C 174 218 168 192 170 165 C 172 134 182 115 200 104 C 218 93 238 93 254 104 C 270 115 280 134 282 165 C 284 192 278 218 268 238 C 258 252 240 260 220 260 C 200 260 184 250 184 238" stroke-width="3.5"/>
+          <path d="M 170 165 C 162 168 158 176 159 185 C 160 194 166 199 172 196" stroke-width="2.8"/>
+          <path d="M 282 165 C 290 168 294 176 293 185 C 292 194 286 199 280 196" stroke-width="2.8"/>
+          <path d="M 184 104 C 188 88 198 78 214 76 C 230 74 246 82 256 96 C 262 106 264 118 263 130" stroke-width="3.5"/>
+          <path d="M 184 104 C 181 97 180 89 182 82" stroke-width="3"/>
+          <path d="M 188 82 C 200 76 216 75 230 79 C 240 83 249 90 255 99" stroke-width="2.2"/>
+          <path d="M 185 95 C 198 88 218 87 235 93" stroke-width="1.8"/>
+          <path d="M 205 77 C 204 88 204 102 205 115" stroke-width="1.8"/>
+          <path d="M 186 170 C 191 165 200 163 208 163 C 216 163 221 166 223 170" stroke-width="3.2"/>
+          <path d="M 186 170 C 191 174 200 176 208 175 C 216 174 221 172 223 170" stroke-width="2.5"/>
+          <ellipse cx="205" cy="169" rx="4.5" ry="4.5" fill="#000"/>
+          <path d="M 239 170 C 244 165 253 163 261 163 C 269 163 274 166 276 170" stroke-width="3.2"/>
+          <path d="M 239 170 C 244 174 253 176 261 175 C 269 174 274 172 276 170" stroke-width="2.5"/>
+          <ellipse cx="257" cy="169" rx="4.5" ry="4.5" fill="#000"/>
+          <path d="M 184 158 C 192 154 202 153 214 155" stroke-width="3.2"/>
+          <path d="M 248 155 C 258 153 268 154 278 158" stroke-width="3.2"/>
+          <path d="M 214 155 C 218 152 222 152 226 155" stroke-width="2.0"/>
+          <path d="M 248 155 C 244 152 240 152 236 155" stroke-width="2.0"/>
+          <path d="M 225 180 C 224 192 220 202 216 208 C 213 212 208 213 205 212" stroke-width="2.5"/>
+          <path d="M 205 212 C 209 215 215 216 221 214 C 226 212 230 213 232 212" stroke-width="2"/>
+          <path d="M 225 160 C 226 168 226 175 225 180" stroke-width="2.2"/>
+          <path d="M 202 235 C 210 232 220 231 230 232 C 238 233 242 235 242 237" stroke-width="3"/>
+          <path d="M 202 237 C 210 238 220 239 230 238 C 237 237 241 236 242 237" stroke-width="2.2"/>
+          <path d="M 184 238 C 186 250 190 258 200 264 C 210 270 222 270 232 264 C 242 258 248 248 250 236" stroke-width="3.2"/>
+        </g>
+      </svg>
+    </div>
+    <div class="avatar-name">Executor</div>
+    <div class="avatar-desc">Direct · Firm<br>Determined</div>
+  </div>
+
+  <!-- 04 COMMUNICATOR -->
+  <div class="avatar-cell">
+    <div class="avatar-wrap">
+      <span class="avatar-number">04</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <defs>
+          <filter id="ink-c1"><feTurbulence type="turbulence" baseFrequency="0.038" numOctaves="3" seed="3" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.0" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink-c1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 82 390 C 90 342 125 308 162 294 L 178 284" stroke-width="3.5"/>
+          <path d="M 318 390 C 310 342 275 308 238 294 L 222 284" stroke-width="3.5"/>
+          <path d="M 162 294 C 178 302 200 305 200 305 C 200 305 222 302 238 294" stroke-width="3"/>
+          <path d="M 178 284 C 179 270 182 258 184 248" stroke-width="3"/>
+          <path d="M 222 284 C 221 270 219 258 217 248" stroke-width="3"/>
+          <path d="M 184 248 C 172 228 166 204 168 178 C 170 148 179 130 196 118 C 212 107 230 105 247 112 C 264 119 275 136 278 160 C 281 184 277 210 268 232 C 260 250 246 260 232 262 C 218 264 205 259 196 250 C 190 244 186 242 184 248" stroke-width="3.2"/>
+          <path d="M 168 178 C 161 181 157 189 158 198 C 159 207 165 212 171 208" stroke-width="2.5"/>
+          <path d="M 278 160 C 285 163 289 171 288 180 C 287 189 282 193 277 191" stroke-width="2.5"/>
+          <path d="M 184 118 C 186 100 196 88 213 86 C 230 84 246 92 256 108 C 262 118 263 132 261 144" stroke-width="3"/>
+          <path d="M 184 118 C 181 110 180 100 182 92" stroke-width="2.5"/>
+          <path d="M 192 90 C 208 84 228 85 244 94" stroke-width="1.8"/>
+          <path d="M 186 104 C 202 96 224 96 242 106" stroke-width="1.5"/>
+          <path d="M 252 108 C 258 104 264 106 266 112 C 267 118 264 124 260 126" stroke-width="1.6"/>
+          <path d="M 186 176 C 190 170 199 167 207 167 C 215 167 221 170 223 175" stroke-width="2.8"/>
+          <path d="M 186 176 C 190 181 199 184 207 183 C 215 182 221 179 223 175" stroke-width="2.2"/>
+          <ellipse cx="205" cy="175" rx="4" ry="4" fill="#000"/>
+          <circle cx="207" cy="173" r="1.3" fill="white"/>
+          <path d="M 240 174 C 244 168 253 165 261 165 C 269 165 275 168 277 173" stroke-width="2.8"/>
+          <path d="M 240 174 C 244 179 253 182 261 181 C 269 180 275 177 277 173" stroke-width="2.2"/>
+          <ellipse cx="258" cy="173" rx="4" ry="4" fill="#000"/>
+          <circle cx="260" cy="171" r="1.3" fill="white"/>
+          <path d="M 223 173 C 226 170 229 170 231 172" stroke-width="1.5"/>
+          <path d="M 277 171 C 280 168 283 168 284 170" stroke-width="1.5"/>
+          <path d="M 184 164 C 190 160 200 158 213 160" stroke-width="2.5"/>
+          <path d="M 237 158 C 246 155 256 155 268 158" stroke-width="2.5"/>
+          <path d="M 224 186 C 222 196 220 204 216 210 C 213 214 209 215 206 214" stroke-width="2.2"/>
+          <path d="M 206 214 C 210 217 216 218 222 216 C 227 214 230 215 231 214" stroke-width="1.8"/>
+          <path d="M 200 242 C 208 238 218 236 228 237 C 236 238 242 241 244 245" stroke-width="2.5"/>
+          <path d="M 200 242 C 208 246 218 249 228 248 C 236 247 242 244 244 245" stroke-width="2"/>
+          <path d="M 198 242 C 196 245 196 248 198 250" stroke-width="1.5"/>
+          <path d="M 246 245 C 248 248 248 251 246 253" stroke-width="1.5"/>
+          <path d="M 190 250 C 196 260 208 266 220 266 C 232 266 243 259 248 250" stroke-width="2.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="avatar-name">Communicator</div>
+    <div class="avatar-desc">Open · Warm<br>Approachable</div>
+  </div>
+
+  <!-- 05 QUESTIONER -->
+  <div class="avatar-cell">
+    <div class="avatar-wrap">
+      <span class="avatar-number">05</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <defs>
+          <filter id="ink-q1"><feTurbulence type="turbulence" baseFrequency="0.042" numOctaves="3" seed="17" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink-q1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 85 390 C 92 344 126 312 160 298 L 176 288" stroke-width="3.5"/>
+          <path d="M 315 390 C 308 348 272 318 240 302 L 224 292" stroke-width="3.5"/>
+          <path d="M 160 298 C 176 307 200 310 200 310 C 200 310 224 307 240 302" stroke-width="3"/>
+          <path d="M 176 288 C 178 274 181 260 183 250" stroke-width="3"/>
+          <path d="M 224 292 C 222 278 220 264 218 252" stroke-width="3"/>
+          <path d="M 183 250 C 170 230 164 206 166 180 C 168 150 178 132 196 120 C 214 108 234 107 250 116 C 267 126 278 146 281 170 C 284 196 280 222 270 242 C 261 259 247 266 232 266 C 218 266 206 260 198 250 C 192 243 186 248 183 250" stroke-width="3.2"/>
+          <path d="M 166 180 C 159 183 155 191 156 200 C 157 209 163 214 169 210" stroke-width="2.5"/>
+          <path d="M 281 170 C 288 173 292 181 291 190 C 290 199 285 203 280 201" stroke-width="2.5"/>
+          <path d="M 183 120 C 185 102 196 90 215 88 C 234 86 250 95 260 112 C 266 122 267 136 265 148" stroke-width="3"/>
+          <path d="M 183 120 C 180 112 179 103 181 95" stroke-width="2.5"/>
+          <path d="M 194 92 C 206 86 222 86 236 92" stroke-width="1.8"/>
+          <path d="M 188 104 C 202 97 222 97 238 104" stroke-width="1.5"/>
+          <path d="M 248 92 C 254 84 260 82 264 86 C 267 90 264 98 258 102" stroke-width="1.8"/>
+          <path d="M 184 178 C 188 173 197 170 205 171 C 213 172 218 175 219 179" stroke-width="2.8"/>
+          <path d="M 184 178 C 188 182 197 184 205 183 C 213 182 218 180 219 179" stroke-width="2.5"/>
+          <path d="M 186 180 C 194 178 205 178 216 180" stroke-width="1.2"/>
+          <ellipse cx="202" cy="177" rx="4" ry="3.8" fill="#000"/>
+          <path d="M 238 175 C 242 168 251 165 260 165 C 269 165 275 169 277 175" stroke-width="2.8"/>
+          <path d="M 238 175 C 242 181 251 184 260 183 C 269 182 275 179 277 175" stroke-width="2.2"/>
+          <ellipse cx="257" cy="174" rx="4.5" ry="5" fill="#000"/>
+          <circle cx="259" cy="172" r="1.2" fill="white"/>
+          <path d="M 182 166 C 188 163 198 162 212 163" stroke-width="2.8"/>
+          <path d="M 236 158 C 244 152 255 149 268 152" stroke-width="2.8"/>
+          <path d="M 240 155 C 248 150 258 149 266 153" stroke-width="1.4"/>
+          <path d="M 270 153 C 273 156 273 160 271 163" stroke-width="1.6"/>
+          <path d="M 226 188 C 225 198 222 208 218 214 C 215 218 210 220 207 218" stroke-width="2.2"/>
+          <path d="M 207 218 C 211 221 217 222 223 219 C 228 217 231 218 232 217" stroke-width="1.8"/>
+          <path d="M 204 244 C 211 241 220 240 229 241 C 237 242 242 245 242 248" stroke-width="2.2"/>
+          <path d="M 204 244 C 206 247 212 249 221 248 C 230 247 237 245 240 247" stroke-width="1.8"/>
+          <path d="M 242 248 C 244 251 244 254 242 255" stroke-width="1.6"/>
+          <path d="M 202 245 C 200 248 200 252 202 253" stroke-width="1.4"/>
+          <path d="M 188 248 C 194 258 207 264 220 264 C 233 264 244 257 249 247" stroke-width="2.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="avatar-name">Questioner</div>
+    <div class="avatar-desc">Skeptical · Curious<br>Asymmetric</div>
+  </div>
+
+  <!-- 06 CALM -->
+  <div class="avatar-cell">
+    <div class="avatar-wrap">
+      <span class="avatar-number">06</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <defs>
+          <filter id="ink-b1"><feTurbulence type="turbulence" baseFrequency="0.025" numOctaves="3" seed="22" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink-b1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 88 390 C 94 348 126 318 160 306 L 178 296" stroke-width="3.2"/>
+          <path d="M 312 390 C 306 348 274 318 240 306 L 222 296" stroke-width="3.2"/>
+          <path d="M 160 306 C 176 314 200 318 200 318 C 200 318 224 314 240 306" stroke-width="2.8"/>
+          <path d="M 178 296 C 180 282 182 268 184 258" stroke-width="2.8"/>
+          <path d="M 222 296 C 220 282 218 268 216 258" stroke-width="2.8"/>
+          <path d="M 184 258 C 174 238 168 214 168 188 C 168 156 177 136 196 124 C 214 113 230 112 246 122 C 262 132 272 152 274 180 C 276 206 272 232 262 252 C 252 268 236 276 220 276 C 204 276 188 268 184 258" stroke-width="3"/>
+          <path d="M 168 188 C 161 191 157 199 158 208 C 159 217 165 221 171 218" stroke-width="2.3"/>
+          <path d="M 274 180 C 281 183 285 191 284 200 C 283 209 278 213 273 211" stroke-width="2.3"/>
+          <path d="M 184 124 C 186 106 197 95 215 93 C 233 91 248 100 256 116 C 261 126 262 140 260 152" stroke-width="2.8"/>
+          <path d="M 184 124 C 182 116 181 107 183 99" stroke-width="2.5"/>
+          <path d="M 190 97 C 206 91 222 91 238 98" stroke-width="1.6"/>
+          <path d="M 187 110 C 204 102 224 102 240 110" stroke-width="1.4"/>
+          <path d="M 186 120 C 204 113 224 113 240 120" stroke-width="1.2"/>
+          <path d="M 186 185 C 190 180 199 177 208 177 C 217 177 223 180 225 185" stroke-width="2.5"/>
+          <path d="M 186 185 C 190 188 199 190 208 189 C 217 188 223 186 225 185" stroke-width="2.2"/>
+          <path d="M 188 184 C 196 182 206 182 222 184" stroke-width="1.5"/>
+          <ellipse cx="206" cy="183" rx="3.5" ry="3.5" fill="#000"/>
+          <path d="M 240 183 C 244 178 253 175 262 175 C 271 175 277 178 279 183" stroke-width="2.5"/>
+          <path d="M 240 183 C 244 186 253 188 262 187 C 271 186 277 184 279 183" stroke-width="2.2"/>
+          <path d="M 242 182 C 250 180 260 180 276 182" stroke-width="1.5"/>
+          <ellipse cx="260" cy="181" rx="3.5" ry="3.5" fill="#000"/>
+          <path d="M 184 172 C 191 168 201 167 215 169" stroke-width="2.2"/>
+          <path d="M 239 167 C 249 165 259 166 271 170" stroke-width="2.2"/>
+          <path d="M 223 196 C 222 206 220 215 216 220 C 213 224 209 225 206 224" stroke-width="2"/>
+          <path d="M 206 224 C 210 227 216 228 222 226 C 227 224 230 224 231 223" stroke-width="1.6"/>
+          <path d="M 204 252 C 212 249 221 248 230 249 C 237 250 241 252 241 255" stroke-width="2"/>
+          <path d="M 205 254 C 212 257 221 258 230 257 C 237 256 241 254 241 255" stroke-width="1.6"/>
+          <path d="M 203 253 C 202 256 203 259 205 259" stroke-width="1.3"/>
+          <path d="M 243 255 C 244 258 243 261 241 261" stroke-width="1.3"/>
+          <path d="M 188 260 C 194 272 208 278 220 278 C 232 278 244 272 250 260" stroke-width="2.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="avatar-name">Calm</div>
+    <div class="avatar-desc">Balanced · Still<br>Meditative</div>
+  </div>
+
+  <!-- 07 INTENSE -->
+  <div class="avatar-cell">
+    <div class="avatar-wrap">
+      <span class="avatar-number">07</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <defs>
+          <filter id="ink-i1"><feTurbulence type="turbulence" baseFrequency="0.028" numOctaves="4" seed="31" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <g filter="url(#ink-i1)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 76 390 C 84 334 124 296 164 280 L 182 270" stroke-width="5"/>
+          <path d="M 324 390 C 316 334 276 296 236 280 L 218 270" stroke-width="5"/>
+          <path d="M 164 280 C 180 290 200 294 200 294 C 200 294 220 290 236 280" stroke-width="4"/>
+          <path d="M 182 270 C 182 255 183 242 185 232" stroke-width="4.5"/>
+          <path d="M 218 270 C 218 255 217 242 215 232" stroke-width="4.5"/>
+          <path d="M 185 232 C 174 210 168 184 170 156 C 172 124 183 104 202 93 C 220 82 240 82 256 93 C 272 104 282 124 284 156 C 286 184 280 210 270 232 C 260 250 242 260 222 260 C 202 260 186 248 185 232" stroke-width="4.5"/>
+          <path d="M 170 156 C 162 159 158 168 159 178 C 160 188 166 193 173 190" stroke-width="3.2"/>
+          <path d="M 284 156 C 292 159 296 168 295 178 C 294 188 288 193 281 190" stroke-width="3.2"/>
+          <path d="M 185 93 C 188 74 200 62 218 60 C 236 58 252 68 260 86 C 265 98 265 112 263 124" stroke-width="4"/>
+          <path d="M 185 93 C 182 85 181 76 183 68" stroke-width="3.5"/>
+          <path d="M 190 67 C 204 60 220 60 234 67" stroke-width="2.8"/>
+          <path d="M 187 78 C 202 70 222 70 240 78" stroke-width="2.4"/>
+          <path d="M 185 88 C 202 80 222 80 242 88" stroke-width="2.0"/>
+          <path d="M 204 62 C 202 75 202 88 204 100" stroke-width="1.8"/>
+          <path d="M 216 60 C 214 73 214 86 216 98" stroke-width="1.8"/>
+          <path d="M 228 63 C 226 76 226 90 228 102" stroke-width="1.6"/>
+          <path d="M 182 162 C 187 156 197 152 207 153 C 217 154 223 158 225 164" stroke-width="3.5"/>
+          <path d="M 182 162 C 187 166 197 168 207 167 C 217 166 223 163 225 164" stroke-width="3.2"/>
+          <path d="M 183 160 C 195 158 208 158 223 161" stroke-width="2.5"/>
+          <ellipse cx="204" cy="160" rx="5" ry="5" fill="#000"/>
+          <path d="M 238 160 C 243 154 253 150 263 151 C 273 152 279 156 281 162" stroke-width="3.5"/>
+          <path d="M 238 160 C 243 164 253 166 263 165 C 273 164 279 161 281 162" stroke-width="3.2"/>
+          <path d="M 239 158 C 251 156 264 156 279 159" stroke-width="2.5"/>
+          <ellipse cx="260" cy="158" rx="5" ry="5" fill="#000"/>
+          <path d="M 180 148 C 190 142 202 140 215 143" stroke-width="4"/>
+          <path d="M 250 143 C 263 140 273 142 282 148" stroke-width="4"/>
+          <path d="M 215 143 C 219 140 224 140 228 143" stroke-width="3.2"/>
+          <path d="M 250 143 C 246 140 241 140 237 143" stroke-width="3.2"/>
+          <path d="M 222 143 C 222 152 221 158 221 163" stroke-width="2.5"/>
+          <path d="M 228 143 C 228 152 229 158 229 163" stroke-width="2.2"/>
+          <path d="M 219 145 C 224 142 228 145" stroke-width="2.0"/>
+          <path d="M 226 174 C 225 186 222 197 218 204 C 215 209 210 211 206 210" stroke-width="3"/>
+          <path d="M 206 210 C 210 213 216 215 222 213 C 228 211 232 212 233 210" stroke-width="2.5"/>
+          <path d="M 226 155 C 227 163 227 170 226 174" stroke-width="3"/>
+          <path d="M 200 232 C 210 228 220 226 230 227 C 240 228 246 231 246 234" stroke-width="3.5"/>
+          <path d="M 200 234 C 210 236 220 238 230 237 C 240 236 246 233 246 234" stroke-width="3"/>
+          <path d="M 198 232 C 196 236 196 240 198 242" stroke-width="2.5"/>
+          <path d="M 248 234 C 250 238 250 242 248 244" stroke-width="2.5"/>
+          <path d="M 185 232 C 186 244 190 254 198 260 C 206 266 218 268 228 266 C 238 264 246 258 250 248 C 254 240 255 234 255 232" stroke-width="4"/>
+        </g>
+      </svg>
+    </div>
+    <div class="avatar-name">Intense</div>
+    <div class="avatar-desc">Tense · Focused<br>High-contrast</div>
+  </div>
+
+  <!-- filler cell to complete the 2x4 grid -->
+  <div class="avatar-cell filler"></div>
+
+</div>
+
+<footer>
+  7 archetypes · consistent visual system · attitude-driven variation
+</footer>
+
+</body>
+</html>

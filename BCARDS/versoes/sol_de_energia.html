@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>☀️ Sol de Energia</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+
+/* ══════════════════════════════════════
+   TOKENS / CSS VARIABLES
+   ══════════════════════════════════════ */
+:root {
+  /* sol base colors (mudam via JS) */
+  --sol-core:    #FFE566;
+  --sol-mid:     #FFA500;
+  --sol-outer:   #FF6B00;
+  --sol-glow:    rgba(255, 180, 0, 0.55);
+
+  /* switches accent */
+  --sw-1: #FFE566; /* intensidade */
+  --sw-2: #FF6B1A; /* calor       */
+  --sw-3: #A855F7; /* vibração     */
+  --sw-4: #22D3EE; /* fluxo        */
+  --sw-5: #F43F5E; /* caos         */
+
+  /* layout */
+  --bg:   #06000F;
+  --card: rgba(255,255,255,0.04);
+
+  /* states (animados via JS) */
+  --intensidade: 0;
+  --calor:       0;
+  --vibracao:    0;
+  --fluxo:       0;
+  --caos:        0;
+
+  /* derived */
+  --glow-size:   80px;
+  --sol-scale:   1;
+  --anim-speed:  3s;
+  --blur-extra:  0px;
+}
+
+/* ══════════════════════════════════════
+   RESET + BASE
+   ══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 16px 36px;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── ESTRELAS DE FUNDO ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 7%  10%, rgba(255,255,255,.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 40%, rgba(255,200,0,.7)   0%, transparent 100%),
+    radial-gradient(1px 1px at 34%  8%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 70%, rgba(255,120,0,.8)   0%, transparent 100%),
+    radial-gradient(1px 1px at 62% 18%, rgba(255,255,255,.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 74% 50%, rgba(250,220,50,.6)  0%, transparent 100%),
+    radial-gradient(1px 1px at 86% 32%, rgba(255,255,255,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 93% 78%, rgba(255,180,0,.6)   0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 14% 88%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 56% 55%, rgba(255,100,0,.4)   0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════
+   TÍTULO
+   ══════════════════════════════════════ */
+.titulo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  color: #FFE566;
+  text-shadow:
+    0 0 12px rgba(255,200,0,.9),
+    0 0 28px rgba(255,140,0,.6);
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+  position: relative; z-index: 1;
+  animation: title-float 4s ease-in-out infinite;
+}
+@keyframes title-float {
+  0%,100% { transform: translateY(0);  }
+  50%      { transform: translateY(-4px); }
+}
+
+.subtitulo {
+  font-size: clamp(.75rem, 3.5vw, .9rem);
+  color: rgba(255,220,100,.55);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  position: relative; z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   CARD PRINCIPAL
+   ══════════════════════════════════════ */
+.card {
+  position: relative; z-index: 1;
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  border: 1.5px solid rgba(255,200,50,.15);
+  border-radius: 32px;
+  padding: 28px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+
+  /* textura de profundidade */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 8px 40px rgba(0,0,0,.6),
+    inset 0 1px 0 rgba(255,255,255,.07);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* borda brilhante dinâmica */
+.card::before {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: 34px;
+  background: conic-gradient(
+    from 0deg,
+    var(--sol-outer) 0%,
+    transparent 30%,
+    var(--sol-mid)  60%,
+    transparent 80%,
+    var(--sol-core) 100%
+  );
+  opacity: 0.25;
+  z-index: -1;
+  animation: card-border-spin 8s linear infinite;
+  transition: opacity .6s;
+}
+.card:hover::before { opacity: 0.4; }
+@keyframes card-border-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ══════════════════════════════════════
+   ARENA DO SOL
+   ══════════════════════════════════════ */
+.sol-arena {
+  width: min(220px, 56vw);
+  height: min(220px, 56vw);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── RAIOS / CORONA ── */
+.sol-corona {
+  position: absolute; inset: -20px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--sol-outer) 0deg, transparent 25deg,
+    var(--sol-mid)  50deg, transparent 75deg,
+    var(--sol-core) 100deg, transparent 125deg,
+    var(--sol-outer) 150deg, transparent 175deg,
+    var(--sol-mid)  200deg, transparent 225deg,
+    var(--sol-core) 250deg, transparent 275deg,
+    var(--sol-outer) 300deg, transparent 325deg,
+    var(--sol-mid)  350deg, transparent 360deg
+  );
+  opacity: 0.5;
+  filter: blur(8px);
+  animation: corona-spin var(--anim-speed) linear infinite;
+  transition: opacity .5s, filter .5s;
+  mix-blend-mode: screen;
+}
+@keyframes corona-spin {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── GLOW EXTERNO ── */
+.sol-glow {
+  position: absolute; inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--sol-glow) 0%, transparent 70%);
+  animation: glow-pulse var(--anim-speed) ease-in-out infinite;
+  transition: background .5s;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+@keyframes glow-pulse {
+  0%,100% { transform: scale(1);    opacity: .8; }
+  50%      { transform: scale(1.18); opacity: 1;  }
+}
+
+/* ── BODY DO SOL ── */
+.sol-body {
+  position: relative;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255,255,200,.9) 0%, transparent 45%),
+    radial-gradient(circle at 65% 65%, rgba(255,100,0,.5)   0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, var(--sol-core) 0%, var(--sol-mid) 40%, var(--sol-outer) 100%);
+
+  box-shadow:
+    0 0 var(--glow-size) calc(var(--glow-size) * .5) var(--sol-glow),
+    0 0 20px 4px rgba(255,200,0,.5),
+    inset 0 -8px 24px rgba(0,0,0,.25),
+    inset 0  4px 16px rgba(255,255,200,.4);
+
+  transform: scale(var(--sol-scale));
+  filter: blur(var(--blur-extra));
+  will-change: transform, filter;
+
+  animation: sol-breath var(--anim-speed) ease-in-out infinite;
+  transition:
+    background .6s,
+    box-shadow .6s,
+    transform  .4s,
+    filter     .3s;
+}
+
+/* animação de respiração base (sobrescrita quando efeitos ativos) */
+@keyframes sol-breath {
+  0%,100% { transform: scale(calc(var(--sol-scale) * 1));    }
+  50%      { transform: scale(calc(var(--sol-scale) * 1.06)); }
+}
+
+/* ── CAMADA DE PLASMA (sempre girando) ── */
+.sol-plasma {
+  position: absolute; inset: 12%;
+  border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,255,200,.6) 0%,
+    transparent 20%,
+    rgba(255,200,50,.4) 40%,
+    transparent 60%,
+    rgba(255,150,0,.5)  80%,
+    transparent 100%
+  );
+  animation: plasma-spin 2s linear infinite;
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+}
+@keyframes plasma-spin {
+  from { transform: rotate(0deg);    }
+  to   { transform: rotate(-360deg); }
+}
+
+/* ── BRILHO INTERNO ── */
+.sol-inner-glow {
+  position: absolute; inset: 20%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 40% 38%,
+    rgba(255,255,255,.95) 0%,
+    rgba(255,230,100,.6)  25%,
+    transparent 65%
+  );
+  mix-blend-mode: overlay;
+  animation: inner-flicker 1.8s ease-in-out infinite alternate;
+}
+@keyframes inner-flicker {
+  0%   { opacity: .7; transform: scale(.9); }
+  100% { opacity: 1;  transform: scale(1);  }
+}
+
+/* ── PARTÍCULAS / CHAMAS ── */
+.sol-particle {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sol-core);
+  opacity: 0;
+  animation: particle-fly 3s ease-in-out infinite;
+  box-shadow: 0 0 6px 2px var(--sol-glow);
+}
+.sol-particle:nth-child(1) { left: 20%; top: 10%; animation-delay: 0s;    --px: -18px; --py: -28px; }
+.sol-particle:nth-child(2) { right:18%; top: 15%; animation-delay: .6s;   --px:  20px; --py: -24px; }
+.sol-particle:nth-child(3) { right:10%; top: 50%; animation-delay: 1.2s;  --px:  28px; --py:  -8px; }
+.sol-particle:nth-child(4) { right:22%; bottom:15%; animation-delay: 1.8s;--px:  16px; --py:  22px; }
+.sol-particle:nth-child(5) { left: 12%; bottom:20%; animation-delay: 2.4s;--px: -24px; --py:  18px; }
+.sol-particle:nth-child(6) { left: 50%; top:  8%;  animation-delay: .3s;  --px:   4px; --py: -30px; }
+
+@keyframes particle-fly {
+  0%   { opacity: 0; transform: translate(0,0)      scale(.5); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--px), var(--py)) scale(0); }
+}
+
+/* ══════════════════════════════════════
+   ESTADO: VIBRAÇÃO
+   ══════════════════════════════════════ */
+.sol-arena.vibrando .sol-body {
+  animation: sol-vibra .12s linear infinite, sol-breath var(--anim-speed) ease-in-out infinite;
+}
+@keyframes sol-vibra {
+  0%,100% { transform: scale(var(--sol-scale)) translate(0,0)      skew(0deg,0deg);  }
+  25%      { transform: scale(var(--sol-scale)) translate(-2px,-3px) skew(.5deg,0deg); }
+  50%      { transform: scale(var(--sol-scale)) translate(3px, 2px)  skew(0deg,.4deg); }
+  75%      { transform: scale(var(--sol-scale)) translate(-2px, 3px) skew(-.3deg,0deg);}
+}
+
+/* ══════════════════════════════════════
+   ESTADO: FLUXO (corona mais rápida)
+   ══════════════════════════════════════ */
+.sol-arena.fluindo .sol-corona {
+  animation: corona-spin .8s linear infinite;
+  opacity: .85;
+}
+.sol-arena.fluindo .sol-plasma {
+  animation: plasma-spin .6s linear infinite;
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════
+   ESTADO: CAOS
+   ══════════════════════════════════════ */
+.sol-arena.caos .sol-body {
+  animation: sol-breath var(--anim-speed) ease-in-out infinite, sol-caos .4s steps(1) infinite;
+}
+@keyframes sol-caos {
+  0%   { filter: hue-rotate(0deg)   saturate(1)   blur(0px);   }
+  14%  { filter: hue-rotate(30deg)  saturate(1.8) blur(1px);   }
+  28%  { filter: hue-rotate(-20deg) saturate(2.2) blur(0px);   }
+  42%  { filter: hue-rotate(60deg)  saturate(1.5) blur(2px);   }
+  56%  { filter: hue-rotate(-40deg) saturate(3)   blur(.5px);  }
+  70%  { filter: hue-rotate(15deg)  saturate(1.2) blur(0px);   }
+  84%  { filter: hue-rotate(-60deg) saturate(2.8) blur(1.5px); }
+  100% { filter: hue-rotate(0deg)   saturate(1)   blur(0px);   }
+}
+.sol-arena.caos .sol-glow {
+  animation: glow-pulse .3s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════
+   LABEL DE ESTADO
+   ══════════════════════════════════════ */
+.sol-estado {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.95rem, 4vw, 1.15rem);
+  color: var(--sol-core);
+  text-shadow: 0 0 10px var(--sol-glow);
+  text-align: center;
+  min-height: 1.5em;
+  transition: color .4s, text-shadow .4s;
+  animation: estado-fade 0s;
+}
+
+/* ══════════════════════════════════════
+   SWITCHES — GRID
+   ══════════════════════════════════════ */
+.switches-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sw-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 20px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: background .25s, border-color .25s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.sw-row:active { transform: scale(.97); }
+.sw-row.ativo {
+  background: rgba(255,255,255,.09);
+}
+
+/* ícone + nome */
+.sw-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sw-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px currentColor);
+  transition: transform .3s;
+}
+.sw-row.ativo .sw-emoji {
+  transform: scale(1.25) rotate(-8deg);
+  animation: emoji-bounce .4s ease;
+}
+@keyframes emoji-bounce {
+  0%   { transform: scale(1) rotate(0); }
+  40%  { transform: scale(1.4) rotate(-12deg); }
+  70%  { transform: scale(1.1) rotate(4deg); }
+  100% { transform: scale(1.25) rotate(-8deg); }
+}
+
+.sw-nome {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1rem, 4.5vw, 1.2rem);
+  color: rgba(255,255,255,.85);
+  letter-spacing: .02em;
+}
+
+/* ── TOGGLE VISUAL ── */
+.sw-toggle {
+  width: 56px; height: 30px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.1);
+  border-radius: 15px;
+  position: relative;
+  transition: background .35s;
+  border: 2px solid rgba(255,255,255,.15);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
+}
+.sw-toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.5);
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .35s, box-shadow .35s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+
+/* ativo: cada switch com cor própria */
+.sw-row[data-sw="1"].ativo .sw-toggle { background: var(--sw-1); border-color: var(--sw-1); box-shadow: 0 0 12px var(--sw-1), inset 0 0 6px rgba(255,255,255,.2); }
+.sw-row[data-sw="2"].ativo .sw-toggle { background: var(--sw-2); border-color: var(--sw-2); box-shadow: 0 0 12px var(--sw-2), inset 0 0 6px rgba(255,255,255,.2); }
+.sw-row[data-sw="3"].ativo .sw-toggle { background: var(--sw-3); border-color: var(--sw-3); box-shadow: 0 0 12px var(--sw-3), inset 0 0 6px rgba(255,255,255,.2); }
+.sw-row[data-sw="4"].ativo .sw-toggle { background: var(--sw-4); border-color: var(--sw-4); box-shadow: 0 0 12px var(--sw-4), inset 0 0 6px rgba(255,255,255,.2); }
+.sw-row[data-sw="5"].ativo .sw-toggle { background: var(--sw-5); border-color: var(--sw-5); box-shadow: 0 0 12px var(--sw-5), inset 0 0 6px rgba(255,255,255,.2); }
+
+.sw-row.ativo .sw-toggle::after {
+  transform: translateX(26px);
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,.4), 0 0 8px rgba(255,255,255,.6);
+}
+
+/* ── ROW GLOW ao ativar ── */
+.sw-row[data-sw="1"].ativo { border-color: rgba(255,229,102,.3); }
+.sw-row[data-sw="2"].ativo { border-color: rgba(255,107,26,.3);  }
+.sw-row[data-sw="3"].ativo { border-color: rgba(168,85,247,.3);  }
+.sw-row[data-sw="4"].ativo { border-color: rgba(34,211,238,.3);  }
+.sw-row[data-sw="5"].ativo { border-color: rgba(244,63,94,.3);   }
+
+/* ══════════════════════════════════════
+   CONTADOR DE ENERGIA
+   ══════════════════════════════════════ */
+.energia-bar-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.energia-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: .85rem;
+  color: rgba(255,220,80,.6);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.energia-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,.08);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.energia-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #FFE566, #FFA500, #FF6B00);
+  box-shadow: 0 0 10px rgba(255,180,0,.7);
+  transition: width .5s cubic-bezier(.34,1.3,.64,1), background .5s;
+}
+
+/* ══════════════════════════════════════
+   EFEITO DE TOQUE NO SOL
+   ══════════════════════════════════════ */
+.sol-tap-ring {
+  position: absolute;
+  width: 60%; height: 60%;
+  border: 3px solid rgba(255,220,100,.8);
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+.sol-tap-ring.disparar {
+  animation: tap-ring .5s ease-out forwards;
+}
+@keyframes tap-ring {
+  0%   { transform: translate(-50%,-50%) scale(.5); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(2.2); opacity: 0; }
+}
+
+/* ══════════════════════════════════════
+   RODAPÉ
+   ══════════════════════════════════════ */
+.rodape {
+  margin-top: 18px;
+  font-size: .72rem;
+  color: rgba(255,200,50,.25);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  position: relative; z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   DESKTOP HOVER EXTRA
+   ══════════════════════════════════════ */
+@media (hover: hover) {
+  .sw-row:hover {
+    background: rgba(255,255,255,.07);
+    transform: translateY(-1px) scale(1.01);
+  }
+  .sol-arena:hover .sol-body {
+    filter: brightness(1.15);
+  }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVO
+   ══════════════════════════════════════ */
+@media (max-width: 360px) {
+  .card { padding: 20px 14px 24px; }
+  .sw-row { padding: 12px 14px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- TÍTULO -->
+<h1 class="titulo">☀️ Sol de Energia</h1>
+<p class="subtitulo">toque nos botões e sinta a magia!</p>
+
+<!-- CARD PRINCIPAL -->
+<div class="card">
+
+  <!-- ARENA DO SOL -->
+  <div class="sol-arena" id="solArena" onclick="tocouNoSol()">
+
+    <!-- camadas em ordem de z-index (de baixo pra cima) -->
+    <div class="sol-glow"      id="solGlow"></div>
+    <div class="sol-corona"    id="solCorona"></div>
+    <div class="sol-body"      id="solBody">
+      <div class="sol-plasma"></div>
+      <div class="sol-inner-glow"></div>
+      <!-- partículas -->
+      <div class="sol-particle"></div>
+      <div class="sol-particle"></div>
+      <div class="sol-particle"></div>
+      <div class="sol-particle"></div>
+      <div class="sol-particle"></div>
+      <div class="sol-particle"></div>
+    </div>
+    <div class="sol-tap-ring" id="tapRing"></div>
+
+  </div>
+
+  <!-- ESTADO TEXTUAL -->
+  <div class="sol-estado" id="solEstado">🌙 dormindo...</div>
+
+  <!-- BARRA DE ENERGIA -->
+  <div class="energia-bar-wrap">
+    <span class="energia-label">⚡ Energia</span>
+    <div class="energia-bar">
+      <div class="energia-fill" id="energiaFill"></div>
+    </div>
+  </div>
+
+  <!-- SWITCHES -->
+  <div class="switches-grid">
+
+    <div class="sw-row" data-sw="1" onclick="toggleSwitch(1)">
+      <div class="sw-info">
+        <span class="sw-emoji">✨</span>
+        <span class="sw-nome">Intensidade</span>
+      </div>
+      <div class="sw-toggle"></div>
+    </div>
+
+    <div class="sw-row" data-sw="2" onclick="toggleSwitch(2)">
+      <div class="sw-info">
+        <span class="sw-emoji">🔥</span>
+        <span class="sw-nome">Calor</span>
+      </div>
+      <div class="sw-toggle"></div>
+    </div>
+
+    <div class="sw-row" data-sw="3" onclick="toggleSwitch(3)">
+      <div class="sw-info">
+        <span class="sw-emoji">🌀</span>
+        <span class="sw-nome">Vibração</span>
+      </div>
+      <div class="sw-toggle"></div>
+    </div>
+
+    <div class="sw-row" data-sw="4" onclick="toggleSwitch(4)">
+      <div class="sw-info">
+        <span class="sw-emoji">💫</span>
+        <span class="sw-nome">Fluxo</span>
+      </div>
+      <div class="sw-toggle"></div>
+    </div>
+
+    <div class="sw-row" data-sw="5" onclick="toggleSwitch(5)">
+      <div class="sw-info">
+        <span class="sw-emoji">⚡</span>
+        <span class="sw-nome">Caos</span>
+      </div>
+      <div class="sw-toggle"></div>
+    </div>
+
+  </div><!-- fim switches-grid -->
+
+</div><!-- fim card -->
+
+<p class="rodape">toque no sol para despertar ✦</p>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════ -->
+<script>
+/* ── ESTADO ── */
+const estado = {
+  sw: [false, false, false, false, false],  // sw[0] = switch 1, etc.
+  get ativos() { return this.sw.filter(Boolean).length; }
+};
+
+/* ── PALETAS POR CALOR ──
+   cada paleta = [core, mid, outer, glow]          */
+const paletas = {
+  frio: ['#FFE566','#FFA500','#FF6B00','rgba(255,180,0,.55)'],
+  morno:['#FFB833','#FF7700','#FF3D00','rgba(255,120,0,.65)'],
+  quente:['#FF7733','#FF3300','#CC0000','rgba(255,60,0,.7)'],
+};
+
+/* ── MENSAGENS DE ESTADO ── */
+const mensagens = [
+  '🌙 dormindo...',
+  '💤 acordando...',
+  '✨ brilhando!',
+  '🔥 esquentando!',
+  '⚡ energia total!',
+  '🌟 PODER MÁXIMO!!!',
+];
+
+/* ── REFS DOM ── */
+const root      = document.documentElement;
+const arena     = document.getElementById('solArena');
+const solBody   = document.getElementById('solBody');
+const solGlow   = document.getElementById('solGlow');
+const solEstado = document.getElementById('solEstado');
+const energiaEl = document.getElementById('energiaFill');
+const tapRing   = document.getElementById('tapRing');
+
+/* ══════════════════════════════════════
+   TOGGLE SWITCH
+   ══════════════════════════════════════ */
+function toggleSwitch(n) {
+  const idx = n - 1;
+  estado.sw[idx] = !estado.sw[idx];
+
+  // atualiza visual da row
+  const row = document.querySelector(`.sw-row[data-sw="${n}"]`);
+  row.classList.toggle('ativo', estado.sw[idx]);
+
+  // feedback háptico (vibração leve no mobile)
+  if (navigator.vibrate) navigator.vibrate(estado.sw[idx] ? [30] : [15]);
+
+  // aplica efeitos
+  aplicarEfeitos();
+}
+
+/* ══════════════════════════════════════
+   APLICAR EFEITOS NO SOL
+   ══════════════════════════════════════ */
+function aplicarEfeitos() {
+  const [intens, calor, vibra, fluxo, caos] = estado.sw;
+  const qtd = estado.ativos;
+
+  // ── PALETA (calor) ──
+  let p;
+  if (calor && qtd >= 4) p = paletas.quente;
+  else if (calor)        p = paletas.morno;
+  else                   p = paletas.frio;
+
+  root.style.setProperty('--sol-core',  p[0]);
+  root.style.setProperty('--sol-mid',   p[1]);
+  root.style.setProperty('--sol-outer', p[2]);
+  root.style.setProperty('--sol-glow',  p[3]);
+
+  // ── GLOW SIZE (intensidade) ──
+  const glowBase = intens ? 120 : 80;
+  root.style.setProperty('--glow-size', glowBase + 'px');
+
+  // ── ESCALA (intensidade) ──
+  const scale = intens ? (qtd >= 4 ? 1.18 : 1.1) : 1;
+  root.style.setProperty('--sol-scale', scale);
+
+  // ── VELOCIDADE (calor / caos) ──
+  let speed;
+  if (caos)       speed = '.8s';
+  else if (calor) speed = '1.4s';
+  else            speed = '3s';
+  root.style.setProperty('--anim-speed', speed);
+
+  // ── BLUR EXTRA (vibração / caos) ──
+  const blur = (vibra || caos) ? (caos ? '1.5px' : '0px') : '0px';
+  root.style.setProperty('--blur-extra', blur);
+
+  // ── CLASSES NO ARENA ──
+  arena.classList.toggle('vibrando', vibra);
+  arena.classList.toggle('fluindo',  fluxo);
+  arena.classList.toggle('caos',     caos);
+
+  // ── BARRA DE ENERGIA ──
+  const pct = Math.round((qtd / 5) * 100);
+  energiaEl.style.width = pct + '%';
+  if (qtd === 0) energiaEl.style.background = 'linear-gradient(90deg,#FFE566,#FFA500,#FF6B00)';
+  else if (calor) energiaEl.style.background = 'linear-gradient(90deg,#FF7733,#FF3300,#CC0000)';
+  else energiaEl.style.background = 'linear-gradient(90deg,#FFE566,#FFA500,#FF6B00)';
+
+  // ── MENSAGEM ──
+  let msg;
+  if      (caos && qtd === 5)   msg = '🌟 PODER MÁXIMO!!!';
+  else if (caos)                msg = '⚡ energia total!';
+  else if (qtd >= 4)            msg = '🔥 esquentando!';
+  else if (qtd === 3)           msg = '✨ brilhando!';
+  else if (qtd === 2)           msg = '💤 acordando...';
+  else if (qtd === 1)           msg = '✨ brilhando!';
+  else                          msg = '🌙 dormindo...';
+
+  solEstado.textContent = msg;
+  solEstado.style.color = p[0];
+  solEstado.style.textShadow = `0 0 12px ${p[3]}`;
+}
+
+/* ══════════════════════════════════════
+   TOQUE NO SOL — feedback visual
+   ══════════════════════════════════════ */
+function tocouNoSol() {
+  // dispara ring
+  tapRing.classList.remove('disparar');
+  void tapRing.offsetWidth; // reflow trick
+  tapRing.classList.add('disparar');
+  tapRing.addEventListener('animationend', () => tapRing.classList.remove('disparar'), { once: true });
+
+  // escala rápida
+  solBody.style.transition = 'transform .1s ease-out';
+  solBody.style.transform  = `scale(${parseFloat(getComputedStyle(root).getPropertyValue('--sol-scale') || 1) * 1.15})`;
+  setTimeout(() => {
+    solBody.style.transition = '';
+    solBody.style.transform  = '';
+  }, 180);
+
+  if (navigator.vibrate) navigator.vibrate([20, 10, 20]);
+}
+
+/* ══════════════════════════════════════
+   CAOS: PULSOS ALEATÓRIOS
+   ══════════════════════════════════════ */
+function pulsoCaos() {
+  if (!estado.sw[4]) return; // switch 5 = índice 4
+  // pequenas variações aleatórias na escala
+  const v = .95 + Math.random() * .15;
+  solBody.style.transform = `scale(${v})`;
+  setTimeout(() => { solBody.style.transform = ''; }, 80 + Math.random()*80);
+  setTimeout(pulsoCaos, 200 + Math.random() * 300);
+}
+
+// observa mudança no switch 5 para iniciar loop de caos
+const origToggle = window.toggleSwitch;
+window.toggleSwitch = function(n) {
+  origToggle(n);
+  if (n === 5 && estado.sw[4]) {
+    setTimeout(pulsoCaos, 200);
+  }
+};
+
+</script>
+</body>
+</html>

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>✦ Almas de Energia</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   ROOT
+══════════════════════════════════════════ */
+:root {
+  --bg: #06000f;
+  --card-bg: rgba(255,255,255,0.035);
+  --card-border: rgba(255,255,255,0.07);
+  --text-dim: rgba(255,255,255,0.28);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* estrelas de fundo */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at  8% 12%, rgba(255,255,255,.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 45%, rgba(255,79,163,.7)  0%, transparent 100%),
+    radial-gradient(1px 1px at 35%  8%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 48% 75%, rgba(180,79,255,.8)  0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 72% 55%, rgba(0,229,255,.6)   0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 80%, rgba(255,224,0,.6)   0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 90%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 50%, rgba(255,79,163,.4)  0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 65%, rgba(0,255,200,.3)   0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 15%, rgba(255,200,0,.4)   0%, transparent 100%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ══════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════ */
+header {
+  position: relative; z-index: 10;
+  padding: 22px 20px 14px;
+  text-align: center;
+}
+
+.page-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.7rem, 6vw, 2.8rem);
+  background: linear-gradient(135deg, #FFE566 0%, #FF9D00 40%, #FF4FA3 80%, #B44FFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(255,160,0,.5));
+  letter-spacing: .06em;
+}
+
+.page-sub {
+  font-weight: 900;
+  font-size: clamp(.55rem, 2vw, .72rem);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+/* ══════════════════════════════════════════
+   LAYOUT PRINCIPAL
+══════════════════════════════════════════ */
+main {
+  position: relative; z-index: 5;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 14px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ══════════════════════════════════════════
+   ALMA CARD (hero — o selecionado)
+══════════════════════════════════════════ */
+.hero-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 28px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .4s;
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 12px 48px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter: blur(16px);
+}
+
+/* borda animada giratória */
+.hero-card::before {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: 30px;
+  background: conic-gradient(from 0deg, var(--alma-glow, #FFE566) 0%, transparent 35%, var(--alma-glow2, #FF9D00) 60%, transparent 85%, var(--alma-glow, #FFE566) 100%);
+  opacity: .22;
+  z-index: -1;
+  animation: border-giro 7s linear infinite;
+}
+@keyframes border-giro { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.hero-canvas-wrap {
+  width: min(240px, 60vw);
+  height: min(240px, 60vw);
+  position: relative;
+  flex-shrink: 0;
+}
+
+#hero-canvas {
+  display: block;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: #020208;
+  box-shadow: 0 0 40px var(--alma-glow, rgba(255,200,0,.4));
+  transition: box-shadow .5s;
+}
+
+.hero-info {
+  text-align: center;
+}
+
+.hero-nome {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.3rem, 5vw, 1.7rem);
+  letter-spacing: .05em;
+  color: var(--alma-glow, #FFE566);
+  text-shadow: 0 0 16px var(--alma-glow, rgba(255,200,0,.5));
+  transition: color .4s, text-shadow .4s;
+}
+
+.hero-poder {
+  font-weight: 900;
+  font-size: clamp(.58rem, 2.2vw, .72rem);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.hero-desc {
+  font-size: clamp(.78rem, 3vw, .9rem);
+  font-weight: 800;
+  color: rgba(255,255,255,.45);
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* ══════════════════════════════════════════
+   SWITCHES DE PODERES (5)
+══════════════════════════════════════════ */
+.poderes-titulo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.85rem, 3vw, 1rem);
+  color: rgba(255,255,255,.4);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 0 2px;
+}
+
+.poderes-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.poder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .12s;
+}
+.poder-row:active { transform: scale(.97); }
+.poder-row.ativo {
+  background: rgba(255,255,255,.07);
+  border-color: var(--sw-color, rgba(255,200,0,.3));
+}
+
+.poder-esq {
+  display: flex; align-items: center; gap: 11px;
+}
+.poder-emoji {
+  font-size: 1.5rem; line-height: 1;
+  transition: transform .3s;
+}
+.poder-row.ativo .poder-emoji { transform: scale(1.3) rotate(-10deg); animation: eb .35s ease; }
+@keyframes eb { 0%{transform:scale(1) rotate(0)} 45%{transform:scale(1.5) rotate(-15deg)} 100%{transform:scale(1.3) rotate(-10deg)} }
+
+.poder-textos { display: flex; flex-direction: column; gap: 1px; }
+.poder-nome {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.95rem, 3.5vw, 1.1rem);
+  color: rgba(255,255,255,.85);
+}
+.poder-dica {
+  font-size: clamp(.6rem, 2.2vw, .7rem);
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* toggle */
+.toggle {
+  width: 52px; height: 28px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.09);
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,.13);
+  position: relative;
+  transition: background .3s, border-color .3s, box-shadow .3s;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.3);
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.45);
+  transition: transform .32s cubic-bezier(.34,1.56,.64,1), background .3s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.poder-row.ativo .toggle {
+  background: var(--sw-color, #FFE566);
+  border-color: var(--sw-color, #FFE566);
+  box-shadow: 0 0 14px var(--sw-color, #FFE566), inset 0 0 6px rgba(255,255,255,.15);
+}
+.poder-row.ativo .toggle::after {
+  transform: translateX(24px);
+  background: #fff;
+}
+
+/* ══════════════════════════════════════════
+   GRID DE ALMAS (seleção)
+══════════════════════════════════════════ */
+.almas-titulo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.85rem, 3vw, 1rem);
+  color: rgba(255,255,255,.4);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 0 2px;
+}
+
+.almas-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.alma-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 10px 4px 8px;
+  border-radius: 16px;
+  border: 1.5px solid var(--card-border);
+  background: var(--card-bg);
+  transition: border-color .25s, background .25s, transform .15s;
+  position: relative;
+  overflow: hidden;
+}
+.alma-mini:active { transform: scale(.93); }
+.alma-mini.ativa {
+  border-color: var(--glow);
+  background: rgba(255,255,255,.07);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 40%, transparent);
+}
+
+.alma-mini canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #020208;
+}
+
+.alma-mini-nome {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.58rem, 2.2vw, .72rem);
+  letter-spacing: .04em;
+  color: var(--glow, #fff);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.alma-mini .coroa {
+  position: absolute;
+  top: 4px; right: 6px;
+  font-size: .75rem;
+  opacity: 0;
+  transition: opacity .2s;
+  filter: drop-shadow(0 0 5px gold);
+}
+.alma-mini.ativa .coroa { opacity: 1; }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: linear-gradient(135deg, #FF4FA3, #B44FFF);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(.85rem, 3vw, 1rem);
+  padding: 9px 22px;
+  border-radius: 40px;
+  box-shadow: 0 4px 24px rgba(180,79,255,.5);
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999;
+  white-space: nowrap;
+  pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (min-width: 520px) {
+  .almas-grid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (hover: hover) {
+  .poder-row:hover { background: rgba(255,255,255,.06); }
+  .alma-mini:hover { transform: translateY(-2px) scale(1.04); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="page-title">✦ Almas de Energia</div>
+  <div class="page-sub">toque nas almas · acorde os poderes</div>
+</header>
+
+<main>
+
+  <!-- HERO CANVAS (alma ativa grande) -->
+  <div class="hero-card" id="heroCard">
+    <div class="hero-canvas-wrap">
+      <canvas id="hero-canvas"></canvas>
+    </div>
+    <div class="hero-info">
+      <div class="hero-nome" id="heroNome">☀️ SOL</div>
+      <div class="hero-poder" id="heroPoder">Energia do Dia</div>
+    </div>
+    <div class="hero-desc" id="heroDesc">Quente e cheio de luz, o Sol pulsa como um coração de fogo.</div>
+  </div>
+
+  <!-- PODERES / SWITCHES -->
+  <div class="poderes-titulo">⚡ Poderes</div>
+  <div class="poderes-grid" id="poderesGrid"></div>
+
+  <!-- GRID DE ALMAS -->
+  <div class="almas-titulo">✦ Escolha a Alma</div>
+  <div class="almas-grid" id="almasGrid"></div>
+
+</main>
+
+<div id="toast">✨ ...</div>
+
+<!-- ══════════════════════════════════════════
+     ENGINE JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────
+   ALMAS — cada uma tem personalidade única
+   h: matiz HSL base
+   s: saturação offset
+   a3: cor alternativa [r,g,b] para PUFFS ímpares
+   speed: velocidade do tempo (mais = mais caótico)
+   bperiod: período do breathing (ms)
+   glow / glow2: cores CSS para UI
+───────────────────────────────────────── */
+const ALMAS = [
+  {
+    id: 'sol',
+    nome: 'SOL', emoji: '☀️',
+    poder: 'Energia do Dia',
+    desc: 'Quente e cheio de luz, o Sol pulsa como um coração de fogo.',
+    h: 38,  s: 22, l: 46,
+    a3: [220, 140, 40],
+    speed: .0108, bperiod: 8200,
+    glow: '#FFE566', glow2: '#FF9D00',
+  },
+  {
+    id: 'lua',
+    nome: 'LUA', emoji: '🌙',
+    poder: 'Névoa Lunar',
+    desc: 'Fria e misteriosa, a Lua dança devagar entre as sombras.',
+    h: 205, s: 18, l: 48,
+    a3: [130, 200, 240],
+    speed: .0042, bperiod: 9400,
+    glow: '#00E5FF', glow2: '#5BAAFF',
+  },
+  {
+    id: 'planta',
+    nome: 'PLANTA', emoji: '🌿',
+    poder: 'Bosque Vivo',
+    desc: 'Raízes e folhas respiram juntos, crescendo para a luz.',
+    h: 140, s: 18, l: 40,
+    a3: [80, 200, 90],
+    speed: .0210, bperiod: 7600,
+    glow: '#39FF14', glow2: '#00CC44',
+  },
+  {
+    id: 'cosmo',
+    nome: 'COSMO', emoji: '💜',
+    poder: 'Cosmos Infinito',
+    desc: 'Galáxias giram dentro dele, cheias de estrelas e mistério.',
+    h: 270, s: 20, l: 48,
+    a3: [160, 80, 220],
+    speed: .0380, bperiod: 8800,
+    glow: '#B44FFF', glow2: '#7C3AED',
+  },
+  {
+    id: 'fogo',
+    nome: 'FOGO', emoji: '🔥',
+    poder: 'Chama Selvagem',
+    desc: 'Rápido e furioso, o Fogo nunca fica parado — arde sempre!',
+    h: 12,  s: 26, l: 42,
+    a3: [220, 60, 20],
+    speed: .0680, bperiod: 6800,
+    glow: '#FF4FA3', glow2: '#FF6B1A',
+  },
+];
+
+/* ─────────────────────────────────────────
+   PODERES — afetam o drawSmoke em tempo real
+───────────────────────────────────────── */
+const PODERES = [
+  { key:'density',    emoji:'💨', nome:'Fumaça',    dica:'grossa ou fininha',   ativo: false, color:'#00E5FF',   min:0.5, max:1.8, valOn:1.6, valOff:0.8 },
+  { key:'turbulence', emoji:'🌀', nome:'Redemoinho', dica:'faíscas por dentro',  ativo: false, color:'#B44FFF',   min:0,   max:3,   valOn:2.5, valOff:0   },
+  { key:'halo',       emoji:'🌟', nome:'Brilho',     dica:'luz de dentro pra fora', ativo: false, color:'#FFE566', min:0.5, max:2.5, valOn:2.2, valOff:0.8 },
+  { key:'drift',      emoji:'🪂', nome:'Voar',       dica:'sobe no ar',          ativo: false, color:'#39FF14',   min:-0.5,max:1.2, valOn:0.9, valOff:0   },
+  { key:'centrifugal',emoji:'💫', nome:'Girar',      dica:'expande tudo pra fora', ativo: false, color:'#FF4FA3', min:0.5, max:3,   valOn:2.4, valOff:1   },
+];
+
+// valores vivos (atualizados ao toggle)
+const P = {
+  density: 0.8,
+  turbulence: 0,
+  halo: 0.8,
+  drift: 0,
+  centrifugal: 1,
+};
+
+/* ─────────────────────────────────────────
+   ESTADO
+───────────────────────────────────────── */
+let selectedId = 'sol';
+const T = {}; // tempo por alma
+ALMAS.forEach(a => T[a.id] = Math.random() * 10);
+
+/* ─────────────────────────────────────────
+   NOISE (mesmo do original)
+───────────────────────────────────────── */
+function n2(t, f, p) {
+  return .42 * Math.sin(t * f + p)
+       + .28 * Math.sin(t * f * 1.618 + p * 1.3)
+       + .18 * Math.sin(t * f * 2.618 + p * 2.1)
+       + .12 * Math.sin(t * f * 4.236 + p * 3.4);
+}
+
+function hsl2rgb(h, s, l) {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n, k = (n + h / 30) % 12) => l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+  return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+}
+
+function breathwave(alma) {
+  const ph = (performance.now() % alma.bperiod) / alma.bperiod;
+  return .5 - .5 * Math.cos(ph * Math.PI * 2);
+}
+
+const BASE_SPEED = .0108, BASE_BPM = 62;
+function heartbeat(alma) {
+  const bpm = BASE_BPM * (alma.speed / BASE_SPEED);
+  const period = 60000 / bpm;
+  const ph = (performance.now() % period) / period;
+  const g = (x, mu, sig) => Math.exp(-.5 * ((x - mu) / sig) ** 2);
+  return Math.max(0, g(ph, .10, .045) + g(ph, .22, .055) * .58);
+}
+
+/* ─────────────────────────────────────────
+   DRAW SMOKE — motor central (idêntico ao original)
+───────────────────────────────────────── */
+function drawSmoke(ctx, alma, W, H) {
+  const cx = W / 2, cy = H / 2, R = W * .46;
+  const t = T[alma.id];
+  const HB = heartbeat(alma);
+  const BW = breathwave(alma);
+  const om = 1 + .09 * BW * P.centrifugal;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+  ctx.fillStyle = '#020208'; ctx.fillRect(0, 0, W, H);
+
+  const baseRGB = hsl2rgb(alma.h, Math.min(alma.s * 2.8, 72), alma.l);
+  const a3 = alma.a3;
+
+  const PUFFS = [
+    { seed:1, ox: Math.cos(t*.50)*R*.44*om,      oy: Math.sin(t*.40)*R*.40*om,      col: baseRGB, alpha: .72 },
+    { seed:2, ox: Math.cos(t*.70+2.1)*R*.42*om,  oy: Math.sin(t*.60+1.0)*R*.44*om,  col: baseRGB, alpha: .58 },
+    { seed:3, ox: Math.cos(t*.90+4.2)*R*.46*om,  oy: Math.sin(t*.80+3.0)*R*.42*om,  col: a3,      alpha: .52 },
+    { seed:4, ox: Math.cos(t*.38+3.1)*R*.48*om,  oy: Math.sin(t*.32+1.7)*R*.44*om,  col: a3,      alpha: .40 },
+    { seed:5, ox: Math.cos(t*.55+5.4)*R*.32*om,  oy: Math.sin(t*.48+4.2)*R*.30*om,  col: baseRGB, alpha: .46 },
+    { seed:6, ox: Math.cos(t*.60+1.5)*R*.34*om,  oy: Math.sin(t*1.00+2.5)*R*.34*om, col: baseRGB, alpha: .42 },
+    { seed:7, ox: Math.cos(t*1.10+0.8)*R*.30*om, oy: Math.sin(t*.85+3.8)*R*.32*om,  col: a3,      alpha: .35 },
+  ];
+
+  ctx.globalCompositeOperation = 'screen';
+
+  PUFFS.forEach(p => {
+    const s = p.seed;
+    const driftBias = P.drift * .18;
+    const ox = p.ox, oy = p.oy - R * driftBias * (1 + s * .12);
+    const sx = 1 + .38 * n2(t, .13, s * 1.3);
+    const sy = 1 + .32 * n2(t, .11, s * 2.1);
+    const rot = n2(t, .17, s * .7) * .9;
+    const pSize = R * (.30 + .18 * n2(t, .23, s * 1.1)) * (1 + .12 * HB);
+
+    for (let i = 0; i < 5; i++) {
+      const fi = i / 5;
+      const fdx = pSize * .45 * n2(t, .31 + i * .07, s * .9 + i * 1.1);
+      const fdy = pSize * .38 * n2(t, .29 + i * .05, s * 1.7 + i * .9);
+      const fr  = pSize * (.55 - fi * .25) * (1 + .15 * n2(t, .19, s + i));
+      const fa  = p.alpha * P.density * (1 - Math.pow(fi, .5 + 1 * .6) * .72) * (1 + .22 * HB);
+
+      ctx.save();
+      ctx.translate(cx + ox, cy + oy);
+      ctx.rotate(rot);
+      ctx.scale(sx * (1 - fi * .12), sy * (1 - fi * .08));
+
+      const g = ctx.createRadialGradient(fdx, fdy, 0, fdx, fdy, fr);
+      const [r, gv, b] = p.col;
+      const hs = P.halo;
+      const rl = Math.min(r  + Math.round(50 * hs), 255);
+      const gl = Math.min(gv + Math.round(50 * hs), 255);
+      const bl = Math.min(b  + Math.round(50 * hs), 255);
+
+      g.addColorStop(0,   `rgba(${r},${gv},${b},${Math.min(fa, .95)})`);
+      g.addColorStop(.18, `rgba(${rl},${gl},${bl},${fa*.55*Math.min(hs,1.5)})`);
+      g.addColorStop(.45, `rgba(${r},${gv},${b},${fa*.28})`);
+      g.addColorStop(.72, `rgba(${r},${gv},${b},${fa*.08})`);
+      g.addColorStop(1,   `rgba(${r},${gv},${b},0)`);
+
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(fdx, fdy, fr, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  });
+
+  /* turbulência */
+  const turbMul = P.turbulence;
+  if (turbMul > 0) {
+    const nV = Math.round(4 + turbMul * 4);
+    for (let k = 0; k < nV; k++) {
+      const ka = k * (Math.PI * 2 / nV) + t * .03;
+      const kn = n2(t, .07 + k * .03, k * 2.3);
+      const tx1 = cx + R * .7 * Math.cos(ka) * kn;
+      const ty1 = cy + R * .7 * Math.sin(ka) * kn;
+      const vr  = R * (.08 + .08 * turbMul) * (.6 + .4 * Math.abs(kn));
+      const [r, gv, b] = baseRGB;
+      const vg = ctx.createRadialGradient(tx1, ty1, 0, tx1, ty1, vr);
+      vg.addColorStop(0,  `rgba(${r},${gv},${b},${.14*turbMul*(1+HB*.3)})`);
+      vg.addColorStop(.4, `rgba(${r},${gv},${b},0.04)`);
+      vg.addColorStop(1,  `rgba(${r},${gv},${b},0)`);
+      ctx.fillStyle = vg;
+      ctx.beginPath(); ctx.arc(tx1, ty1, vr, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  /* brilho móvel */
+  ctx.globalCompositeOperation = 'screen';
+  const lx = cx + Math.cos(t * .45 + 1) * R * .32;
+  const ly = cy + Math.sin(t * .55 + .5) * R * .28;
+  const sh = ctx.createRadialGradient(lx, ly, 0, lx, ly, R * .28);
+  const [r, gv, b] = hsl2rgb(alma.h, 48, 82);
+  sh.addColorStop(0,  `rgba(${r},${gv},${b},${.22 + BW*.08 + HB*.06})`);
+  sh.addColorStop(.5, `rgba(${r},${gv},${b},0.06)`);
+  sh.addColorStop(1,  'rgba(0,0,0,0)');
+  ctx.fillStyle = sh; ctx.fillRect(0, 0, W, H);
+
+  /* vinheta */
+  ctx.globalCompositeOperation = 'source-over';
+  const vg2 = ctx.createRadialGradient(cx, cy, R * .28, cx, cy, R);
+  vg2.addColorStop(0,   'rgba(0,0,0,0)');
+  vg2.addColorStop(.65, 'rgba(1,1,7,0.48)');
+  vg2.addColorStop(1,   'rgba(1,1,9,0.93)');
+  ctx.fillStyle = vg2; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+/* ─────────────────────────────────────────
+   CANVAS REFS
+───────────────────────────────────────── */
+const heroCanvas = document.getElementById('hero-canvas');
+const heroCtx    = heroCanvas.getContext('2d');
+
+// offscreens por alma (mini cards)
+const miniCanvases = {}; // id -> canvas element
+const miniOff = {};      // id -> {c, ctx}
+
+/* ─────────────────────────────────────────
+   BUILD UI
+───────────────────────────────────────── */
+
+// PODERES
+const poderesGrid = document.getElementById('poderesGrid');
+PODERES.forEach((pd, i) => {
+  const row = document.createElement('div');
+  row.className = 'poder-row';
+  row.id = 'poder_' + pd.key;
+  row.style.setProperty('--sw-color', pd.color + '55');
+  row.innerHTML = `
+    <div class="poder-esq">
+      <span class="poder-emoji">${pd.emoji}</span>
+      <div class="poder-textos">
+        <span class="poder-nome">${pd.nome}</span>
+        <span class="poder-dica">${pd.dica}</span>
+      </div>
+    </div>
+    <div class="toggle"></div>
+  `;
+  row.addEventListener('click', () => togglePoder(pd.key));
+  poderesGrid.appendChild(row);
+});
+
+// ALMAS MINI GRID
+const almasGrid = document.getElementById('almasGrid');
+ALMAS.forEach(alma => {
+  const card = document.createElement('div');
+  card.className = 'alma-mini';
+  card.id = 'mini_' + alma.id;
+  card.style.setProperty('--glow', alma.glow);
+  if (alma.id === selectedId) card.classList.add('ativa');
+
+  const coroa = document.createElement('span');
+  coroa.className = 'coroa';
+  coroa.textContent = '👑';
+
+  const cnv = document.createElement('canvas');
+  miniCanvases[alma.id] = cnv;
+
+  const off = document.createElement('canvas');
+  miniOff[alma.id] = { c: off, ctx: off.getContext('2d') };
+
+  const nome = document.createElement('div');
+  nome.className = 'alma-mini-nome';
+  nome.textContent = alma.emoji + ' ' + alma.nome;
+
+  card.append(coroa, cnv, nome);
+  card.addEventListener('click', () => selectAlma(alma.id));
+  almasGrid.appendChild(card);
+});
+
+/* ─────────────────────────────────────────
+   SELECT ALMA
+───────────────────────────────────────── */
+function selectAlma(id) {
+  selectedId = id;
+  const alma = ALMAS.find(a => a.id === id);
+
+  // atualiza hero UI
+  document.getElementById('heroNome').textContent = alma.emoji + ' ' + alma.nome;
+  document.getElementById('heroNome').style.color = alma.glow;
+  document.getElementById('heroNome').style.textShadow = `0 0 16px ${alma.glow}80`;
+  document.getElementById('heroPoder').textContent = alma.poder;
+  document.getElementById('heroDesc').textContent = alma.desc;
+  document.getElementById('heroCard').style.setProperty('--alma-glow', alma.glow);
+  document.getElementById('heroCard').style.setProperty('--alma-glow2', alma.glow2);
+  heroCanvas.style.boxShadow = `0 0 40px ${alma.glow}66`;
+
+  // marca mini ativa
+  document.querySelectorAll('.alma-mini').forEach(c => c.classList.remove('ativa'));
+  document.getElementById('mini_' + id).classList.add('ativa');
+
+  showToast(alma.emoji + ' ' + alma.nome + ' escolhida!');
+}
+
+/* ─────────────────────────────────────────
+   TOGGLE PODER
+───────────────────────────────────────── */
+function togglePoder(key) {
+  const pd = PODERES.find(p => p.key === key);
+  pd.ativo = !pd.ativo;
+  P[key] = pd.ativo ? pd.valOn : pd.valOff;
+
+  const row = document.getElementById('poder_' + key);
+  row.classList.toggle('ativo', pd.ativo);
+
+  if (navigator.vibrate) navigator.vibrate(pd.ativo ? [30] : [15]);
+  showToast(pd.emoji + ' ' + pd.nome + (pd.ativo ? ' ativado!' : ' desligado'));
+}
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✨ ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+/* ─────────────────────────────────────────
+   SIZE SYNC
+───────────────────────────────────────── */
+function syncSizes() {
+  // hero canvas
+  const hRect = heroCanvas.getBoundingClientRect();
+  const hS = Math.max(Math.round(hRect.width), 2);
+  if (heroCanvas.width !== hS) { heroCanvas.width = hS; heroCanvas.height = hS; }
+
+  // mini canvases
+  ALMAS.forEach(alma => {
+    const cnv = miniCanvases[alma.id];
+    if (!cnv) return;
+    const rect = cnv.getBoundingClientRect();
+    const s = Math.max(Math.round(rect.width), 2);
+    if (cnv.width !== s) { cnv.width = s; cnv.height = s; }
+    const o = miniOff[alma.id];
+    if (o.c.width !== s) { o.c.width = s; o.c.height = s; }
+  });
+}
+
+/* ─────────────────────────────────────────
+   LOOP DE ANIMAÇÃO
+───────────────────────────────────────── */
+function loop() {
+  syncSizes();
+
+  // avança tempo de cada alma em velocidades diferentes
+  ALMAS.forEach(alma => {
+    T[alma.id] += alma.speed;
+  });
+
+  // hero (alma selecionada)
+  const heroAlma = ALMAS.find(a => a.id === selectedId);
+  if (heroCanvas.width > 2) {
+    drawSmoke(heroCtx, heroAlma, heroCanvas.width, heroCanvas.height);
+  }
+
+  // mini cards (todos renderizam, mas mais lento — a cada frame tb)
+  ALMAS.forEach(alma => {
+    const cnv = miniCanvases[alma.id];
+    const o   = miniOff[alma.id];
+    if (!cnv || cnv.width < 2) return;
+    drawSmoke(o.ctx, alma, cnv.width, cnv.height);
+    const ctx2 = cnv.getContext('2d');
+    ctx2.clearRect(0, 0, cnv.width, cnv.height);
+    ctx2.drawImage(o.c, 0, 0);
+  });
+
+  requestAnimationFrame(loop);
+}
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+selectAlma('sol');
+setTimeout(() => { syncSizes(); loop(); }, 150);
+window.addEventListener('resize', syncSizes);
+</script>
+</body>
+</html>

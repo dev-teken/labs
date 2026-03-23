@@ -1,0 +1,289 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --fire: #E24B4A; --water: #378ADD; --earth: #639922;
+    --air: #888780; --metal: #B4B2A9;
+    --fire-light: #FCEBEB; --water-light: #E6F1FB; --earth-light: #EAF3DE;
+    --air-light: #F1EFE8; --metal-light: #D3D1C7;
+    --fire-dark: #A32D2D; --water-dark: #0C447C; --earth-dark: #3B6D11;
+    --air-dark: #5F5E5A; --metal-dark: #444441;
+  }
+  body { font-family: 'Fredoka One', 'Arial Rounded MT Bold', Arial, sans-serif; background: #1a1a2e; min-height: 100vh; }
+  #game { max-width: 480px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 100vh; }
+
+  /* REGRAS */
+  #rules-panel {
+    background: #16213e; border-radius: 14px; padding: 10px 12px;
+    border: 1.5px solid #0f3460;
+  }
+  #rules-title { color: #FFD700; font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 7px; letter-spacing: 1px; text-transform: uppercase; }
+  #rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .rule-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #ccc; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 3px 6px; }
+  .rule-icon { font-size: 14px; }
+  .beats { color: #4ade80; font-weight: 700; }
+
+  /* VIDA */
+  #lifebars { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+  .life-side { display: flex; flex-direction: column; gap: 3px; }
+  .life-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+  .life-label.enemy { text-align: right; }
+  .life-bar-bg { background: rgba(255,255,255,0.1); border-radius: 20px; height: 18px; overflow: hidden; }
+  .life-bar-fill { height: 100%; border-radius: 20px; transition: width 0.5s; background: #4ade80; }
+  .life-bar-fill.low { background: #E24B4A; }
+  .life-number { font-size: 22px; font-weight: 700; color: #fff; }
+  .life-number.enemy { text-align: right; }
+  #vs-badge { background: #FFD700; color: #1a1a2e; font-size: 15px; font-weight: 700; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* ÁREA DO INIMIGO */
+  #enemy-area { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  #enemy-label { color: #ff6b6b; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+  #enemy-card-display { width: 130px; height: 170px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border: 3px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); transition: all 0.3s; }
+  #enemy-card-display.revealed { border-color: var(--card-color, #888); background: var(--card-bg, rgba(255,255,255,0.1)); }
+  .card-emoji { font-size: 48px; }
+  .card-name { font-size: 16px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+  .card-stats { display: flex; gap: 12px; }
+  .stat-badge { display: flex; flex-direction: column; align-items: center; border-radius: 8px; padding: 3px 8px; min-width: 36px; }
+  .stat-badge.atk { background: rgba(226,75,74,0.3); border: 1px solid #E24B4A; }
+  .stat-badge.def { background: rgba(55,138,221,0.3); border: 1px solid #378ADD; }
+  .stat-label { font-size: 9px; color: #ccc; letter-spacing: 1px; font-weight: 700; }
+  .stat-val { font-size: 20px; font-weight: 700; color: #fff; line-height: 1; }
+
+  /* RESULTADO */
+  #result-area { text-align: center; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+  #result-text { font-size: 22px; font-weight: 700; border-radius: 12px; padding: 6px 20px; opacity: 0; transition: opacity 0.3s; }
+  #result-text.show { opacity: 1; }
+  #result-text.win { background: rgba(74,222,128,0.2); color: #4ade80; border: 2px solid #4ade80; }
+  #result-text.lose { background: rgba(226,75,74,0.2); color: #ff6b6b; border: 2px solid #ff6b6b; }
+  #result-text.draw { background: rgba(255,215,0,0.2); color: #FFD700; border: 2px solid #FFD700; }
+
+  /* CARTAS DO JOGADOR */
+  #player-area { display: flex; flex-direction: column; gap: 8px; }
+  #player-label { color: #60a5fa; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; text-align: center; }
+  #hand { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .hand-card {
+    width: 82px; height: 112px; border-radius: 12px; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 3px; cursor: pointer; border: 3px solid transparent;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative; flex-shrink: 0;
+  }
+  .hand-card:active { transform: scale(0.95); }
+  .hand-card.selected { border-color: #FFD700; box-shadow: 0 0 0 3px rgba(255,215,0,0.4); transform: translateY(-6px); }
+  .hand-card .card-emoji { font-size: 30px; }
+  .hand-card .card-name { font-size: 10px; }
+  .hand-card .card-stats { gap: 5px; }
+  .hand-card .stat-badge { padding: 1px 5px; min-width: 26px; }
+  .hand-card .stat-val { font-size: 14px; }
+  .hand-card .stat-label { font-size: 8px; }
+
+  /* BOTÃO */
+  #fight-btn {
+    background: #FFD700; color: #1a1a2e; font-size: 22px; font-weight: 700;
+    border: none; border-radius: 16px; padding: 14px; width: 100%; cursor: pointer;
+    letter-spacing: 1px; text-transform: uppercase; transition: transform 0.1s, opacity 0.2s;
+    font-family: inherit;
+  }
+  #fight-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  #fight-btn:active:not(:disabled) { transform: scale(0.97); }
+
+  /* MENSAGEM GAME OVER */
+  #gameover {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    align-items: center; justify-content: center; z-index: 100;
+  }
+  #gameover.show { display: flex; }
+  #gameover-box { background: #16213e; border-radius: 20px; padding: 32px 28px; text-align: center; border: 3px solid #FFD700; max-width: 300px; width: 90%; }
+  #gameover-title { font-size: 36px; font-weight: 700; color: #FFD700; margin-bottom: 8px; }
+  #gameover-sub { font-size: 16px; color: #ccc; margin-bottom: 20px; }
+  #restart-btn { background: #FFD700; color: #1a1a2e; font-size: 18px; font-weight: 700; border: none; border-radius: 12px; padding: 12px 28px; cursor: pointer; font-family: inherit; text-transform: uppercase; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+
+<div id="game">
+
+  <div id="rules-panel">
+    <div id="rules-title">⚔️ Quem vence quem?</div>
+    <div id="rules-grid">
+      <div class="rule-row"><span class="rule-icon">🔥</span><span>Fogo <span class="beats">vence</span> Ar e Metal</span></div>
+      <div class="rule-row"><span class="rule-icon">💧</span><span>Água <span class="beats">vence</span> Fogo e Terra</span></div>
+      <div class="rule-row"><span class="rule-icon">🌍</span><span>Terra <span class="beats">vence</span> Ar e Metal</span></div>
+      <div class="rule-row"><span class="rule-icon">🌀</span><span>Ar <span class="beats">vence</span> Água e Fogo</span></div>
+      <div class="rule-row"><span class="rule-icon">⚙️</span><span>Metal <span class="beats">vence</span> Água e Ar</span></div>
+      <div class="rule-row" style="font-size:10px;color:#aaa;">Iguais = empate. Ataque alto = mais dano!</div>
+    </div>
+  </div>
+
+  <div id="lifebars">
+    <div class="life-side">
+      <div class="life-label">Você</div>
+      <div class="life-bar-bg"><div class="life-bar-fill" id="player-bar" style="width:100%"></div></div>
+      <div class="life-number" id="player-hp">20</div>
+    </div>
+    <div id="vs-badge">VS</div>
+    <div class="life-side">
+      <div class="life-label enemy">Inimigo</div>
+      <div class="life-bar-bg"><div class="life-bar-fill" id="enemy-bar" style="width:100%"></div></div>
+      <div class="life-number enemy" id="enemy-hp">20</div>
+    </div>
+  </div>
+
+  <div id="enemy-area">
+    <div id="enemy-label">🤖 Carta do Inimigo</div>
+    <div id="enemy-card-display">
+      <div class="card-emoji">❓</div>
+      <div class="card-name" style="color:#666">Escolha!</div>
+    </div>
+  </div>
+
+  <div id="result-area">
+    <div id="result-text"></div>
+  </div>
+
+  <div id="player-area">
+    <div id="player-label">👆 Sua mão — toque para escolher</div>
+    <div id="hand"></div>
+  </div>
+
+  <button id="fight-btn" disabled>⚔️ BATALHAR!</button>
+
+</div>
+
+<div id="gameover">
+  <div id="gameover-box">
+    <div id="gameover-title"></div>
+    <div id="gameover-sub"></div>
+    <button id="restart-btn" onclick="initGame()">🔄 Jogar de novo</button>
+  </div>
+</div>
+
+<script>
+const ELEMENTS = [
+  { id:'fire',  name:'Fogo',  emoji:'🔥', atk:5, def:1, color:'#E24B4A', bg:'rgba(226,75,74,0.15)', beats:['air','metal'] },
+  { id:'water', name:'Água',  emoji:'💧', atk:3, def:3, color:'#378ADD', bg:'rgba(55,138,221,0.15)', beats:['fire','earth'] },
+  { id:'earth', name:'Terra', emoji:'🌍', atk:2, def:4, color:'#639922', bg:'rgba(99,153,34,0.15)',  beats:['air','metal'] },
+  { id:'air',   name:'Ar',   emoji:'🌀', atk:4, def:2, color:'#9E9E9E', bg:'rgba(158,158,158,0.15)', beats:['water','fire'] },
+  { id:'metal', name:'Metal', emoji:'⚙️', atk:3, def:3, color:'#B4B2A9', bg:'rgba(180,178,169,0.2)', beats:['water','air'] },
+];
+
+let playerHP, enemyHP, selectedCard, phase;
+
+function getEl(id,n=1){const els=ELEMENTS.find(e=>e.id===id);return els;}
+
+function initGame(){
+  playerHP = 20; enemyHP = 20; selectedCard = null; phase = 'select';
+  updateHP(); renderHand(); resetEnemy(); resetResult();
+  document.getElementById('fight-btn').disabled = true;
+  document.getElementById('gameover').classList.remove('show');
+}
+
+function updateHP(){
+  const ph = Math.max(0,playerHP), eh = Math.max(0,enemyHP);
+  document.getElementById('player-hp').textContent = ph;
+  document.getElementById('enemy-hp').textContent = eh;
+  const pb = document.getElementById('player-bar');
+  pb.style.width = (ph/20*100)+'%';
+  pb.className = 'life-bar-fill' + (ph<=6?' low':'');
+  const eb = document.getElementById('enemy-bar');
+  eb.style.width = (eh/20*100)+'%';
+  eb.className = 'life-bar-fill' + (eh<=6?' low':'');
+}
+
+function renderHand(){
+  const hand = document.getElementById('hand');
+  hand.innerHTML = '';
+  ELEMENTS.forEach(el => {
+    const card = document.createElement('div');
+    card.className = 'hand-card';
+    card.style.background = el.bg;
+    card.style.borderColor = selectedCard===el.id ? '#FFD700' : el.color;
+    if(selectedCard===el.id) card.classList.add('selected');
+    card.innerHTML = `
+      <div class="card-emoji">${el.emoji}</div>
+      <div class="card-name" style="color:${el.color}">${el.name}</div>
+      <div class="card-stats">
+        <div class="stat-badge atk"><div class="stat-label">ATK</div><div class="stat-val">${el.atk}</div></div>
+        <div class="stat-badge def"><div class="stat-label">DEF</div><div class="stat-val">${el.def}</div></div>
+      </div>`;
+    card.onclick = () => { selectedCard = el.id; renderHand(); document.getElementById('fight-btn').disabled = false; };
+    hand.appendChild(card);
+  });
+}
+
+function resetEnemy(){
+  const d = document.getElementById('enemy-card-display');
+  d.className = 'revealed';
+  d.style.setProperty('--card-color','rgba(255,255,255,0.15)');
+  d.style.setProperty('--card-bg','rgba(255,255,255,0.05)');
+  d.innerHTML = '<div class="card-emoji">❓</div><div class="card-name" style="color:#555">Escolha!</div>';
+}
+
+function resetResult(){
+  const r = document.getElementById('result-text');
+  r.className = '';
+  r.textContent = '';
+}
+
+function showEnemy(el){
+  const d = document.getElementById('enemy-card-display');
+  d.style.setProperty('--card-color', el.color);
+  d.style.setProperty('--card-bg', el.bg);
+  d.innerHTML = `
+    <div class="card-emoji">${el.emoji}</div>
+    <div class="card-name" style="color:${el.color}">${el.name}</div>
+    <div class="card-stats">
+      <div class="stat-badge atk"><div class="stat-label">ATK</div><div class="stat-val">${el.atk}</div></div>
+      <div class="stat-badge def"><div class="stat-label">DEF</div><div class="stat-val">${el.def}</div></div>
+    </div>`;
+}
+
+function fight(){
+  if(!selectedCard) return;
+  const player = ELEMENTS.find(e=>e.id===selectedCard);
+  const enemyEl = ELEMENTS[Math.floor(Math.random()*ELEMENTS.length)];
+  showEnemy(enemyEl);
+
+  const playerBeats = player.beats.includes(enemyEl.id);
+  const enemyBeats = enemyEl.beats.includes(player.id);
+
+  const rText = document.getElementById('result-text');
+  rText.className = '';
+
+  let msg = '';
+  if(playerBeats && !enemyBeats){
+    const dmg = Math.max(1, player.atk - enemyEl.def);
+    enemyHP = Math.max(0, enemyHP - dmg);
+    msg = `✅ Você venceu! -${dmg} ❤️ inimigo`;
+    rText.className = 'show win';
+  } else if(enemyBeats && !playerBeats){
+    const dmg = Math.max(1, enemyEl.atk - player.def);
+    playerHP = Math.max(0, playerHP - dmg);
+    msg = `❌ Você perdeu! -${dmg} ❤️ seu`;
+    rText.className = 'show lose';
+  } else {
+    msg = '🤝 Empate! Ninguém se machuca.';
+    rText.className = 'show draw';
+  }
+  rText.textContent = msg;
+  updateHP();
+
+  document.getElementById('fight-btn').disabled = true;
+  selectedCard = null;
+  renderHand();
+
+  setTimeout(() => {
+    if(playerHP <= 0 || enemyHP <= 0){
+      const won = enemyHP <= 0;
+      document.getElementById('gameover-title').textContent = won ? '🏆 Você Ganhou!' : '💀 Game Over';
+      document.getElementById('gameover-sub').textContent = won ? 'Incrível! Você destruiu o inimigo!' : 'Tente novamente!';
+      document.getElementById('gameover').classList.add('show');
+    } else {
+      resetEnemy();
+      resetResult();
+    }
+  }, 2200);
+}
+
+document.getElementById('fight-btn').onclick = fight;
+initGame();
+</script>

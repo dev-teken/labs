@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Soul Grid</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /*
+    STACK DO EFEITO SOUL:
+    1. Canvas (metaballs grayscale, blur interno)
+    2. color-layer (color-dodge — injeta cor)
+    3. grid filter: contrast alto + saturate (funde os blobs e cria o neon)
+
+    O .sphere-wrapper NÃO tem blur próprio — o blur fica só no canvas.
+    Isso mantém as bordas da esfera nítidas no contexto do contraste.
+  */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    filter: contrast(22) brightness(1.05) saturate(2.2);
+  }
+
+  .soul-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sphere-wrapper {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: #000;
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /*
+      Blur no canvas: suaviza os blobs para que o contrast() do grid
+      possa fundi-los em liquid metal. Valor calibrado para não
+      destruir a estrutura de movimento.
+    */
+    filter: blur(18px);
+  }
+
+  .color-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    mix-blend-mode: color-dodge;
+    border-radius: 50%;
+  }
+
+  .label {
+    color: #fff;
+    opacity: 0.25;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    margin-top: 14px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="grid" id="main-grid"></div>
+
+<script>
+/*
+  ARQUITETURA DE MOVIMENTO SOUL
+  ─────────────────────────────
+  Cada blob tem DOIS componentes de posição:
+
+  1. BASE ORBIT (determinístico, sempre presente)
+     — Lissajous suave: sin/cos com frequências primas baixas
+     — Define a "alma" do movimento: nunca para, nunca sai do centro
+     — Amplitude: ocupa ~55% do raio da esfera
+
+  2. NOISE DRIFT (aleatório, controlado)
+     — Ruído de Perlin simplificado (somatório de senos com fases irracionais)
+     — Amplitude máxima: 20% do raio — NUNCA domina o base orbit
+     — Tem seu próprio tempo de progressão, mais lento que o base
+
+  3. HEARTBEAT (escala de raio)
+     — Pulso baseado em sin^N, periódico e suave
+     — Cada blob tem fase offset para não pulsarem juntos (desfasados)
+     — Amplitude máxima: ±30% do raio base
+
+  PARÂMETROS GLOBAIS
+  ─────────────────
+  BASE_SPEED: escala geral do movimento base (orbit)
+  NOISE_WEIGHT: quanto o drift aleatório contribui (0 = puro orbital, 1 = caótico)
+  NOISE_SPEED: velocidade do drift
+*/
+
+const CFG = {
+  BASE_SPEED:   0.28,   // velocidade base global (multiplicada por soul.speed)
+  NOISE_WEIGHT: 0.22,   // 0..1 — peso da camada aleatória sobre o movimento total
+  NOISE_SPEED:  0.17,   // velocidade de evolução do noise
+  BLOB_COUNT:   6,      // blobs por soul
+  HEARTBEAT_POW: 8,     // sin^N — quão "nítido" é o batimento (maior = mais pontudo)
+  BASE_RADIUS:  68,     // raio base dos blobs em px (canvas 400x400)
+  ORBIT_AMP:    110,    // amplitude do orbit base (px)
+  NOISE_AMP:    28,     // amplitude máxima do noise drift (px)
+  CANVAS_SIZE:  400,
+};
+
+// Souls: hue define a cor, speed é o multiplicador de tempo
+const SOULS = [
+  {id:'a', hue:200, a3:'#4ef0ff', label:'névoa',      speed: 0.7 },
+  {id:'b', hue:18,  a3:'#ff8050', label:'terra',      speed: 1.0 },
+  {id:'c', hue:155, a3:'#80ff90', label:'bosque',     speed: 1.3 },
+  {id:'d', hue:278, a3:'#e050ff', label:'cosmos',     speed: 1.7 },
+  {id:'e', hue:58,  a3:'#ffff70', label:'areia',      speed: 0.9 },
+  {id:'f', hue:335, a3:'#ff60b0', label:'crepúsculo', speed: 2.1 },
+];
+
+/*
+  NOISE 1D SUAVE
+  Composição de senos com frequências irracionais e fases distintas.
+  Substitui Perlin com previsibilidade controlável.
+  Range: aproximadamente -1..1
+*/
+function smoothNoise(t, seed) {
+  const s = seed * 1.618;
+  return (
+      0.50 * Math.sin(t * 0.97  + s * 1.0)
+    + 0.28 * Math.sin(t * 1.618 + s * 2.3)
+    + 0.14 * Math.sin(t * 2.618 + s * 4.1)
+    + 0.08 * Math.sin(t * 4.236 + s * 7.7)
+  );
+}
+
+class Soul {
+  constructor(cfg, wrapper) {
+    this.cfg = cfg;
+    this.W = this.H = CFG.CANVAS_SIZE;
+
+    this.canvas = document.createElement('canvas');
+    this.canvas.width  = this.W;
+    this.canvas.height = this.H;
+    this.ctx = this.canvas.getContext('2d');
+    wrapper.appendChild(this.canvas);
+
+    const cx = this.W / 2;
+    const cy = this.H / 2;
+
+    // Pré-calcula parâmetros fixos de cada blob
+    this.blobs = Array.from({ length: CFG.BLOB_COUNT }, (_, i) => {
+      const fi = i / CFG.BLOB_COUNT;
+
+      // Órbita base: frequências de Lissajous com rácios primos para não repetir rápido
+      // Cada blob tem um par de frequências diferente → movimentos não-sincronizados
+      const FREQS = [
+        [1.0,  1.3 ],
+        [1.3,  0.7 ],
+        [0.7,  1.7 ],
+        [1.7,  1.0 ],
+        [1.0,  2.0 ],
+        [2.0,  0.5 ],
+      ];
+      const [fx, fy] = FREQS[i % FREQS.length];
+
+      return {
+        // fase inicial do orbit (espalha os blobs em posições distintas)
+        orbitPhase: fi * Math.PI * 2,
+        fx,
+        fy,
+        // seed única para o noise de cada blob
+        noiseSeedX: i * 3.7  + cfg.speed * 1.1,
+        noiseSeedY: i * 5.13 + cfg.speed * 2.3,
+        // fase do heartbeat (offset para blobs não pulsarem juntos)
+        heartPhase: fi * Math.PI * 2,
+        // raio base ligeiramente variado por blob
+        baseR: CFG.BASE_RADIUS * (0.82 + 0.36 * Math.sin(fi * Math.PI * 3.7)),
+      };
+    });
+
+    this.raf = null;
+  }
+
+  getPos(blob, t) {
+    const cx = this.W / 2;
+    const cy = this.H / 2;
+    const speed = this.cfg.speed * CFG.BASE_SPEED;
+    const T = t * speed + blob.orbitPhase;
+
+    // 1. BASE ORBIT — Lissajous suave
+    const bx = Math.sin(T * blob.fx) * CFG.ORBIT_AMP;
+    const by = Math.cos(T * blob.fy) * CFG.ORBIT_AMP;
+
+    // 2. NOISE DRIFT — camada aleatória controlada
+    const nt = t * CFG.NOISE_SPEED * this.cfg.speed;
+    const nx = smoothNoise(nt + blob.noiseSeedX, blob.noiseSeedX) * CFG.NOISE_AMP;
+    const ny = smoothNoise(nt + blob.noiseSeedY, blob.noiseSeedY) * CFG.NOISE_AMP;
+
+    // Soma com peso controlado
+    const w = CFG.NOISE_WEIGHT;
+    return {
+      x: cx + bx * (1 - w) + nx * w + nx * (1 - w) * 0.3,
+      y: cy + by * (1 - w) + ny * w + ny * (1 - w) * 0.3,
+    };
+  }
+
+  getRadius(blob, t) {
+    const speed = this.cfg.speed;
+    // Heartbeat: sin^N cria um pulso nítido e suave
+    const hb = Math.pow(
+      Math.abs(Math.sin(t * speed * 0.9 + blob.heartPhase)),
+      CFG.HEARTBEAT_POW
+    );
+    return blob.baseR * (1 + hb * 0.30);
+  }
+
+  draw() {
+    const { ctx, W, H, blobs } = this;
+    const t = performance.now() * 0.001;
+
+    /*
+      LIMPEZA com rastro muito sutil:
+      Não limpamos completamente — deixamos um rastro escuro (alpha baixo)
+      para criar profundidade de movimento, sem deixar "fantasmas" longos.
+    */
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, 0, W, H);
+
+    blobs.forEach(blob => {
+      const { x, y } = this.getPos(blob, t);
+      const r = this.getRadius(blob, t);
+
+      /*
+        GRADIENTE GRAYSCALE para o metaball:
+        — Centro branco puro (255,255,255) → ativa color-dodge ao máximo
+        — Feather médio em cinza médio (120) → zona de fusão entre blobs
+        — Borda em cinza escuro (40) → transição suave para o preto
+        — Transparente no fim → sem artefatos de borda
+
+        A proporção dos stops controla o "gordura" do blob:
+        stop mais perto de 1.0 no centro = blob mais "sólido" e visível
+      */
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0.00, 'rgba(255,255,255,1.0)');
+      g.addColorStop(0.25, 'rgba(200,200,200,0.75)');
+      g.addColorStop(0.55, 'rgba(100,100,100,0.40)');
+      g.addColorStop(0.80, 'rgba(40, 40, 40, 0.15)');
+      g.addColorStop(1.00, 'rgba(0,  0,  0, 0.0)');
+
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    this.raf = requestAnimationFrame(() => this.draw());
+  }
+
+  stop() {
+    if (this.raf) cancelAnimationFrame(this.raf);
+  }
+}
+
+// ── BUILD GRID ──────────────────────────────────────
+const grid = document.getElementById('main-grid');
+
+SOULS.forEach(cfg => {
+  const card = document.createElement('div');
+  card.className = 'soul-card';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'sphere-wrapper';
+
+  /*
+    COLOR LAYER:
+    — Gradiente radial do hue principal (saturado, claro) para o accent
+    — mix-blend-mode: color-dodge → só "acende" onde há luz (branco) no canvas
+    — O preto do canvas não é afetado → o fundo permanece preto puro
+  */
+  const colorLayer = document.createElement('div');
+  colorLayer.className = 'color-layer';
+  colorLayer.style.background = `
+    radial-gradient(
+      circle at 45% 42%,
+      hsla(${cfg.hue},     100%, 72%, 1.0)   0%,
+      hsla(${cfg.hue + 35},100%, 60%, 0.75) 38%,
+      hsla(${cfg.hue + 60},100%, 50%, 0.45) 62%,
+      ${cfg.a3}44 80%,
+      transparent 100%
+    )
+  `;
+
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = cfg.label;
+
+  wrapper.appendChild(colorLayer);
+  card.appendChild(wrapper);
+  card.appendChild(label);
+  grid.appendChild(card);
+
+  new Soul(cfg, wrapper).draw();
+});
+</script>
+</body>
+</html>

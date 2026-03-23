@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Batalha Elemental</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0f;
+  --surf:#111318;
+  --surf2:#1a1d26;
+  --surf3:#22263a;
+  --p1:#00d4ff;
+  --p1d:#0099cc;
+  --p2:#ff4655;
+  --p2d:#cc2233;
+  --gold:#ffe05a;
+  --goldd:#cc9900;
+  --red:#ff4655;
+  --green:#39d353;
+  --neon1:rgba(0,212,255,.18);
+  --neon2:rgba(255,70,85,.18);
+  --clip:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  --clip2:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  height:100dvh;background:var(--bg);
+  font-family:'Rajdhani',sans-serif;color:#fff;
+  overflow:hidden;display:flex;flex-direction:column;
+  max-width:480px;margin:0 auto;
+  padding:env(safe-area-inset-top,6px) 0 env(safe-area-inset-bottom,6px);
+}
+
+/* scanline overlay */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+}
+
+/* corner accent top-right */
+body::after{
+  content:'';position:fixed;top:0;right:0;width:120px;height:120px;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at top right,rgba(0,212,255,.06),transparent 70%);
+}
+
+/* ══════════════════════════════════════════
+   SCOREBAR
+   P1 esq: [NUM][barra→]   P2 dir: [←barra][NUM]
+   Número = corações RESTANTES do dono da barra
+══════════════════════════════════════════ */
+#scorebar{
+  flex:0 0 auto;
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  padding:8px 12px 4px;
+  z-index:10;
+}
+.sc-p1{ display:flex;flex-direction:column;gap:3px;align-items:flex-start; }
+.sc-p2{ display:flex;flex-direction:column;gap:3px;align-items:flex-end; }
+
+.sc-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;opacity:.7;
+}
+.sc-name.p1{ color:var(--p1); }
+.sc-name.p2{ color:var(--p2); }
+
+/* P1: [número][barra→]  P2: [←barra][número] */
+.hp-row-p1{ display:flex;align-items:center;gap:5px;width:100%; }
+.hp-row-p2{ display:flex;align-items:center;gap:5px;width:100%;flex-direction:row-reverse; }
+
+.hp-num{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(22px,5dvh,30px);font-weight:800;line-height:1;
+  min-width:1.6ch;text-align:center;flex:0 0 auto;transition:color .3s;
+}
+.hp-num.p1{ color:var(--p1);filter:drop-shadow(0 0 8px var(--p1)); }
+.hp-num.p2{ color:var(--p2);filter:drop-shadow(0 0 8px var(--p2)); }
+.hp-num.low{ color:var(--red)!important;filter:drop-shadow(0 0 8px var(--red))!important;animation:numPulse 1s ease infinite; }
+@keyframes numPulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+.hp-track{
+  flex:1;height:6px;background:rgba(255,255,255,.06);
+  position:relative;overflow:hidden;
+  clip-path:polygon(4px 0,100% 0,100% 100%,0 100%,0 4px);
+}
+/* P1 ancora LEFT — encolhe pela direita */
+.hp-fill-p1{
+  position:absolute;left:0;top:0;bottom:0;
+  background:linear-gradient(90deg,var(--p1d),var(--p1));
+  box-shadow:0 0 10px var(--p1),0 0 20px rgba(0,212,255,.35);
+  transition:width .55s cubic-bezier(.4,0,.2,1);
+}
+/* P2 ancora RIGHT — encolhe pela esquerda */
+.hp-fill-p2{
+  position:absolute;right:0;top:0;bottom:0;
+  background:linear-gradient(270deg,var(--p2d),var(--p2));
+  box-shadow:0 0 10px var(--p2),0 0 20px rgba(255,70,85,.35);
+  transition:width .55s cubic-bezier(.4,0,.2,1);
+}
+.hp-fill-p1.low{
+  background:linear-gradient(90deg,#770000,var(--red))!important;
+  box-shadow:0 0 12px var(--red)!important;animation:barFlash 1s ease infinite;
+}
+.hp-fill-p2.low{
+  background:linear-gradient(270deg,#770000,var(--red))!important;
+  box-shadow:0 0 12px var(--red)!important;animation:barFlash 1s ease infinite;
+}
+@keyframes barFlash{0%,100%{opacity:1}50%{opacity:.55}}
+
+.hp-pips{ display:flex;gap:3px;align-items:center; }
+.sc-p2 .hp-pips{ flex-direction:row-reverse; }
+.pip{
+  width:8px;height:8px;
+  clip-path:polygon(2px 0,calc(100% - 2px) 0,100% 2px,100% 100%,0 100%,0 2px);
+  transition:background .3s,box-shadow .3s;
+}
+.pip.p1.on{ background:var(--p1);box-shadow:0 0 6px var(--p1); }
+.pip.p1.off{ background:rgba(0,212,255,.1); }
+.pip.p2.on{ background:var(--p2);box-shadow:0 0 6px var(--p2); }
+.pip.p2.off{ background:rgba(255,70,85,.1); }
+
+#vs-center{
+  display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 8px;
+}
+#vs-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;font-weight:800;letter-spacing:2px;
+  color:var(--gold);filter:drop-shadow(0 0 6px var(--gold));
+}
+#round-num{font-size:8px;color:rgba(255,255,255,.25);letter-spacing:2px;}
+
+/* ══════════════════════════════════════════
+   ARENA
+══════════════════════════════════════════ */
+#arena{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;
+  padding:0 10px;gap:4px;
+  position:relative;z-index:1;
+}
+
+/* ── CAMPO ── */
+#field-wrap{
+  flex:0 0 auto;
+  display:flex;gap:6px;
+  align-items:stretch;
+  min-height:clamp(90px,18dvh,140px);
+}
+
+/* divider central */
+#field-div{
+  flex:0 0 auto;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(255,255,255,.12),transparent);
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
+#field-vs-icon{
+  position:absolute;
+  width:24px;height:24px;
+  background:var(--bg);border:1px solid rgba(255,255,255,.12);
+  clip-path:var(--clip2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;color:var(--gold);letter-spacing:1px;
+}
+
+.fslot{
+  flex:1;
+  clip-path:var(--clip);
+  border:1.5px solid rgba(255,255,255,.06);
+  background:var(--surf);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:3px;padding:8px 6px;
+  transition:border-color .3s,background .3s,box-shadow .3s,transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s,filter .3s;
+  position:relative;overflow:hidden;
+}
+/* neon corner accent */
+.fslot::before{
+  content:'';position:absolute;top:0;right:0;
+  width:30px;height:30px;
+  background:radial-gradient(ellipse at top right,rgba(255,255,255,.04),transparent 70%);
+  pointer-events:none;
+}
+.fslot.placed{border-color:rgba(255,255,255,.18);background:var(--surf2);}
+.fslot.winner{
+  border-color:var(--gold)!important;
+  box-shadow:0 0 0 2px rgba(255,224,90,.35),0 0 28px rgba(255,224,90,.15),inset 0 0 20px rgba(255,224,90,.04)!important;
+  transform:translateY(-4px) scale(1.03);
+}
+.fslot.loser{opacity:.38;filter:saturate(.15) brightness(.6);transform:scale(.95);}
+.fslot.draw-result{border-color:rgba(255,255,255,.25)!important;}
+
+.fcard-pips{display:flex;gap:3px;z-index:1;margin-top:1px;}
+.fcpip{
+  width:7px;height:7px;
+  clip-path:polygon(2px 0,100% 0,100% calc(100% - 2px),calc(100% - 2px) 100%,0 100%,0 2px);
+  transition:background .3s,box-shadow .3s;
+}
+.fcpip.on{ background:var(--green); box-shadow:0 0 5px var(--green); }
+.fcpip.low{ background:var(--red); box-shadow:0 0 5px var(--red); animation:barFlash 1s ease infinite; }
+.fcpip.off{ background:rgba(255,255,255,.08); }
+
+.fowner{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:8px;font-weight:800;letter-spacing:3px;text-transform:uppercase;opacity:.8;z-index:1;
+}
+.fback{font-size:clamp(20px,4dvh,30px);line-height:1;z-index:1;opacity:.3;}
+.fstatus{font-size:7px;opacity:.3;z-index:1;letter-spacing:1px;}
+.femoji{font-size:clamp(18px,3.8dvh,26px);line-height:1;z-index:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,.8));}
+.fname{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(10px,2vw,13px);font-weight:700;text-transform:uppercase;letter-spacing:1px;z-index:1;
+  text-shadow:0 0 12px currentColor;
+}
+.fstats{display:flex;gap:3px;z-index:1;}
+.fbadge{
+  display:flex;flex-direction:column;align-items:center;
+  clip-path:var(--clip2);
+  padding:2px 5px;
+}
+.fbadge.atk{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.5);box-shadow:0 2px 8px rgba(239,68,68,.15);}
+.fbadge.def{background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.5);box-shadow:0 2px 8px rgba(59,130,246,.15);}
+.flabel{font-size:5px;color:#555;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;}
+.fval{font-size:clamp(10px,2.2vw,14px);font-weight:700;color:#fff;line-height:1;font-family:'Barlow Condensed',sans-serif;}
+
+.slot-badge{
+  position:absolute;top:5px;right:5px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:8px;font-weight:700;letter-spacing:.8px;
+  clip-path:var(--clip2);padding:2px 7px;
+  animation:badgeIn .28s cubic-bezier(.34,1.56,.64,1);z-index:10;
+}
+@keyframes badgeIn{from{opacity:0;transform:scale(.4) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.slot-badge.win{background:var(--gold);color:#080812;box-shadow:0 0 12px rgba(255,224,90,.5);}
+.slot-badge.lose{background:rgba(239,68,68,.88);color:#fff;box-shadow:0 0 8px rgba(239,68,68,.4);}
+.slot-badge.tie{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.18);}
+.slot-dmg{font-size:8px;color:#f87171;font-weight:700;z-index:1;animation:up .25s ease;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;}
+.slot-hp-line{font-size:7px;font-weight:700;background:rgba(0,0,0,.5);clip-path:var(--clip2);padding:1px 6px;z-index:1;animation:up .3s ease .12s both;font-family:'Barlow Condensed',sans-serif;}
+@keyframes up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* PHASE */
+#phase{
+  flex:0 0 auto;text-align:center;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(9px,2vw,12px);font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  opacity:.55;padding:0 4px;
+}
+
+/* ══════════════════════════════════════════
+   CARTAS — ELEMENTAL PREMIUM
+   Cores reais por elemento + seção PPR interna
+══════════════════════════════════════════ */
+
+/* paleta elemental por variável */
+:root{
+  --fire-a:#ff6b35;--fire-b:#c41e00;--fire-s:rgba(255,107,53,.25);
+  --water-a:#00b4d8;--water-b:#023e8a;--water-s:rgba(0,180,216,.22);
+  --earth-a:#52b788;--earth-b:#1b4332;--earth-s:rgba(82,183,136,.22);
+  --air-a:#cad3e0;--air-b:#4a5568;--air-s:rgba(202,211,224,.18);
+  --lightning-a:#ffd60a;--lightning-b:#7b5e00;--lightning-s:rgba(255,214,10,.22);
+}
+
+#hand-wrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:3px;justify-content:center;}
+#hand{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:clamp(4px,1dvh,7px);
+}
+.hand-row{display:flex;gap:clamp(5px,1.4vw,9px);justify-content:center;align-items:stretch;}
+.hand-row.top{width:68%;}
+.hand-row.bot{width:100%;}
+
+/* ── CARTA ── */
+.hcard{
+  flex:1;min-width:0;max-width:96px;
+  border-radius:10px;
+  border:1.5px solid rgba(255,255,255,.1);
+  display:flex;flex-direction:column;
+  align-items:stretch;
+  cursor:pointer;overflow:hidden;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .15s,border-color .15s,filter .15s;
+  -webkit-user-select:none;user-select:none;position:relative;
+  min-height:clamp(108px,20dvh,148px);
+  background:var(--card-bg,var(--surf2));
+}
+
+/* glow halo quando selecionada */
+.hcard.sel{
+  border-color:var(--gold)!important;
+  box-shadow:
+    0 0 0 2px rgba(255,224,90,.35),
+    0 14px 32px rgba(0,0,0,.85),
+    0 0 28px var(--card-glow,rgba(255,224,90,.2));
+  transform:translateY(-12px) scale(1.07);
+  filter:brightness(1.08);
+}
+.hcard:active:not(.sel){transform:scale(.91)!important;}
+.hcard.dead{opacity:.15;pointer-events:none;filter:grayscale(1) brightness(.4);}
+
+/* ── ZONA SUPERIOR: gradiente elemental ── */
+.card-hero{
+  flex:0 0 auto;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;
+  padding:7px 4px 5px;
+  position:relative;
+  /* gradiente será setado inline via style */
+  border-radius:8px 8px 0 0;
+  overflow:hidden;
+}
+/* brilho central radial sobre o gradiente */
+.card-hero::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.18),transparent 65%);
+  pointer-events:none;
+}
+.he{
+  font-size:clamp(22px,4.5dvh,32px);line-height:1;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.7)) drop-shadow(0 0 12px var(--card-glow,transparent));
+  z-index:1;
+}
+.hn{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(8px,1.7vw,11px);font-weight:800;text-transform:uppercase;
+  letter-spacing:1.5px;text-align:center;
+  color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.9),0 0 16px var(--card-glow,transparent);
+  z-index:1;margin-top:2px;
+}
+
+/* ── ZONA INFERIOR: stats + PPR ── */
+.card-body{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;
+  padding:4px 5px 5px;
+  background:rgba(0,0,0,.55);
+  gap:3px;
+}
+
+/* stats ATK DEF */
+.hs{display:flex;gap:3px;justify-content:center;width:100%;}
+.hb{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  border-radius:4px;
+  padding:2px 3px;
+}
+.hb.atk{
+  background:rgba(239,68,68,.18);
+  border:1px solid rgba(239,68,68,.45);
+  box-shadow:0 1px 6px rgba(239,68,68,.15),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.hb.def{
+  background:rgba(59,130,246,.18);
+  border:1px solid rgba(59,130,246,.45);
+  box-shadow:0 1px 6px rgba(59,130,246,.15),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.hl{font-size:5px;color:#666;letter-spacing:1.2px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;}
+.hv{font-size:clamp(11px,2.3vw,15px);font-weight:800;color:#fff;line-height:1;font-family:'Barlow Condensed',sans-serif;}
+
+/* ── SEÇÃO PPR — "vence contra" ── */
+.card-beats{
+  width:100%;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:5px;
+  padding:3px 4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+.beats-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.3);
+  line-height:1;
+}
+.beats-icons{
+  display:flex;gap:3px;align-items:center;justify-content:center;
+}
+.beats-arrow{
+  font-size:7px;color:rgba(255,255,255,.2);line-height:1;
+}
+.beat-chip{
+  display:flex;align-items:center;gap:1px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:3px;
+  padding:1px 3px;
+}
+.beat-chip-em{font-size:8px;line-height:1;}
+.beat-chip-nm{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  color:rgba(255,255,255,.45);line-height:1;
+}
+
+/* HP pips na carta */
+.hh{display:flex;gap:2px;justify-content:center;}
+.hht{
+  width:7px;height:7px;
+  border-radius:2px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.06);
+  transition:background .3s,box-shadow .3s,border-color .3s;
+}
+.hht.on{
+  background:var(--card-pip,var(--green));
+  border-color:var(--card-pip,var(--green));
+  box-shadow:0 0 6px var(--card-pip,var(--green));
+}
+.hht.low{
+  background:var(--red);border-color:var(--red);
+  box-shadow:0 0 7px var(--red);
+  animation:barFlash 1s ease infinite;
+}
+
+/* barra hp fina */
+.card-hp-bar{
+  width:85%;height:2px;
+  background:rgba(255,255,255,.05);
+  border-radius:99px;overflow:hidden;
+}
+.card-hp-fill{
+  height:100%;border-radius:99px;
+  transition:width .4s cubic-bezier(.4,0,.2,1);
+}
+
+#dinfo{
+  flex:0 0 auto;text-align:center;
+  font-size:7px;color:rgba(255,255,255,.12);
+  letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;
+}
+
+/* ══ BOTÃO ══ */
+#abtn{
+  flex:0 0 auto;margin:4px 10px 2px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(13px,3dvh,18px);font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  border:none;
+  clip-path:var(--clip);
+  padding:clamp(10px,2.2dvh,15px) 0;
+  cursor:pointer;width:calc(100% - 20px);
+  transition:transform .1s,opacity .2s,box-shadow .2s,filter .2s;
+  position:relative;overflow:hidden;
+}
+#abtn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 60%);
+  pointer-events:none;
+}
+#abtn:disabled{opacity:.15;cursor:not-allowed;filter:grayscale(1);}
+#abtn:active:not(:disabled){transform:scale(.97);}
+
+/* ══ PASS SCREEN ══ */
+#pass{
+  display:none;position:fixed;inset:0;
+  background:rgba(8,9,14,.97);
+  backdrop-filter:blur(4px);
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(10px,2.5dvh,20px);padding:24px;z-index:200;
+}
+#pass.show{display:flex;}
+/* decoração */
+#pass::before{
+  content:'';position:absolute;left:50%;top:50%;
+  width:260px;height:260px;
+  background:radial-gradient(ellipse,rgba(0,212,255,.04),transparent 70%);
+  transform:translate(-50%,-50%);pointer-events:none;
+}
+#picon{
+  font-size:clamp(44px,12dvh,68px);
+  animation:pulse 2.2s ease-in-out infinite;
+  filter:drop-shadow(0 0 22px rgba(255,255,255,.15));
+}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+#pwho{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:9px;font-weight:800;letter-spacing:4px;text-transform:uppercase;opacity:.5;
+}
+#pmsg{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(16px,4dvh,22px);font-weight:600;
+  color:rgba(255,255,255,.8);text-align:center;line-height:1.4;max-width:280px;letter-spacing:.5px;
+}
+#pbtn{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(14px,3.5dvh,19px);font-weight:700;
+  border:none;
+  clip-path:var(--clip);
+  padding:clamp(12px,2.8dvh,18px) clamp(28px,8vw,52px);
+  cursor:pointer;text-transform:uppercase;letter-spacing:2px;
+  transition:transform .12s,box-shadow .12s;margin-top:4px;
+  position:relative;overflow:hidden;
+}
+#pbtn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;}
+#pbtn:active{transform:scale(.95);}
+
+/* ══ GAME OVER ══ */
+#over{display:none;position:fixed;inset:0;background:rgba(8,9,14,.96);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:300;}
+#over.show{display:flex;}
+#overbox{
+  background:var(--surf);
+  clip-path:var(--clip);
+  padding:clamp(24px,5dvh,40px) clamp(20px,6vw,36px);
+  text-align:center;border:1.5px solid rgba(255,224,90,.35);
+  box-shadow:0 0 60px rgba(255,224,90,.06),0 30px 60px rgba(0,0,0,.8);
+  max-width:300px;width:88%;
+  position:relative;
+}
+#overbox::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gold);box-shadow:0 0 12px var(--gold);
+}
+#overtitle{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(26px,6.5dvh,38px);font-weight:800;
+  color:var(--gold);margin-bottom:6px;
+  text-shadow:0 0 20px rgba(255,224,90,.4);letter-spacing:2px;
+}
+#oversub{font-family:'Barlow Condensed',sans-serif;font-size:clamp(11px,2.5vw,14px);color:#444;margin-bottom:20px;line-height:1.6;letter-spacing:1px;}
+#rbtn{
+  font-family:'Barlow Condensed',sans-serif;background:var(--gold);color:#080812;
+  font-size:clamp(12px,2.8vw,15px);font-weight:800;
+  border:none;clip-path:var(--clip2);padding:10px 26px;cursor:pointer;text-transform:uppercase;letter-spacing:2px;
+  transition:transform .12s,box-shadow .12s;
+  box-shadow:0 4px 20px rgba(255,224,90,.25);
+}
+#rbtn:active{transform:scale(.95);}
+
+/* round indicator */
+#round-strip{
+  position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+}
+</style>
+</head>
+<body>
+
+<!-- SCOREBAR -->
+<div id="scorebar">
+
+  <!-- PLAYER 1: número à esquerda, barra cresce para a direita -->
+  <div class="sc-p1">
+    <div class="sc-name p1">⚔ Jogador 1</div>
+    <div class="hp-row-p1">
+      <div class="hp-num p1" id="h1">3</div>
+      <div class="hp-track">
+        <div class="hp-fill-p1" id="b1" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="hp-pips" id="pips1"></div>
+  </div>
+
+  <!-- VS CENTER -->
+  <div id="vs-center">
+    <div id="vs-label">VS</div>
+    <div id="round-num">RD 1</div>
+  </div>
+
+  <!-- PLAYER 2: barra cresce para a esquerda, número à direita -->
+  <div class="sc-p2">
+    <div class="sc-name p2">Jogador 2 ⚔</div>
+    <div class="hp-row-p2">
+      <div class="hp-num p2" id="h2">3</div>
+      <div class="hp-track">
+        <div class="hp-fill-p2" id="b2" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="hp-pips" id="pips2"></div>
+  </div>
+
+  <div id="round-strip"></div>
+</div>
+
+<!-- ARENA -->
+<div id="arena">
+
+  <!-- CAMPO -->
+  <div id="field-wrap">
+    <div class="fslot" id="s1">
+      <div class="fowner" style="color:var(--p1)">J1</div>
+      <div class="fback">🂠</div>
+      <div class="fstatus">Aguardando</div>
+    </div>
+    <div id="field-div">
+      <div id="field-vs-icon">VS</div>
+    </div>
+    <div class="fslot" id="s2">
+      <div class="fowner" style="color:var(--p2)">J2</div>
+      <div class="fback">🂠</div>
+      <div class="fstatus">Aguardando</div>
+    </div>
+  </div>
+
+  <!-- FASE -->
+  <div id="phase"></div>
+
+  <!-- MÃO -->
+  <div id="hand-wrap">
+    <div id="hand">
+      <div class="hand-row top" id="row-top"></div>
+      <div class="hand-row bot" id="row-bot"></div>
+    </div>
+    <div id="dinfo"></div>
+  </div>
+
+  <!-- BOTÃO -->
+  <button id="abtn" disabled></button>
+
+</div>
+
+<!-- PASS SCREEN -->
+<div id="pass">
+  <div id="picon"></div>
+  <div id="pwho"></div>
+  <div id="pmsg"></div>
+  <button id="pbtn" onclick="onPass()"></button>
+</div>
+
+<!-- GAME OVER -->
+<div id="over">
+  <div id="overbox">
+    <div id="overtitle"></div>
+    <div id="oversub"></div>
+    <button id="rbtn" onclick="init()">↺ Jogar de novo</button>
+  </div>
+</div>
+
+<script>
+/*
+  DESIGN DA DINÂMICA (alvo: 3 rds média, 5 max)
+  ─────────────────────────────────────────────
+  HP jogador = 3 corações.  Dano ao jogador = SEMPRE 1 por vitória de rodada.
+  Empate     = ninguém perde coração (tensão pura, sem punição dupla).
+  HP carta   = 3.  Dano à carta = max(1, atkAdversário - defPrópria).
+  Calibração ATK/DEF das cartas:
+    – Carta com ATK 4 vs DEF 2 → dano 2 → carta morre em 1-2 usos  (agressiva)
+    – Carta com ATK 2 vs DEF 4 → dano 1 → carta morre em 2-3 usos  (tanque)
+  Com 5 cartas por deck, cartas morrem mas não todas de uma vez → pressão crescente.
+  Resultado esperado: 3 rds comuns, 5 rds se os dois jogarem tanques + empates.
+*/
+const EL=[
+  {id:'fire',     name:'Fogo',    emoji:'🔥',atk:4,def:1,color:'#ef4444',bg:'linear-gradient(160deg,rgba(239,68,68,.22),rgba(10,11,15,.95))',  beats:['earth','air']},
+  {id:'water',    name:'Água',    emoji:'💧',atk:2,def:3,color:'#3b82f6',bg:'linear-gradient(160deg,rgba(59,130,246,.22),rgba(10,11,15,.95))', beats:['fire','earth']},
+  {id:'earth',    name:'Terra',   emoji:'🌍',atk:1,def:4,color:'#22c55e',bg:'linear-gradient(160deg,rgba(34,197,94,.22),rgba(10,11,15,.95))',  beats:['lightning','water']},
+  {id:'air',      name:'Ar',      emoji:'🌀',atk:3,def:2,color:'#94a3b8',bg:'linear-gradient(160deg,rgba(148,163,184,.22),rgba(10,11,15,.95))',beats:['water','fire']},
+  {id:'lightning',name:'Raio',    emoji:'⚡',atk:5,def:0,color:'#fbbf24',bg:'linear-gradient(160deg,rgba(251,191,36,.22),rgba(10,11,15,.95))', beats:['water','air']},
+];
+
+const MAX_HP=3;   /* vidas do jogador — 3 corações, perde 1 por derrota de rodada */
+const MAX_CHP=3;  /* HP das cartas — morrem em 1-3 usos conforme matchup */
+
+let p1HP,p2HP,p1Deck,p2Deck,p1Pick,p2Pick,phase,active,roundNum;
+const $=id=>document.getElementById(id);
+const mk=b=>({...b,hp:MAX_CHP});
+const alv=d=>d.filter(c=>c.hp>0);
+
+/* ── PIPS ── */
+function renderPips(){
+  function makePips(id,cur,max,cls){
+    let h='';
+    for(let i=0;i<max;i++){
+      h+=`<div class="pip ${cls} ${i<cur?'on':'off'}"></div>`;
+    }
+    $(id).innerHTML=h;
+  }
+  makePips('pips1',p1HP,MAX_HP,'p1');
+  makePips('pips2',p2HP,MAX_HP,'p2');
+}
+
+/* ── UPDATE HP ── */
+function updHP(){
+  const h1=Math.max(0,p1HP),h2=Math.max(0,p2HP);
+
+  /* números */
+  $('h1').textContent=h1;
+  $('h2').textContent=h2;
+  $('h1').className='hp-num p1'+(h1<=1?' low':'');
+  $('h2').className='hp-num p2'+(h2<=1?' low':'');
+
+  /* barras */
+  const pct1=h1/MAX_HP*100;
+  const pct2=h2/MAX_HP*100;
+  $('b1').style.width=pct1+'%';
+  $('b2').style.width=pct2+'%';
+  $('b1').className='hp-fill-p1'+(h1<=1?' low':'');
+  $('b2').className='hp-fill-p2'+(h2<=1?' low':'');
+
+  renderPips();
+}
+
+/* ── CARD HP PIP ── */
+function cardPips(hp,max){
+  let s='';
+  for(let i=0;i<max;i++){
+    const on=i<hp;
+    s+=`<div class="hht ${on?(hp===1?'low':'on'):''}"></div>`;
+  }
+  return s;
+}
+
+function lf(hp,max=MAX_CHP){
+  const p=Math.round(hp/max*100);
+  const col=p<=33?'#f87171':p<=66?'#fbbf24':'#39d353';
+  return `width:${p}%;background:${col};box-shadow:0 0 6px ${col};`;
+}
+
+/* ── INIT ── */
+function init(){
+  p1HP=MAX_HP;p2HP=MAX_HP;roundNum=1;
+  p1Deck=EL.map(mk);p2Deck=EL.map(mk);
+  p1Pick=null;p2Pick=null;active=null;
+  $('over').classList.remove('show');
+  $('round-num').textContent='RD '+roundNum;
+  updHP();resetField();clearUI();showPass('p1');
+}
+
+/* ── FIELD ── */
+function resetField(){
+  slotEmpty('s1','var(--p1)','J1');
+  slotEmpty('s2','var(--p2)','J2');
+}
+function slotEmpty(id,col,lbl){
+  const s=$(id);s.className='fslot';s.style.cssText='';
+  s.innerHTML=`<div class="fowner" style="color:${col}">${lbl}</div><div class="fback">🂠</div><div class="fstatus" style="letter-spacing:1px">Aguardando</div>`;
+}
+function slotPlaced(id,col,lbl){
+  const s=$(id);s.className='fslot placed';
+  s.innerHTML=`<div class="fowner" style="color:${col}">${lbl}</div>
+    <div class="fback">🂠</div>
+    <div class="fstatus" style="color:${col};font-weight:700;opacity:1;letter-spacing:1px">✔ Pronto</div>`;
+}
+function slotReveal(id,card,col,lbl,outcome,extra=''){
+  const s=$(id);
+  s.className=`fslot revealed ${outcome}`;
+  const SL={
+    fire:{ga:'#ff6b35',gb:'#6b1500'},water:{ga:'#00b4d8',gb:'#03045e'},
+    earth:{ga:'#52b788',gb:'#1b4332'},air:{ga:'#cad3e0',gb:'#374151'},
+    lightning:{ga:'#ffd60a',gb:'#5a3d00'},
+  };
+  const EM={fire:'🔥',water:'💧',earth:'🌍',air:'🌀',lightning:'⚡'};
+  const st=SL[card.id]||{ga:'#888',gb:'#333'};
+  s.style.background=`linear-gradient(160deg,${st.ga}44,${st.gb}ee)`;
+  s.style.borderColor=outcome==='winner'?'var(--gold)':st.ga+'77';
+  if(outcome==='winner')s.style.boxShadow=`0 0 0 2px rgba(255,224,90,.4),0 0 24px rgba(255,224,90,.12),inset 0 0 20px rgba(255,224,90,.03)`;
+
+  let pipsHtml='<div class="fcard-pips">';
+  for(let i=0;i<MAX_CHP;i++){
+    const on=i<card.hp;
+    pipsHtml+=`<div class="fcpip ${on?(card.hp===1?'low':'on'):'off'}"></div>`;
+  }
+  pipsHtml+='</div>';
+
+  const beatsField=card.beats.map(bid=>`<span style="font-size:10px;filter:drop-shadow(0 0 4px rgba(255,255,255,.3))">${EM[bid]||'?'}</span>`).join('<span style="font-size:6px;opacity:.2;margin:0 1px">·</span>');
+
+  s.innerHTML=`
+    <div class="fowner" style="color:${col}">${lbl}</div>
+    <div class="femoji" style="filter:drop-shadow(0 2px 10px ${st.ga}99)">${card.emoji}</div>
+    <div class="fname" style="color:${st.ga};text-shadow:0 0 14px ${st.ga}88">${card.name}</div>
+    <div class="fstats">
+      <div class="fbadge atk"><div class="flabel">ATK</div><div class="fval">${card.atk}</div></div>
+      <div class="fbadge def"><div class="flabel">DEF</div><div class="fval">${card.def}</div></div>
+    </div>
+    ${pipsHtml}
+    <div style="display:flex;align-items:center;gap:2px;margin-top:1px">${beatsField}</div>
+    ${extra}`;
+}
+
+/* ── PASS ── */
+function showPass(player){
+  phase=player+'-pass';
+  const p1=player==='p1';
+  $('picon').textContent=p1?'⚔️':'🛡️';
+  $('pwho').style.color=p1?'var(--p1)':'var(--p2)';
+  $('pwho').textContent=p1?'— Vez do Jogador 1 —':'— Vez do Jogador 2 —';
+  $('pmsg').textContent='Passe o celular e toque para ver sua mão';
+  const bc=p1?'var(--p1)':'var(--p2)',sh=p1?'rgba(0,212,255,.35)':'rgba(255,70,85,.35)';
+  $('pbtn').style.cssText=`background:${bc};color:#000;box-shadow:0 4px 22px ${sh}`;
+  $('pbtn').textContent=p1?'👁 Ver minha mão — J1':'👁 Ver minha mão — J2';
+  clearUI();$('pass').classList.add('show');
+}
+function onPass(){
+  $('pass').classList.remove('show');
+  if(phase==='p1-pass')startPick('p1');
+  else if(phase==='p2-pass')startPick('p2');
+  else if(phase==='next'){roundNum++;$('round-num').textContent='RD '+roundNum;newRound();}
+}
+function clearUI(){
+  $('row-top').innerHTML='';$('row-bot').innerHTML='';
+  $('phase').textContent='';$('dinfo').textContent='';
+  const b=$('abtn');b.disabled=true;b.textContent='';b.style.cssText='';active=null;
+}
+
+/* ── PICK ── */
+function startPick(player){
+  phase=player+'-pick';
+  const p1=player==='p1';
+  const deck=p1?p1Deck:p2Deck;
+  active=null;
+  $('phase').style.color=p1?'var(--p1)':'var(--p2)';
+  $('phase').textContent=p1?'Jogador 1 — escolha sua carta':'Jogador 2 — escolha sua carta';
+  renderHand(deck);
+  const b=$('abtn'),col=p1?'var(--p1)':'var(--p2)',sh=p1?'rgba(0,212,255,.35)':'rgba(255,70,85,.35)';
+  b.style.cssText=`background:${col};color:#000;box-shadow:0 4px 18px ${sh};font-weight:800;`;
+  b.textContent=p1?'▶ Jogar carta — J1':'▶ Jogar carta — J2';
+  b.disabled=true;b.onclick=confirmPick;
+}
+
+function renderHand(deck){
+  const cards=alv(deck);
+  const top=cards.slice(0,2);
+  const bot=cards.slice(2);
+  $('row-top').innerHTML='';$('row-bot').innerHTML='';
+  $('row-top').style.display=top.length?'flex':'none';
+  $('row-bot').style.display=bot.length?'flex':'none';
+
+  /* mapa de aparência elemental */
+  const EL_STYLE={
+    fire:    {ga:'#ff6b35',gb:'#8b1a00',glow:'rgba(255,107,53,.5)', pip:'#ff6b35'},
+    water:   {ga:'#00b4d8',gb:'#03045e',glow:'rgba(0,180,216,.5)',  pip:'#00b4d8'},
+    earth:   {ga:'#52b788',gb:'#1b4332',glow:'rgba(82,183,136,.5)', pip:'#52b788'},
+    air:     {ga:'#cad3e0',gb:'#374151',glow:'rgba(202,211,224,.4)',pip:'#cad3e0'},
+    lightning:{ga:'#ffd60a',gb:'#6b4c00',glow:'rgba(255,214,10,.5)',pip:'#ffd60a'},
+  };
+  /* mapa de nomes/emojis para a seção "vence contra" */
+  const EL_MAP={fire:'🔥',water:'💧',earth:'🌍',air:'🌀',lightning:'⚡'};
+  const EL_NAME={fire:'Fogo',water:'Água',earth:'Terra',air:'Ar',lightning:'Raio'};
+
+  function makeCard(card,row){
+    const d=document.createElement('div');
+    const sel=active===card;
+    const st=EL_STYLE[card.id]||{ga:'#888',gb:'#333',glow:'rgba(255,255,255,.3)',pip:'#fff'};
+    const pct=Math.round(card.hp/MAX_CHP*100);
+    const hpCol=pct<=33?'#f87171':pct<=66?'#fbbf24':st.pip;
+
+    d.className='hcard'+(sel?' sel':'');
+    d.style.cssText=`
+      --card-bg:${card.bg};
+      --card-glow:${st.glow};
+      --card-pip:${st.pip};
+      border-color:${sel?'var(--gold)':st.ga+'55'};
+      box-shadow:${sel
+        ?`0 0 0 2px rgba(255,224,90,.35),0 14px 32px rgba(0,0,0,.85),0 0 28px ${st.glow}`
+        :`0 4px 16px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05)`};
+    `;
+
+    /* seção "vence contra" */
+    const beatsHtml=card.beats.map(bid=>`
+      <div class="beat-chip">
+        <span class="beat-chip-em">${EL_MAP[bid]||'?'}</span>
+        <span class="beat-chip-nm">${EL_NAME[bid]||bid}</span>
+      </div>`).join('<span class="beats-arrow">·</span>');
+
+    /* pips */
+    let pips='';
+    for(let i=0;i<MAX_CHP;i++){
+      const on=i<card.hp;
+      pips+=`<div class="hht ${on?(card.hp===1?'low':'on'):''}"></div>`;
+    }
+
+    d.innerHTML=`
+      <div class="card-hero" style="background:linear-gradient(160deg,${st.ga},${st.gb})">
+        <div class="he">${card.emoji}</div>
+        <div class="hn">${card.name}</div>
+      </div>
+      <div class="card-body">
+        <div class="hs">
+          <div class="hb atk"><div class="hl">ATK</div><div class="hv">${card.atk}</div></div>
+          <div class="hb def"><div class="hl">DEF</div><div class="hv">${card.def}</div></div>
+        </div>
+        <div class="card-beats">
+          <div class="beats-label">▸ Vence contra</div>
+          <div class="beats-icons">${beatsHtml}</div>
+        </div>
+        <div class="hh">${pips}</div>
+        <div class="card-hp-bar">
+          <div class="card-hp-fill" style="width:${pct}%;background:${hpCol};box-shadow:0 0 6px ${hpCol};"></div>
+        </div>
+      </div>`;
+
+    d.onclick=()=>{active=card;renderHand(deck);$('abtn').disabled=false;};
+    row.appendChild(d);
+  }
+
+  top.forEach(c=>makeCard(c,$('row-top')));
+  bot.forEach(c=>makeCard(c,$('row-bot')));
+  const n=cards.length;
+  $('dinfo').textContent=`${n} carta${n!==1?'s':''} disponíve${n!==1?'is':'l'}`;
+}
+
+function confirmPick(){
+  if(!active)return;
+  const p1=phase==='p1-pick';
+  if(p1){p1Pick=active;slotPlaced('s1','var(--p1)','J1');clearUI();showPass('p2');}
+  else  {p2Pick=active;slotPlaced('s2','var(--p2)','J2');clearUI();showRevealBtn();}
+}
+function showRevealBtn(){
+  phase='reveal';
+  $('phase').style.color='var(--gold)';
+  $('phase').textContent='Cartas prontas — hora de revelar!';
+  const b=$('abtn');
+  b.style.cssText='background:var(--gold);color:#080812;box-shadow:0 4px 22px rgba(255,224,90,.4);font-weight:800;';
+  b.textContent='⚡ REVELAR';
+  b.disabled=false;b.onclick=doReveal;
+}
+
+/* ── COMBATE ── */
+function doReveal(){
+  const c1=p1Pick,c2=p2Pick;
+  const p1b=c1.beats.includes(c2.id),p2b=c2.beats.includes(c1.id);
+
+  /* dano às cartas */
+  const cd1=Math.max(1,c2.atk-c1.def);
+  const cd2=Math.max(1,c1.atk-c2.def);
+  c1.hp=Math.max(0,c1.hp-cd1);
+  c2.hp=Math.max(0,c2.hp-cd2);
+
+  /*
+    REGRA DE DANO AO JOGADOR:
+    – Vitória de rodada (tem vantagem elemental) → perdedor perde 1 coração
+    – Empate                                     → ninguém perde coração
+    Isso garante: mín 3 rodadas para acabar, máx 5 se houver vários empates.
+  */
+  let lostP1=false,lostP2=false;
+  if(p1b&&!p2b){
+    p2HP=Math.max(0,p2HP-1); lostP2=true;
+  }else if(p2b&&!p1b){
+    p1HP=Math.max(0,p1HP-1); lostP1=true;
+  }
+  /* empate: nenhum coração perdido */
+  updHP();
+
+  function extra(cardDmg,lostHeart,outcome){
+    const bc=outcome==='winner'?'win':outcome==='loser'?'lose':'tie';
+    const bt=outcome==='winner'
+      ?(lostHeart?'🏆 −1 ❤':'🏆 Vitória')
+      :outcome==='loser'
+      ?(cardDmg>=MAX_CHP?'💀 Destruída':'☠ −1 ❤')
+      :'🤝 Empate';
+    const hl=outcome==='winner'&&lostHeart
+      ?`<div class="slot-hp-line" style="color:var(--red)">−1 CORAÇÃO</div>`:'';
+    const dl=outcome==='loser'
+      ?`<div class="slot-dmg">−${cardDmg} vida</div>`:'';
+    return `<div class="slot-badge ${bc}">${bt}</div>${hl}${dl}`;
+  }
+
+  if(p1b&&!p2b){
+    slotReveal('s1',c1,'var(--p1)','J1','winner',extra(cd1,lostP2,'winner'));
+    slotReveal('s2',c2,'var(--p2)','J2','loser', extra(cd2,lostP2,'loser'));
+  }else if(p2b&&!p1b){
+    slotReveal('s1',c1,'var(--p1)','J1','loser', extra(cd1,lostP1,'loser'));
+    slotReveal('s2',c2,'var(--p2)','J2','winner',extra(cd2,lostP1,'winner'));
+  }else{
+    slotReveal('s1',c1,'var(--p1)','J1','draw-result',extra(cd1,false,'tie'));
+    slotReveal('s2',c2,'var(--p2)','J2','draw-result',extra(cd2,false,'tie'));
+  }
+  $('phase').textContent='';
+
+  const b=$('abtn');
+  const over=p1HP<=0||p2HP<=0||alv(p1Deck).length===0||alv(p2Deck).length===0;
+  if(over){
+    b.style.cssText='background:var(--red);color:#fff;box-shadow:0 4px 18px rgba(255,70,85,.35);font-weight:800;';
+    b.textContent='🏁 Resultado Final';b.disabled=false;b.onclick=endGame;
+  }else{
+    b.style.cssText='background:var(--surf2);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.08);font-weight:700;';
+    b.textContent='▶ Próxima Rodada';b.disabled=false;
+    b.onclick=()=>{phase='next';showPass('p1');};
+  }
+}
+
+function newRound(){
+  p1Pick=null;p2Pick=null;active=null;
+  resetField();showPass('p1');
+}
+
+function endGame(){
+  const a1=alv(p1Deck).length,a2=alv(p2Deck).length;
+  let t='',s='';
+  if((p1HP<=0&&p2HP<=0)||(a1===0&&a2===0)){t='🤝 Empate!';s='Os dois tombaram juntos!';}
+  else if(p2HP<=0||a2===0){t='🏆 J1 Venceu!';s=p2HP<=0?'HP do J2 chegou a zero!':'J2 ficou sem cartas!';}
+  else{t='🏆 J2 Venceu!';s=p1HP<=0?'HP do J1 chegou a zero!':'J1 ficou sem cartas!';}
+  $('overtitle').textContent=t;$('oversub').textContent=s;
+  $('over').classList.add('show');
+}
+
+init();
+</script>
+</body>
+</html>

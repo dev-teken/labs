@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Batalha Elemental</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c18;
+  --surf: #14142a;
+  --surf2: #1c1c36;
+  --p1: #60a5fa;
+  --p2: #fb923c;
+  --gold: #fbbf24;
+  --red: #f87171;
+  --r: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; }
+body {
+  height: 100dvh;
+  background: var(--bg);
+  font-family: 'Fredoka', sans-serif;
+  color: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+}
+
+/* ── SCOREBAR: 12dvh ── */
+#scorebar {
+  flex: 0 0 12dvh;
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+}
+.sc { display: flex; flex-direction: column; gap: 3px; }
+.sc.r { align-items: flex-end; }
+.sc-name { font-size: clamp(9px,2.2vw,12px); font-weight:600; letter-spacing:1.5px; text-transform:uppercase; opacity:.8; }
+.sc-name.p1 { color:var(--p1); }
+.sc-name.p2 { color:var(--p2); }
+.hp-row { display:flex; align-items:center; gap:6px; }
+.hp-row.r { flex-direction:row-reverse; }
+.hp-num { font-size:clamp(24px,6dvh,36px); font-weight:700; line-height:1; min-width:2ch; transition:color .3s; }
+.hp-num.low { color:var(--red); }
+.hp-track { flex:1; height:7px; background:rgba(255,255,255,.1); border-radius:99px; overflow:hidden; }
+.hp-fill { height:100%; border-radius:99px; transition:width .5s cubic-bezier(.4,0,.2,1),background .4s; }
+/* P2 barra cresce da direita */
+.hp-fill.p1 { background:var(--p1); }
+.hp-fill.p2 { background:var(--p2); float:right; }
+.hp-fill.low { background:var(--red)!important; }
+#vs { background:var(--gold); color:#0c0c18; font-size:12px; font-weight:700; border-radius:99px; width:40px; height:22px; display:flex; align-items:center; justify-content:center; }
+
+/* ── FIELD: 26dvh ── */
+#field {
+  flex: 0 0 26dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 14px;
+}
+.fslot {
+  border-radius: var(--r);
+  border: 2px dashed rgba(255,255,255,.1);
+  background: var(--surf);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; padding: 6px;
+  transition: border-color .3s, background .3s;
+  overflow: hidden;
+}
+.fslot.placed { border-style:solid; }
+.fslot.revealed { border-style:solid; }
+.fowner { font-size:clamp(8px,2vw,10px); font-weight:600; letter-spacing:2px; text-transform:uppercase; }
+.fback { font-size:clamp(26px,5.5dvh,40px); line-height:1; }
+.fstatus { font-size:clamp(8px,1.8vw,10px); opacity:.55; }
+.femoji { font-size:clamp(22px,4.8dvh,34px); line-height:1; }
+.fname { font-size:clamp(9px,2.2vw,12px); font-weight:700; text-transform:uppercase; }
+.fstats { display:flex; gap:4px; }
+.fbadge { display:flex; flex-direction:column; align-items:center; border-radius:7px; padding:2px 5px; }
+.fbadge.atk { background:rgba(239,68,68,.22); border:1px solid #ef4444; }
+.fbadge.def { background:rgba(59,130,246,.22); border:1px solid #3b82f6; }
+.flabel { font-size:7px; color:#aaa; letter-spacing:1px; }
+.fval { font-size:clamp(11px,2.8vw,15px); font-weight:700; color:#fff; line-height:1; }
+.fhearts { display:flex; gap:2px; }
+.fheart { font-size:clamp(7px,1.8vw,10px); }
+.fheart.e { filter:grayscale(1) opacity(.2); }
+
+/* ── RESULTADO: height auto, comprime zonas abaixo ── */
+#result-box {
+  flex-shrink: 1;
+  margin: 4px 14px 0;
+  border-radius: var(--r);
+  padding: 7px 12px;
+  text-align: center;
+  display: none;
+  animation: up .22s ease;
+}
+#result-box.show { display:block; }
+@keyframes up { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+#result-box.win1 { background:rgba(96,165,250,.1); border:1.5px solid var(--p1); }
+#result-box.win2 { background:rgba(251,146,60,.1); border:1.5px solid var(--p2); }
+#result-box.draw  { background:rgba(251,191,36,.1); border:1.5px solid var(--gold); }
+#rtitle { font-size:clamp(12px,3.2vw,16px); font-weight:700; margin-bottom:2px; }
+#rdetail { font-size:clamp(9px,2vw,11px); color:#bbb; line-height:1.5; }
+
+/* ── FASE: 4dvh ── */
+#phase {
+  flex: 0 0 4dvh;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(9px,2.2vw,12px);
+  font-weight:600; letter-spacing:2px; text-transform:uppercase;
+  opacity:.75; padding:0 14px; text-align:center;
+}
+
+/* ── MÃO: flex:1 pega o resto ── */
+#hand-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex; flex-direction: column;
+  padding: 0 14px;
+  gap: 3px;
+}
+#hand {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: clamp(4px,1.4vw,7px);
+  justify-content: center;
+  align-items: stretch;
+}
+.hcard {
+  flex:1; min-width:0; max-width:88px;
+  border-radius: var(--r);
+  border: 2.5px solid transparent;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: clamp(2px,.5dvh,4px);
+  cursor: pointer; overflow: hidden; padding: 3px 2px;
+  transition: transform .13s cubic-bezier(.4,0,.2,1), box-shadow .13s, border-color .13s;
+  -webkit-user-select:none; user-select:none;
+}
+.hcard:active { transform:scale(.92)!important; }
+.hcard.sel {
+  border-color:var(--gold)!important;
+  box-shadow:0 0 0 3px rgba(251,191,36,.28),0 6px 18px rgba(0,0,0,.5);
+  transform:translateY(-7px) scale(1.04);
+}
+.he { font-size:clamp(18px,4.5dvh,30px); line-height:1; }
+.hn { font-size:clamp(7px,1.7vw,9px); font-weight:700; text-transform:uppercase; text-align:center; }
+.hs { display:flex; gap:clamp(2px,.7vw,4px); }
+.hb { display:flex; flex-direction:column; align-items:center; border-radius:6px; padding:clamp(1px,.3vw,2px) clamp(3px,.7vw,5px); }
+.hb.atk { background:rgba(239,68,68,.22); border:1px solid #ef4444; }
+.hb.def { background:rgba(59,130,246,.22); border:1px solid #3b82f6; }
+.hl { font-size:clamp(5px,1.2vw,7px); color:#aaa; letter-spacing:1px; }
+.hv { font-size:clamp(10px,2.6vw,14px); font-weight:700; color:#fff; line-height:1; }
+.hh { display:flex; gap:1px; }
+.hht { font-size:clamp(6px,1.5vw,9px); }
+.hht.e { filter:grayscale(1) opacity(.2); }
+.hlb { width:80%; height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+.hlf { height:100%; border-radius:99px; transition:width .4s; }
+#dinfo { flex-shrink:0; text-align:center; font-size:clamp(7px,1.8vw,9px); color:#444; }
+
+/* ── BOTÃO: 9dvh ── */
+#abtn {
+  flex: 0 0 9dvh;
+  margin: 5px 14px 0;
+  font-family:'Fredoka',sans-serif;
+  font-size:clamp(13px,3.5dvh,19px);
+  font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  border:none; border-radius:var(--r);
+  cursor:pointer;
+  transition:transform .1s,opacity .2s;
+  width:calc(100% - 28px);
+}
+#abtn:disabled { opacity:.2; cursor:not-allowed; }
+#abtn:active:not(:disabled) { transform:scale(.97); }
+#pad { flex: 0 0 5dvh; }
+
+/* ── PASS SCREEN ── */
+#pass {
+  display:none; position:fixed; inset:0;
+  background:#06060f;
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:clamp(10px,2.8dvh,20px);
+  padding:24px; z-index:200;
+}
+#pass.show { display:flex; }
+#picon { font-size:clamp(48px,13dvh,76px); animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
+#pwho { font-size:clamp(10px,2.4vw,13px); font-weight:600; letter-spacing:3px; text-transform:uppercase; }
+#pmsg { font-size:clamp(14px,3.8dvh,21px); color:rgba(255,255,255,.8); text-align:center; line-height:1.4; max-width:290px; }
+#pbtn {
+  font-family:'Fredoka',sans-serif;
+  font-size:clamp(13px,3.8dvh,19px); font-weight:700;
+  border:none; border-radius:var(--r);
+  padding:clamp(11px,2.8dvh,17px) clamp(24px,7vw,44px);
+  cursor:pointer; text-transform:uppercase; letter-spacing:1px;
+  transition:transform .1s; margin-top:4px;
+}
+#pbtn:active { transform:scale(.95); }
+
+/* ── GAME OVER ── */
+#over { display:none; position:fixed; inset:0; background:rgba(6,6,15,.93); align-items:center; justify-content:center; z-index:300; }
+#over.show { display:flex; }
+#overbox { background:var(--surf); border-radius:22px; padding:clamp(20px,5dvh,38px) clamp(18px,5vw,34px); text-align:center; border:2px solid var(--gold); max-width:300px; width:88%; }
+#overtitle { font-size:clamp(24px,7dvh,38px); font-weight:700; color:var(--gold); margin-bottom:8px; }
+#oversub { font-size:clamp(11px,2.8vw,14px); color:#aaa; margin-bottom:18px; line-height:1.6; }
+#rbtn { font-family:'Fredoka',sans-serif; background:var(--gold); color:#0c0c18; font-size:clamp(12px,3.2vw,16px); font-weight:700; border:none; border-radius:var(--r); padding:10px 24px; cursor:pointer; text-transform:uppercase; }
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div class="sc">
+    <div class="sc-name p1">⚔️ Jogador 1</div>
+    <div class="hp-row">
+      <div class="hp-num" id="h1">20</div>
+      <div class="hp-track"><div class="hp-fill p1" id="b1" style="width:100%"></div></div>
+    </div>
+  </div>
+  <div id="vs">VS</div>
+  <div class="sc r">
+    <div class="sc-name p2">Jogador 2 ⚔️</div>
+    <div class="hp-row r">
+      <div class="hp-num" id="h2">20</div>
+      <div class="hp-track"><div class="hp-fill p2" id="b2" style="width:100%"></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="field">
+  <div class="fslot" id="s1">
+    <div class="fowner" style="color:var(--p1)">Jogador 1</div>
+    <div class="fback">🂠</div>
+    <div class="fstatus">Aguardando...</div>
+  </div>
+  <div class="fslot" id="s2">
+    <div class="fowner" style="color:var(--p2)">Jogador 2</div>
+    <div class="fback">🂠</div>
+    <div class="fstatus">Aguardando...</div>
+  </div>
+</div>
+
+<div id="result-box"><div id="rtitle"></div><div id="rdetail"></div></div>
+<div id="phase"></div>
+<div id="hand-wrap"><div id="hand"></div><div id="dinfo"></div></div>
+<button id="abtn" disabled></button>
+<div id="pad"></div>
+
+<div id="pass">
+  <div id="picon"></div>
+  <div id="pwho"></div>
+  <div id="pmsg"></div>
+  <button id="pbtn" onclick="onPass()"></button>
+</div>
+
+<div id="over">
+  <div id="overbox">
+    <div id="overtitle"></div>
+    <div id="oversub"></div>
+    <button id="rbtn" onclick="init()">🔄 Jogar de novo</button>
+  </div>
+</div>
+
+<script>
+const EL=[
+  {id:'fire',     name:'Fogo', emoji:'🔥',atk:5,def:1,color:'#ef4444',bg:'rgba(239,68,68,.15)',  beats:['earth','air']},
+  {id:'water',    name:'Água', emoji:'💧',atk:2,def:4,color:'#3b82f6',bg:'rgba(59,130,246,.15)', beats:['fire','earth']},
+  {id:'earth',    name:'Terra',emoji:'🌍',atk:1,def:5,color:'#22c55e',bg:'rgba(34,197,94,.15)',  beats:['lightning','water']},
+  {id:'air',      name:'Ar',   emoji:'🌀',atk:4,def:2,color:'#94a3b8',bg:'rgba(148,163,184,.15)',beats:['water','fire']},
+  {id:'lightning',name:'Raio', emoji:'⚡',atk:6,def:0,color:'#fbbf24',bg:'rgba(251,191,36,.15)', beats:['water','air']},
+];
+const MAX_HP=20,MAX_CHP=5;
+let p1HP,p2HP,p1Deck,p2Deck,p1Pick,p2Pick,phase,active;
+const $=id=>document.getElementById(id);
+const mk=b=>({...b,hp:MAX_CHP});
+const alv=d=>d.filter(c=>c.hp>0);
+
+function H(hp,max=MAX_CHP,cls='fheart'){
+  let s='';for(let i=0;i<max;i++)s+=`<span class="${cls}${i<hp?'':' e'}">❤️</span>`;return s;
+}
+function lf(hp,max=MAX_CHP){
+  const p=Math.round(hp/max*100);
+  return `width:${p}%;background:${p<=40?'#f87171':p<=70?'#fbbf24':'#4ade80'}`;
+}
+
+function init(){
+  p1HP=MAX_HP;p2HP=MAX_HP;
+  p1Deck=EL.map(mk);p2Deck=EL.map(mk);
+  p1Pick=null;p2Pick=null;active=null;
+  $('over').classList.remove('show');
+  $('result-box').classList.remove('show');
+  updHP();resetField();clearUI();showPass('p1');
+}
+
+function updHP(){
+  const h1=Math.max(0,p1HP),h2=Math.max(0,p2HP);
+  $('h1').textContent=h1;$('h2').textContent=h2;
+  $('h1').className='hp-num'+(h1<=6?' low':'');
+  $('h2').className='hp-num'+(h2<=6?' low':'');
+  // p1 barra: cresce da esquerda (normal)
+  $('b1').style.cssText=`width:${h1/MAX_HP*100}%;background:${h1<=6?'var(--red)':'var(--p1)'}`;
+  // p2 barra: float:right já no CSS, só ajusta width
+  $('b2').style.cssText=`width:${h2/MAX_HP*100}%;background:${h2<=6?'var(--red)':'var(--p2)'}`;
+}
+
+function resetField(){
+  slotEmpty('s1','var(--p1)','Jogador 1');
+  slotEmpty('s2','var(--p2)','Jogador 2');
+}
+function slotEmpty(id,col,lbl){
+  const s=$(id);s.className='fslot';s.style.cssText='';
+  s.innerHTML=`<div class="fowner" style="color:${col}">${lbl}</div><div class="fback">🂠</div><div class="fstatus">Aguardando...</div>`;
+}
+function slotPlaced(id,col,lbl){
+  const s=$(id);s.className='fslot placed';s.style.borderColor=col;
+  s.innerHTML=`<div class="fowner" style="color:${col}">${lbl}</div><div class="fback">🂠</div><div class="fstatus" style="color:${col};font-weight:700">✅ Pronto!</div>`;
+}
+function slotReveal(id,card,col,lbl){
+  const s=$(id);s.className='fslot revealed';
+  s.style.borderColor=card.color;s.style.background=card.bg;
+  s.innerHTML=`<div class="fowner" style="color:${col}">${lbl}</div>
+    <div class="femoji">${card.emoji}</div>
+    <div class="fname" style="color:${card.color}">${card.name}</div>
+    <div class="fstats">
+      <div class="fbadge atk"><div class="flabel">ATK</div><div class="fval">${card.atk}</div></div>
+      <div class="fbadge def"><div class="flabel">DEF</div><div class="fval">${card.def}</div></div>
+    </div>
+    <div class="fhearts">${H(card.hp)}</div>`;
+}
+
+function showPass(player){
+  phase=player+'-pass';
+  const p1=player==='p1';
+  $('picon').textContent=p1?'⚔️':'🛡️';
+  $('pwho').style.color=p1?'var(--p1)':'var(--p2)';
+  $('pwho').textContent=p1?'Vez do Jogador 1':'Vez do Jogador 2';
+  $('pmsg').textContent='Passe o celular e toque para ver sua mão';
+  $('pbtn').style.cssText=`background:${p1?'var(--p1)':'var(--p2)'};color:#fff`;
+  $('pbtn').textContent=p1?'👁️ Ver minha mão — J1':'👁️ Ver minha mão — J2';
+  clearUI();$('pass').classList.add('show');
+}
+function onPass(){
+  $('pass').classList.remove('show');
+  if(phase==='p1-pass')startPick('p1');
+  else if(phase==='p2-pass')startPick('p2');
+  else if(phase==='next')newRound();
+}
+
+function clearUI(){
+  $('hand').innerHTML='';$('phase').textContent='';$('dinfo').textContent='';
+  const b=$('abtn');b.disabled=true;b.textContent='';b.style.cssText='';active=null;
+}
+
+function startPick(player){
+  phase=player+'-pick';
+  const p1=player==='p1';
+  const deck=p1?p1Deck:p2Deck;
+  active=null;
+  $('phase').style.color=p1?'var(--p1)':'var(--p2)';
+  $('phase').textContent=p1?'Jogador 1 — escolha sua carta':'Jogador 2 — escolha sua carta';
+  renderHand(deck);
+  const b=$('abtn');
+  b.style.cssText=`background:${p1?'var(--p1)':'var(--p2)'};color:#fff`;
+  b.textContent=p1?'🂠 Jogar carta — J1':'🂠 Jogar carta — J2';
+  b.disabled=true;b.onclick=confirm;
+}
+
+function renderHand(deck){
+  const hand=$('hand');hand.innerHTML='';
+  alv(deck).forEach(card=>{
+    const d=document.createElement('div');
+    const sel=active===card;
+    d.className='hcard'+(sel?' sel':'');
+    d.style.cssText=`background:${card.bg};border-color:${sel?'var(--gold)':card.color}`;
+    d.innerHTML=`
+      <div class="he">${card.emoji}</div>
+      <div class="hn" style="color:${card.color}">${card.name}</div>
+      <div class="hs">
+        <div class="hb atk"><div class="hl">ATK</div><div class="hv">${card.atk}</div></div>
+        <div class="hb def"><div class="hl">DEF</div><div class="hv">${card.def}</div></div>
+      </div>
+      <div class="hh">${H(card.hp,MAX_CHP,'hht')}</div>
+      <div class="hlb"><div class="hlf" style="${lf(card.hp)}"></div></div>`;
+    d.onclick=()=>{active=card;renderHand(deck);$('abtn').disabled=false;};
+    hand.appendChild(d);
+  });
+  const n=alv(deck).length;
+  $('dinfo').textContent=`${n} carta${n!==1?'s':''} restante${n!==1?'s':''}`;
+}
+
+function confirm(){
+  if(!active)return;
+  const p1=phase==='p1-pick';
+  if(p1){p1Pick=active;slotPlaced('s1','var(--p1)','Jogador 1');clearUI();showPass('p2');}
+  else  {p2Pick=active;slotPlaced('s2','var(--p2)','Jogador 2');clearUI();showRevealBtn();}
+}
+
+function showRevealBtn(){
+  phase='reveal';
+  $('phase').style.color='var(--gold)';
+  $('phase').textContent='Ambos jogaram — hora de revelar!';
+  const b=$('abtn');
+  b.style.cssText='background:var(--gold);color:#0c0c18';
+  b.textContent='⚡ Revelar as cartas!';
+  b.disabled=false;b.onclick=doReveal;
+}
+
+function doReveal(){
+  const c1=p1Pick,c2=p2Pick;
+  slotReveal('s1',c1,'var(--p1)','Jogador 1');
+  slotReveal('s2',c2,'var(--p2)','Jogador 2');
+
+  const p1b=c1.beats.includes(c2.id);
+  const p2b=c2.beats.includes(c1.id);
+
+  // desgaste carta: ATK adversário − DEF própria, mín 1
+  const cd1=Math.max(1,c2.atk-c1.def);
+  const cd2=Math.max(1,c1.atk-c2.def);
+  c1.hp=Math.max(0,c1.hp-cd1);
+  c2.hp=Math.max(0,c2.hp-cd2);
+
+  // dano HP jogador: ATK cheio da carta vencedora
+  let d1=0,d2=0;
+  if(p1b&&!p2b){d2=-c1.atk;p2HP=Math.max(0,p2HP+d2);}
+  else if(p2b&&!p1b){d1=-c2.atk;p1HP=Math.max(0,p1HP+d1);}
+  updHP();
+
+  const rb=$('result-box');
+  let lines=[];
+  lines.push(`${c1.emoji} ${c1.name} (J1) perdeu ${cd1} vida${c1.hp<=0?' — <b style="color:#f87171">💀 Destruída!</b>':`  →  ${c1.hp}/${MAX_CHP}`}`);
+  lines.push(`${c2.emoji} ${c2.name} (J2) perdeu ${cd2} vida${c2.hp<=0?' — <b style="color:#f87171">💀 Destruída!</b>':`  →  ${c2.hp}/${MAX_CHP}`}`);
+
+  if(p1b&&!p2b){
+    $('rtitle').textContent='🏆 Jogador 1 venceu este turno!';
+    rb.className='result-box show win1';
+    lines.push(`⚡ J2 levou <b>${c1.atk} de dano</b> — ficou com ${p2HP} HP`);
+  }else if(p2b&&!p1b){
+    $('rtitle').textContent='🏆 Jogador 2 venceu este turno!';
+    rb.className='result-box show win2';
+    lines.push(`⚡ J1 levou <b>${c2.atk} de dano</b> — ficou com ${p1HP} HP`);
+  }else{
+    $('rtitle').textContent='🤝 Empate de elemento!';
+    rb.className='result-box show draw';
+    lines.push('Nenhum HP perdido — cartas se desgastam.');
+  }
+  $('rdetail').innerHTML=lines.join('<br>');
+  $('phase').textContent='';
+
+  const b=$('abtn');
+  const over=p1HP<=0||p2HP<=0||alv(p1Deck).length===0||alv(p2Deck).length===0;
+  if(over){
+    b.style.cssText='background:#ef4444;color:#fff';
+    b.textContent='🏁 Resultado final';
+    b.disabled=false;b.onclick=endGame;
+  }else{
+    b.style.cssText='background:var(--surf2);color:#fff;border:1.5px solid rgba(255,255,255,.14)';
+    b.textContent='▶️ Próxima rodada';
+    b.disabled=false;
+    b.onclick=()=>{$('result-box').classList.remove('show');phase='next';showPass('p1');};
+  }
+}
+
+function newRound(){
+  p1Pick=null;p2Pick=null;active=null;
+  $('result-box').classList.remove('show');
+  resetField();showPass('p1');
+}
+
+function endGame(){
+  const a1=alv(p1Deck).length,a2=alv(p2Deck).length;
+  let t='',s='';
+  if((p1HP<=0&&p2HP<=0)||(a1===0&&a2===0)){t='🤝 Empate!';s='Os dois foram derrotados juntos!';}
+  else if(p2HP<=0||a2===0){t='🏆 Jogador 1 Venceu!';s=p2HP<=0?'HP do J2 chegou a zero!':'J2 ficou sem cartas!';}
+  else{t='🏆 Jogador 2 Venceu!';s=p1HP<=0?'HP do J1 chegou a zero!':'J1 ficou sem cartas!';}
+  $('overtitle').textContent=t;
+  $('oversub').textContent=s;
+  $('over').classList.add('show');
+}
+
+init();
+</script>
+</body>
+</html>

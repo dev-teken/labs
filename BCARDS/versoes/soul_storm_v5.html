@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>✦ SOUL STORM v5 ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+
+body{
+  background:#03000a;
+  font-family:'Nunito',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ────────── ESTRELAS ────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    radial-gradient(1px 1px at 8% 12%,rgba(255,255,255,.9) 0%,transparent 100%),
+    radial-gradient(1px 1px at 22% 45%,rgba(255,79,163,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 35% 8%,rgba(255,255,255,.6) 0%,transparent 100%),
+    radial-gradient(1px 1px at 48% 75%,rgba(180,79,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 60% 20%,rgba(255,255,255,.9) 0%,transparent 100%),
+    radial-gradient(1px 1px at 72% 55%,rgba(0,229,255,.6) 0%,transparent 100%),
+    radial-gradient(1px 1px at 85% 35%,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 92% 80%,rgba(255,224,0,.6) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 90%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 55% 50%,rgba(255,79,163,.4) 0%,transparent 100%);
+  pointer-events:none;z-index:0;
+}
+
+/* ────────── HEADER ────────── */
+header{
+  position:relative;z-index:10;
+  padding:20px 20px 16px;
+  text-align:center;
+}
+.logo{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(1.8rem,5vw,3rem);
+  letter-spacing:.1em;
+  background:linear-gradient(135deg,#FFD426,#FF6B00 45%,#FF3FA0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(255,160,0,.5));
+}
+.tagline{
+  font-size:.6rem;font-weight:900;letter-spacing:.26em;
+  text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:4px;
+}
+
+/* ────────── GRID ────────── */
+#grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  padding:0 14px 40px;
+  max-width:960px;
+  margin:0 auto;
+  position:relative;z-index:5;
+}
+@media(max-width:640px){#grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:0 10px 28px}}
+@media(max-width:360px){#grid{grid-template-columns:1fr}}
+
+/* ────────── SOUL CARD ────────── */
+.sc{
+  position:relative;
+  border-radius:22px;
+  display:flex;
+  flex-direction:column;
+  /* borda cónica animada */
+  --g:#fff;
+  --g2:#888;
+}
+
+/* wrapper do canvas */
+.sc-wrap{
+  position:relative;
+  aspect-ratio:3/4;
+  border-radius:22px 22px 0 0;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.06);
+  border-bottom:none;
+  cursor:pointer;
+  transition:border-color .3s, box-shadow .35s;
+}
+.sc:hover .sc-wrap{
+  border-color:var(--g);
+  box-shadow:0 0 22px var(--g);
+}
+.sc-canvas{display:block;width:100%;height:100%}
+
+/* rune flutuante */
+.sc-rune{
+  position:absolute;top:8px;right:9px;font-size:1.25rem;
+  filter:drop-shadow(0 0 7px var(--g));
+  animation:rf 3.2s ease-in-out infinite;
+  pointer-events:none;z-index:3;
+}
+@keyframes rf{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-7px) rotate(5deg)}}
+
+/* mana badge */
+.sc-mana{
+  position:absolute;top:-8px;left:-8px;
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,#1e6fff,#7b2fff);
+  border:2px solid #fff;box-shadow:0 0 10px #4a90ff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:.8rem;color:#fff;
+  z-index:5;
+}
+
+/* label overlay no canvas */
+.sc-label{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:28px 10px 10px;
+  background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 100%);
+  text-align:center;pointer-events:none;z-index:3;
+}
+.sc-name{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(.78rem,1.8vw,1rem);
+  letter-spacing:.1em;text-transform:uppercase;
+  color:#fff;text-shadow:0 0 10px var(--g);
+}
+.sc-vibe{
+  font-size:.5rem;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.3);
+  margin-top:1px;
+}
+
+/* ────────── PAINEL (abaixo do canvas) ────────── */
+.sc-panel{
+  background:rgba(255,255,255,.04);
+  border:2px solid rgba(255,255,255,.07);
+  border-top:none;
+  border-radius:0 0 20px 20px;
+  padding:10px 11px 13px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* ── TABS (Switches / Barra) ── */
+.sc-tabs{
+  display:flex;
+  gap:4px;
+  background:rgba(255,255,255,.06);
+  border-radius:10px;
+  padding:3px;
+}
+.sc-tab{
+  flex:1;
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(.58rem,1.6vw,.68rem);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.35);
+  text-align:center;
+  padding:5px 2px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background .2s, color .2s, box-shadow .2s;
+  white-space:nowrap;
+}
+.sc-tab.active{
+  background:var(--g);
+  color:#000;
+  box-shadow:0 0 10px var(--g);
+  font-weight:900;
+}
+
+/* ── PAINEL SWITCHES ── */
+.sc-switches{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.sw-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:6px 9px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.03);
+  cursor:pointer;
+  transition:background .18s, border-color .18s, transform .1s;
+  gap:6px;
+}
+.sw-row:active{transform:scale(.96)}
+.sw-row.on{
+  background:rgba(255,255,255,.08);
+  border-color:var(--sw-c, rgba(255,255,255,.2));
+}
+.sw-left{display:flex;align-items:center;gap:7px}
+.sw-em{
+  font-size:1.05rem;line-height:1;
+  transition:transform .25s;
+}
+.sw-row.on .sw-em{transform:scale(1.3) rotate(-8deg);animation:swbounce .3s ease}
+@keyframes swbounce{0%{transform:scale(1)}50%{transform:scale(1.5) rotate(-12deg)}100%{transform:scale(1.3) rotate(-8deg)}}
+.sw-nome{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(.62rem,1.7vw,.76rem);
+  letter-spacing:.03em;
+  color:rgba(255,255,255,.75);
+}
+
+/* toggle pill */
+.sw-pill{
+  width:40px;height:22px;flex-shrink:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.09);
+  border:1.5px solid rgba(255,255,255,.12);
+  position:relative;
+  transition:background .28s, border-color .28s, box-shadow .28s;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.3);
+}
+.sw-pill::after{
+  content:'';
+  position:absolute;
+  top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;
+  background:rgba(255,255,255,.4);
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1), background .25s;
+  box-shadow:0 2px 5px rgba(0,0,0,.4);
+}
+.sw-row.on .sw-pill{
+  background:var(--sw-c,#fff);
+  border-color:var(--sw-c,#fff);
+  box-shadow:0 0 10px var(--sw-c,#fff), inset 0 0 5px rgba(255,255,255,.15);
+}
+.sw-row.on .sw-pill::after{
+  transform:translateX(18px);
+  background:#fff;
+}
+
+/* ── PAINEL BARRA ── */
+.sc-bar{display:flex;flex-direction:column;gap:6px}
+.sc-bar-top{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sc-bar-label{
+  font-family:'Fredoka One',cursive;
+  font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.3);
+}
+.sc-bar-value{
+  font-family:'Fredoka One',cursive;
+  font-size:.82rem;color:#fff;
+  min-width:42px;text-align:right;
+  transition:color .2s;
+}
+/* track */
+.sc-track{
+  position:relative;height:10px;border-radius:6px;
+  background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.14);
+  cursor:pointer;overflow:visible;
+}
+.sc-fill{
+  position:absolute;top:0;left:0;bottom:0;
+  border-radius:5px;
+  transition:width .07s linear;
+  box-shadow:0 0 8px var(--g),0 0 16px var(--g);
+}
+.sc-thumb{
+  position:absolute;top:50%;
+  width:20px;height:20px;border-radius:50%;
+  background:#fff;border:3px solid var(--g);
+  box-shadow:0 0 10px var(--g),0 0 20px var(--g);
+  transform:translate(-50%,-50%);
+  transition:left .07s linear;
+  pointer-events:none;
+}
+/* stage label */
+.sc-stage{
+  font-family:'Fredoka One',cursive;
+  font-size:.62rem;letter-spacing:.1em;
+  text-align:center;
+  min-height:1em;
+  transition:color .3s;
+}
+
+/* sparkle */
+.sparkle{
+  position:absolute;pointer-events:none;border-radius:50%;
+  width:5px;height:5px;
+  animation:sp .5s ease-out forwards;z-index:20;
+}
+@keyframes sp{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+}
+
+/* toast */
+#toast{
+  position:fixed;bottom:20px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:linear-gradient(135deg,#FFD426,#FF6B00);
+  color:#000;font-family:'Fredoka One',cursive;font-size:.9rem;
+  padding:8px 22px;border-radius:40px;
+  box-shadow:0 4px 24px rgba(255,180,0,.5);
+  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
+  z-index:999;white-space:nowrap;pointer-events:none;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ SOUL STORM ⚡</div>
+  <div class="tagline">✦ switches · barra · transforma a alma ✦</div>
+</header>
+
+<div id="grid"></div>
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   SOULS
+════════════════════════════════════════════ */
+const SOULS = [
+  {
+    id:'a', h:205, s:22, l:48, a3:[196,245,183],
+    speed:.004, phase:0, bperiod:7800,
+    label:'Névoa', vibe:'alma etérea', rune:'🌫️', mana:1,
+    glow:'rgba(180,240,255,.55)', glowHex:'#b4f0ff',
+    fx:'trail',
+    stages:['adormecida','acordando','flutuando','voando','transcendendo'],
+    switches:[
+      {key:'turbulence', em:'🌀', nome:'Redemoinho', c:'#00E5FF'},
+      {key:'drift',      em:'🪂', nome:'Voar',       c:'#5BAAFF'},
+      {key:'halo',       em:'🌟', nome:'Brilho',     c:'#90E0FF'},
+    ],
+  },
+  {
+    id:'b', h:18, s:22, l:42, a3:[189,121,146],
+    speed:.011, phase:1.3, bperiod:8200,
+    label:'Terra', vibe:'alma ancestral', rune:'🌍', mana:3,
+    glow:'rgba(220,130,100,.55)', glowHex:'#dc8264',
+    fx:'pulse',
+    stages:['dormindo','respirando','tremendo','rugindo','eruptando'],
+    switches:[
+      {key:'density',    em:'💥', nome:'Espessura',  c:'#FF6B1A'},
+      {key:'turbulence', em:'🌋', nome:'Erupção',    c:'#FF3D00'},
+      {key:'centrifugal',em:'💫', nome:'Expansão',   c:'#FFB347'},
+    ],
+  },
+  {
+    id:'c', h:150, s:18, l:40, a3:[205,158,74],
+    speed:.021, phase:2.7, bperiod:7400,
+    label:'Bosque', vibe:'alma selvagem', rune:'🌿', mana:4,
+    glow:'rgba(100,220,130,.5)', glowHex:'#64dc82',
+    fx:'orbit',
+    stages:['quieto','brotando','crescendo','florescendo','explodindo'],
+    switches:[
+      {key:'orbit',      em:'🌱', nome:'Brotar',     c:'#39FF14'},
+      {key:'density',    em:'🍃', nome:'Folhagem',   c:'#00CC44'},
+      {key:'halo',       em:'☀️', nome:'Fotossíntese',c:'#AAFFA0'},
+    ],
+  },
+  {
+    id:'d', h:270, s:20, l:48, a3:[192,117,180],
+    speed:.038, phase:4.1, bperiod:8600,
+    label:'Cosmos', vibe:'alma cósmica', rune:'✨', mana:6,
+    glow:'rgba(192,117,255,.6)', glowHex:'#c075ff',
+    fx:'stars',
+    stages:['apagada','piscando','brilhando','irradiando','supernova'],
+    switches:[
+      {key:'stars',      em:'⭐', nome:'Estrelas',   c:'#B44FFF'},
+      {key:'turbulence', em:'🌌', nome:'Galáxia',    c:'#7C3AED'},
+      {key:'halo',       em:'💜', nome:'Aura',        c:'#E040FB'},
+    ],
+  },
+  {
+    id:'e', h:38, s:22, l:44, a3:[128,138,86],
+    speed:.062, phase:5.5, bperiod:7100,
+    label:'Areia', vibe:'alma efêmera', rune:'⏳', mana:2,
+    glow:'rgba(200,180,80,.45)', glowHex:'#c8b450',
+    fx:'dust',
+    stages:['parada','mexendo','girando','redemoinhando','tempestade'],
+    switches:[
+      {key:'dust',       em:'🌪️', nome:'Pó',          c:'#FFD426'},
+      {key:'drift',      em:'💨', nome:'Vento',       c:'#C8B450'},
+      {key:'density',    em:'🏖️', nome:'Grãos',       c:'#E8A020'},
+    ],
+  },
+  {
+    id:'f', h:320, s:18, l:45, a3:[126,200,192],
+    speed:.104, phase:.8, bperiod:9000,
+    label:'Crepúsculo', vibe:'alma aurora', rune:'🌅', mana:7,
+    glow:'rgba(255,100,180,.5)', glowHex:'#ff64b4',
+    fx:'aurora',
+    stages:['noite','madrugada','amanhecendo','aurorada','ascendendo'],
+    switches:[
+      {key:'aurora',     em:'🌈', nome:'Aurora',     c:'#FF64B4'},
+      {key:'halo',       em:'🌸', nome:'Brilho Rosa',c:'#FF3FA0'},
+      {key:'centrifugal',em:'🌀', nome:'Expansão',   c:'#C040FF'},
+    ],
+  },
+];
+
+/* ════════════════════════════════════════════
+   ESTADO
+════════════════════════════════════════════ */
+const T   = {};   // time tick por alma
+const INT = {};   // intensidade 0..1 por alma
+const SW  = {};   // switches: {id: {key: bool}}
+const TAB = {};   // tab ativa: 'sw' | 'bar'
+
+SOULS.forEach(s => {
+  T[s.id]   = s.phase;
+  INT[s.id] = 0.15;
+  SW[s.id]  = {};
+  s.switches.forEach(sw => SW[s.id][sw.key] = false);
+  TAB[s.id] = 'sw'; // começa em switches
+});
+
+/* ════════════════════════════════════════════
+   ENGINE — NOISE + HSL
+════════════════════════════════════════════ */
+function n2(t,f,p){
+  return .42*Math.sin(t*f+p)+.28*Math.sin(t*f*1.618+p*1.3)
+        +.18*Math.sin(t*f*2.618+p*2.1)+.12*Math.sin(t*f*4.236+p*3.4);
+}
+function hsl2rgb(h,s,l){
+  s/=100;l/=100;const a=s*Math.min(l,1-l);
+  const f=(n,k=(n+h/30)%12)=>l-a*Math.max(Math.min(k-3,9-k,1),-1);
+  return[Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)];
+}
+function breathwave(s){
+  const ph=(performance.now()%s.bperiod)/s.bperiod;
+  return .5-.5*Math.cos(ph*Math.PI*2);
+}
+function heartbeat(s){
+  const bpm=62*(s.speed/.011), period=60000/bpm;
+  const ph=(performance.now()%period)/period;
+  const g=(x,m,sg)=>Math.exp(-.5*((x-m)/sg)**2);
+  return Math.max(0,g(ph,.1,.045)+g(ph,.22,.055)*.58);
+}
+
+/* ════════════════════════════════════════════
+   DRAW SMOKE — herda do v4, switches amplificam parâmetros
+════════════════════════════════════════════ */
+function drawSmoke(oc, soul, W, H, iv){
+  const cx=W/2, cy=H/2, R=W*.46;
+  const t=T[soul.id], HB=heartbeat(soul), BW=breathwave(soul);
+  const sw=SW[soul.id];
+
+  /* parâmetros base da barra */
+  let density     = .3 + iv*2.2;
+  let turbulence  = iv*3.5;
+  let centrifugal = .8 + iv*2.2;
+  let drift       = (iv-.5)*1.4;
+  let halo        = .5 + iv*2.0;
+  let dissipation = .4 + iv*1.6;
+
+  /* SWITCHES: cada um amplifica DRAMATICAMENTE um parâmetro */
+  if(sw['turbulence']) turbulence  = Math.min(turbulence  + 2.8, 6);
+  if(sw['density'])    density     = Math.min(density     + 1.8, 4);
+  if(sw['halo'])       halo        = Math.min(halo        + 1.6, 4);
+  if(sw['drift'])      drift       = Math.min(drift       + 1.2, 2);
+  if(sw['centrifugal'])centrifugal = Math.min(centrifugal + 2.0, 5);
+  /* switches fx-específicos — bônus de density/turbulência */
+  if(sw['orbit'])  { turbulence += 1.5; centrifugal += 1.2; }
+  if(sw['stars'])  { halo       += 1.2; density     += .8;  }
+  if(sw['dust'])   { turbulence += 2.0; drift       += .8;  }
+  if(sw['aurora']) { halo       += 2.0; centrifugal += 1.5; }
+
+  const om=1+.09*BW*centrifugal;
+
+  oc.clearRect(0,0,W,H);oc.save();
+  oc.beginPath();oc.arc(cx,cy,R,0,Math.PI*2);oc.clip();
+  oc.fillStyle='#020208';oc.fillRect(0,0,W,H);
+
+  const bRGB=hsl2rgb(soul.h, Math.min(soul.s*2.8,72), 52+iv*18);
+  const a3=soul.a3;
+
+  const PUFFS=[
+    {s:1,ox:Math.cos(t*.5)*R*.44*om,      oy:Math.sin(t*.4)*R*.4*om,     col:bRGB,al:.72},
+    {s:2,ox:Math.cos(t*.7+2.1)*R*.42*om,  oy:Math.sin(t*.6+1)*R*.44*om,  col:bRGB,al:.58},
+    {s:3,ox:Math.cos(t*.9+4.2)*R*.46*om,  oy:Math.sin(t*.8+3)*R*.42*om,  col:a3,  al:.52},
+    {s:4,ox:Math.cos(t*.38+3.1)*R*.48*om, oy:Math.sin(t*.32+1.7)*R*.44*om,col:a3, al:.40},
+    {s:5,ox:Math.cos(t*.55+5.4)*R*.32*om, oy:Math.sin(t*.48+4.2)*R*.3*om, col:bRGB,al:.46},
+  ];
+
+  oc.globalCompositeOperation='screen';
+  PUFFS.forEach(p=>{
+    const db=drift*.18, ox=p.ox, oy=p.oy-R*db*(1+p.s*.12);
+    const sx=1+.38*n2(t,.13,p.s*1.3), sy=1+.32*n2(t,.11,p.s*2.1);
+    const rot=n2(t,.17,p.s*.7)*.9;
+    const pSz=R*(.3+.18*n2(t,.23,p.s*1.1))*(1+.12*HB);
+    for(let i=0;i<5;i++){
+      const fi=i/5;
+      const fdx=pSz*.45*n2(t,.31+i*.07,p.s*.9+i*1.1);
+      const fdy=pSz*.38*n2(t,.29+i*.05,p.s*1.7+i*.9);
+      const fr=pSz*(.55-fi*.25);
+      const fa=p.al*density*(1-Math.pow(fi,.5+dissipation*.6)*.72)*(1+.22*HB);
+      oc.save();oc.translate(cx+ox,cy+oy);oc.rotate(rot);oc.scale(sx,sy);
+      const g=oc.createRadialGradient(fdx,fdy,0,fdx,fdy,fr);
+      const [r,gv,b]=p.col;
+      const rl=Math.min(r+Math.round(55*halo),255);
+      const gl=Math.min(gv+Math.round(55*halo),255);
+      const bl=Math.min(b+Math.round(55*halo),255);
+      g.addColorStop(0,  `rgba(${r},${gv},${b},${Math.min(fa,.95)})`);
+      g.addColorStop(.2, `rgba(${rl},${gl},${bl},${fa*.6*Math.min(halo,1.8)})`);
+      g.addColorStop(.5, `rgba(${r},${gv},${b},${fa*.25})`);
+      g.addColorStop(1,  `rgba(${r},${gv},${b},0)`);
+      oc.fillStyle=g;oc.beginPath();oc.arc(fdx,fdy,fr,0,Math.PI*2);oc.fill();oc.restore();
+    }
+  });
+
+  /* turbulência */
+  if(turbulence>.1){
+    const nv=Math.round(2+turbulence*3.5);
+    for(let k=0;k<nv;k++){
+      const ka=k*(Math.PI*2/nv)+t*.03, kn=n2(t,.07+k*.03,k*2.3);
+      const tx1=cx+R*.7*Math.cos(ka)*kn, ty1=cy+R*.7*Math.sin(ka)*kn;
+      const vr=R*(.06+.07*turbulence)*(.6+.4*Math.abs(kn));
+      const [r,gv,b]=bRGB;
+      const vg=oc.createRadialGradient(tx1,ty1,0,tx1,ty1,vr);
+      vg.addColorStop(0,`rgba(${r},${gv},${b},${.1*turbulence*(1+HB*.5)})`);
+      vg.addColorStop(1,`rgba(${r},${gv},${b},0)`);
+      oc.fillStyle=vg;oc.beginPath();oc.arc(tx1,ty1,vr,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  /* inner shine */
+  oc.globalCompositeOperation='screen';
+  const lx=cx+Math.cos(t*.45+1)*R*.3, ly=cy+Math.sin(t*.55+.5)*R*.26;
+  const sh=oc.createRadialGradient(lx,ly,0,lx,ly,R*(.22+iv*.18+halo*.06));
+  const [r,gv,b]=hsl2rgb(soul.h,48,82);
+  sh.addColorStop(0,`rgba(${r},${gv},${b},${.18+BW*.07+HB*.05+iv*.2})`);
+  sh.addColorStop(.5,`rgba(${r},${gv},${b},.05)`);
+  sh.addColorStop(1,'rgba(0,0,0,0)');
+  oc.fillStyle=sh;oc.fillRect(0,0,W,H);
+
+  /* vinheta */
+  oc.globalCompositeOperation='source-over';
+  const vg2=oc.createRadialGradient(cx,cy,R*.25,cx,cy,R);
+  const vigAmt=.52-iv*.22;
+  vg2.addColorStop(0,'rgba(0,0,0,0)');
+  vg2.addColorStop(.6,`rgba(1,1,7,${vigAmt})`);
+  vg2.addColorStop(1,`rgba(1,1,9,${.9-iv*.2})`);
+  oc.fillStyle=vg2;oc.fillRect(0,0,W,H);
+
+  /* FX únicos */
+  oc.save();oc.beginPath();oc.arc(cx,cy,R,0,Math.PI*2);oc.clip();
+  oc.globalCompositeOperation='screen';
+  const fx=soul.fx;
+  const fxBoost = Object.values(sw).filter(Boolean).length * .25; // boost por switches ativos
+
+  if(fx==='trail'||sw['orbit']){
+    const count=Math.round(4+(iv+fxBoost)*12);
+    for(let i=0;i<count;i++){
+      const a=t*.3+i*(Math.PI*2/count);
+      const rr=R*(.28+iv*.18)+R*.08*Math.sin(t*.7+i);
+      const x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr*.8;
+      const sz=R*(.04+iv*.05+fxBoost*.03);
+      const gs=oc.createRadialGradient(x,y,0,x,y,sz);
+      gs.addColorStop(0,`rgba(${bRGB[0]},${bRGB[1]},${bRGB[2]},${.12+(iv+fxBoost)*.28})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(x,y,sz,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  if(fx==='pulse'){
+    const rings=Math.round(1+(iv+fxBoost)*5);
+    for(let i=0;i<rings;i++){
+      const ph=((performance.now()/(2200-iv*1200))+i/rings)%1;
+      const pr2=ph*R*.9, al=(1-ph)*(.14+(iv+fxBoost)*.24)*(1+HB*.4);
+      oc.globalAlpha=al;
+      oc.strokeStyle=`rgba(${a3[0]},${a3[1]},${a3[2]},1)`;
+      oc.lineWidth=1+(iv+fxBoost)*2.5;
+      oc.beginPath();oc.arc(cx,cy,pr2,0,Math.PI*2);oc.stroke();
+    }
+    oc.globalAlpha=1;
+  }
+
+  if(fx==='orbit'||sw['orbit']){
+    const count=Math.round(3+(iv+fxBoost)*10);
+    for(let i=0;i<count;i++){
+      const angle=t*(1+(iv+fxBoost)*2)+i*(Math.PI*2/count);
+      const orr=R*(.25+iv*.22), ex=.6+(iv+fxBoost)*.35;
+      const ox2=cx+Math.cos(angle)*orr, oy2=cy+Math.sin(angle)*orr*ex;
+      const sz=R*(.025+(iv+fxBoost)*.03);
+      const gs=oc.createRadialGradient(ox2,oy2,0,ox2,oy2,sz);
+      gs.addColorStop(0,`rgba(205,158,74,${.7+(iv+fxBoost)*.25})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(ox2,oy2,sz,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  if(fx==='stars'||sw['stars']){
+    const count=Math.round(6+(iv+fxBoost)*28);
+    for(let i=0;i<count;i++){
+      const sx2=cx+Math.sin(i*137.5)*R*.44, sy2=cy+Math.cos(i*97.3)*R*.4;
+      const al=(.1+(iv+fxBoost)*.6)*(.5+.5*Math.sin(t*(1+iv)+i*1.7));
+      const sz=R*(.012+(iv+fxBoost)*.022);
+      const gs=oc.createRadialGradient(sx2,sy2,0,sx2,sy2,sz);
+      gs.addColorStop(0,`rgba(255,255,255,${al})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(sx2,sy2,sz,0,Math.PI*2);oc.fill();
+    }
+    if((iv+fxBoost)>.5){
+      const burst=Math.round(((iv+fxBoost)-.5)/.5*8);
+      for(let i=0;i<burst;i++){
+        const bx=cx+Math.sin(i*83.7+t*.5)*R*.35, by=cy+Math.cos(i*61.3+t*.4)*R*.3;
+        const al=((iv+fxBoost)-.5)/.5*.8;
+        for(let arm=0;arm<4;arm++){
+          const ax=Math.cos(arm*Math.PI/2+t*.3)*R*.07, ay=Math.sin(arm*Math.PI/2+t*.3)*R*.07;
+          const lg=oc.createLinearGradient(bx,by,bx+ax,by+ay);
+          lg.addColorStop(0,`rgba(255,255,255,${al})`);
+          lg.addColorStop(1,'rgba(255,255,255,0)');
+          oc.strokeStyle=lg;oc.lineWidth=1.5;
+          oc.beginPath();oc.moveTo(bx,by);oc.lineTo(bx+ax,by+ay);oc.stroke();
+        }
+      }
+    }
+  }
+
+  if(fx==='dust'||sw['dust']){
+    const count=Math.round(6+(iv+fxBoost)*22);
+    for(let i=0;i<count;i++){
+      const spd=300+(iv+fxBoost)*1400;
+      const dx=Math.sin(i*73.1+t*(iv*.8))*R*(.3+iv*.18);
+      const dy=((performance.now()/spd+i*40)%H)-H/2;
+      const sz=R*(.012+(iv+fxBoost)*.02);
+      const al=.08+(iv+fxBoost)*.18;
+      const gs=oc.createRadialGradient(cx+dx,cy+dy,0,cx+dx,cy+dy,sz);
+      gs.addColorStop(0,`rgba(200,180,100,${al})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(cx+dx,cy+dy,sz,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  if(fx==='aurora'||sw['aurora']){
+    const hues=[320,160,200,290,350,120];
+    const count=Math.round(2+(iv+fxBoost)*5);
+    for(let i=0;i<count;i++){
+      const y1=cy+Math.sin(t*.4+i*1.3)*R*(.2+(iv+fxBoost)*.22);
+      const x1=cx-R*.9+(i/count)*R*1.8, x2=x1+R*.45;
+      const rgb=hsl2rgb(hues[i%hues.length],60+iv*20,65+iv*15);
+      const g2=oc.createLinearGradient(x1,y1,x2,y1+R*.24);
+      const a2=.07+(iv+fxBoost)*.18;
+      g2.addColorStop(0,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+      g2.addColorStop(.5,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a2})`);
+      g2.addColorStop(1,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+      oc.fillStyle=g2;
+      oc.beginPath();oc.moveTo(x1,y1);oc.bezierCurveTo(x1+R*.1,y1-R*.1,x2-R*.1,y1+R*.1,x2,y1+R*.24);
+      oc.lineTo(x2,y1+R*.3);oc.bezierCurveTo(x2,y1+R*.14,x1,y1+R*.06,x1,y1+R*.3);oc.closePath();oc.fill();
+    }
+  }
+
+  oc.restore();
+  oc.restore();
+}
+
+/* ════════════════════════════════════════════
+   BUILD CARDS
+════════════════════════════════════════════ */
+const cvs_map={}, off_map={};
+// refs por alma para update
+const refs={}; // id -> {wrap, fill, thumb, stageEl, barValue}
+
+function buildCards(){
+  const grid=document.getElementById('grid');
+
+  SOULS.forEach(soul=>{
+    const glowHex=soul.glowHex;
+
+    /* root */
+    const sc=document.createElement('div');
+    sc.className='sc';
+    sc.style.setProperty('--g', soul.glow);
+
+    /* canvas wrapper */
+    const wrap=document.createElement('div');
+    wrap.className='sc-wrap';
+    wrap.style.setProperty('--g', soul.glow);
+
+    const cv=document.createElement('canvas');cv.className='sc-canvas';
+    cvs_map[soul.id]=cv;
+    const off=document.createElement('canvas');
+    off_map[soul.id]={canvas:off, ctx:off.getContext('2d')};
+
+    const rune=document.createElement('div');rune.className='sc-rune';rune.textContent=soul.rune;
+    rune.style.animationDelay=(Math.random()*2.5)+'s';
+
+    const mana=document.createElement('div');mana.className='sc-mana';mana.textContent=soul.mana;
+
+    const lbl=document.createElement('div');lbl.className='sc-label';
+    lbl.innerHTML=`<div class="sc-name" style="color:#fff;text-shadow:0 0 12px ${glowHex}">${soul.label}</div><div class="sc-vibe">${soul.vibe}</div>`;
+
+    wrap.append(cv, rune, mana, lbl);
+
+    /* click = sparkle */
+    wrap.addEventListener('click', e=>{ sparkle(wrap,e); toast(soul.rune+' '+soul.label); });
+    wrap.addEventListener('mousemove', e=>tilt(wrap,e));
+    wrap.addEventListener('mouseleave', ()=>{ wrap.style.transform=''; });
+
+    /* ── PAINEL ABAIXO ── */
+    const panel=document.createElement('div');
+    panel.className='sc-panel';
+
+    /* TABS */
+    const tabs=document.createElement('div');tabs.className='sc-tabs';
+    const tabSw=document.createElement('div');tabSw.className='sc-tab active';
+    tabSw.style.setProperty('--g', glowHex);
+    tabSw.textContent='⚡ Poderes';
+    const tabBar=document.createElement('div');tabBar.className='sc-tab';
+    tabBar.style.setProperty('--g', glowHex);
+    tabBar.textContent='🎚️ Força';
+    tabs.append(tabSw, tabBar);
+
+    /* SWITCHES PANEL */
+    const swPanel=document.createElement('div');swPanel.className='sc-switches';
+    soul.switches.forEach(swDef=>{
+      const row=document.createElement('div');
+      row.className='sw-row';
+      row.id=`sw_${soul.id}_${swDef.key}`;
+      row.style.setProperty('--sw-c', swDef.c+'aa');
+      row.innerHTML=`
+        <div class="sw-left">
+          <span class="sw-em">${swDef.em}</span>
+          <span class="sw-nome">${swDef.nome}</span>
+        </div>
+        <div class="sw-pill"></div>
+      `;
+      row.addEventListener('click',()=>{
+        SW[soul.id][swDef.key] = !SW[soul.id][swDef.key];
+        row.classList.toggle('on', SW[soul.id][swDef.key]);
+        if(navigator.vibrate) navigator.vibrate(SW[soul.id][swDef.key]?[30]:[15]);
+        toast(swDef.em+' '+(SW[soul.id][swDef.key]?swDef.nome+' ON!':swDef.nome+' off'));
+      });
+      swPanel.appendChild(row);
+    });
+
+    /* BAR PANEL */
+    const barPanel=document.createElement('div');barPanel.className='sc-bar';
+    barPanel.style.display='none';
+
+    const barTop=document.createElement('div');barTop.className='sc-bar-top';
+    const barLabel=document.createElement('div');barLabel.className='sc-bar-label';barLabel.textContent='INTENSIDADE';
+    const barValue=document.createElement('div');barValue.className='sc-bar-value';barValue.style.color=glowHex;
+    barTop.append(barLabel, barValue);
+
+    const track=document.createElement('div');track.className='sc-track';
+    track.style.setProperty('--g', glowHex);
+    const fill=document.createElement('div');fill.className='sc-fill';
+    fill.style.background=`linear-gradient(90deg,${glowHex}88,${glowHex})`;
+    const thumb=document.createElement('div');thumb.className='sc-thumb';
+    thumb.style.setProperty('--g', glowHex);
+    track.append(fill, thumb);
+
+    const stageEl=document.createElement('div');stageEl.className='sc-stage';stageEl.style.color=glowHex;
+    barPanel.append(barTop, track, stageEl);
+
+    /* guarda refs para updateBar */
+    refs[soul.id]={wrap, fill, thumb, stageEl, barValue};
+
+    /* TAB SWITCH logic */
+    function setTab(t){
+      TAB[soul.id]=t;
+      tabSw.classList.toggle('active', t==='sw');
+      tabBar.classList.toggle('active', t==='bar');
+      swPanel.style.display = t==='sw' ? 'flex' : 'none';
+      barPanel.style.display= t==='bar'? 'flex'  : 'none';
+    }
+    tabSw.addEventListener('click',  ()=>setTab('sw'));
+    tabBar.addEventListener('click', ()=>setTab('bar'));
+    setTab('sw'); // default
+
+    /* DRAG na barra */
+    function setFromEvent(e){
+      const rect=track.getBoundingClientRect();
+      const clientX=e.touches?e.touches[0].clientX:e.clientX;
+      const raw=(clientX-rect.left)/rect.width;
+      INT[soul.id]=Math.max(0,Math.min(1,raw));
+      updateBar(soul.id);
+    }
+    let dragging=false;
+    track.addEventListener('mousedown',  e=>{dragging=true;setFromEvent(e);e.preventDefault();});
+    track.addEventListener('touchstart', e=>{dragging=true;setFromEvent(e);},{passive:true});
+    window.addEventListener('mousemove', e=>{if(dragging)setFromEvent(e);});
+    window.addEventListener('touchmove', e=>{if(dragging)setFromEvent(e);},{passive:true});
+    window.addEventListener('mouseup',   ()=>dragging=false);
+    window.addEventListener('touchend',  ()=>dragging=false);
+
+    panel.append(tabs, swPanel, barPanel);
+    sc.append(wrap, panel);
+    grid.appendChild(sc);
+
+    updateBar(soul.id);
+  });
+}
+
+function updateBar(id){
+  const soul=SOULS.find(s=>s.id===id);
+  const iv=INT[id];
+  const pct=iv*100;
+  const r=refs[id];
+  r.fill.style.width=pct+'%';
+  r.thumb.style.left=pct+'%';
+  const si=Math.min(Math.floor(iv*soul.stages.length), soul.stages.length-1);
+  r.stageEl.textContent=soul.stages[si].toUpperCase();
+  r.barValue.textContent=Math.round(pct)+'%';
+
+  /* glow no wrap */
+  r.wrap.style.boxShadow=iv>.05
+    ? `0 0 ${8+iv*32}px ${soul.glow}, 0 8px 24px rgba(0,0,0,.6)`
+    : '';
+  r.wrap.style.borderColor=iv>.05 ? soul.glow : 'rgba(255,255,255,.06)';
+}
+
+/* ════════════════════════════════════════════
+   INTERAÇÕES
+════════════════════════════════════════════ */
+function tilt(el,e){
+  const rect=el.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width-.5;
+  const y=(e.clientY-rect.top)/rect.height-.5;
+  el.style.transform=`perspective(500px) rotateX(${y*-14}deg) rotateY(${x*14}deg)`;
+}
+
+function sparkle(el,e){
+  const rect=el.getBoundingClientRect();
+  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+  const cols=['#FFD426','#FF3FA0','#00D4FF','#C040FF','#39FF14','#FF6B00'];
+  for(let i=0;i<12;i++){
+    const sp=document.createElement('div');sp.className='sparkle';
+    const a=Math.random()*Math.PI*2, d=18+Math.random()*50;
+    sp.style.cssText=`left:${cx}px;top:${cy}px;background:${cols[i%cols.length]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px`;
+    el.appendChild(sp);sp.addEventListener('animationend',()=>sp.remove());
+  }
+}
+
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent='✨ '+msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1600);
+}
+
+/* ════════════════════════════════════════════
+   RENDER LOOP
+════════════════════════════════════════════ */
+function loop(){
+  SOULS.forEach(soul=>{
+    const iv=INT[soul.id];
+    const swCount=Object.values(SW[soul.id]).filter(Boolean).length;
+    /* velocidade: intensidade + boost dos switches */
+    T[soul.id] += soul.speed * (.4 + iv*3 + swCount*.4);
+
+    const cv=cvs_map[soul.id]; if(!cv) return;
+    const W=cv.clientWidth||120, H=cv.clientHeight||160;
+    if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+    const o=off_map[soul.id];
+    o.canvas.width=W; o.canvas.height=H;
+    drawSmoke(o.ctx, soul, W, H, iv);
+    cv.getContext('2d').drawImage(o.canvas,0,0);
+  });
+  requestAnimationFrame(loop);
+}
+
+buildCards();
+loop();
+</script>
+</body>
+</html>

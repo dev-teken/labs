@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>✦ SOUL STORM ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+body{
+  background:#03000a;
+  font-family:'Nunito',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── HEADER ── */
+header{
+  padding:18px 20px 14px;
+  text-align:center;
+}
+.logo{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(1.8rem,5vw,3rem);
+  letter-spacing:.1em;
+  background:linear-gradient(135deg,#FFD426,#FF6B00 45%,#FF3FA0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(255,160,0,.5));
+}
+.tagline{
+  font-size:.6rem;font-weight:900;letter-spacing:.28em;
+  text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:4px;
+}
+
+/* ── GRID ── */
+#grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  padding:0 16px 32px;
+  max-width:900px;
+  margin:0 auto;
+}
+
+/* ── SOUL CARD ── */
+.sc{
+  position:relative;
+  border-radius:20px;
+  overflow:visible;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+
+/* canvas wrapper */
+.sc-wrap{
+  position:relative;
+  aspect-ratio:3/4;
+  border-radius:20px;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.06);
+  transition:border-color .3s, box-shadow .3s;
+  cursor:pointer;
+}
+.sc:hover .sc-wrap{
+  border-color:var(--g);
+  box-shadow:0 0 18px var(--g), 0 8px 28px rgba(0,0,0,.6);
+}
+
+.sc-canvas{display:block;width:100%;height:100%}
+
+/* rune top-right */
+.sc-rune{
+  position:absolute;top:10px;right:10px;font-size:1.3rem;
+  filter:drop-shadow(0 0 7px var(--g));
+  animation:rf 3.2s ease-in-out infinite;
+  pointer-events:none;z-index:3;
+}
+@keyframes rf{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-7px) rotate(5deg)}}
+
+/* mana */
+.sc-mana{
+  position:absolute;top:-8px;left:-8px;
+  width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,#1e6fff,#7b2fff);
+  border:2.5px solid #fff;box-shadow:0 0 12px #4a90ff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:.85rem;color:#fff;
+  z-index:5;
+}
+
+/* label overlay */
+.sc-label{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:32px 10px 12px;
+  background:linear-gradient(to top,rgba(0,0,0,.92) 0%,transparent 100%);
+  text-align:center;pointer-events:none;z-index:3;
+}
+.sc-name{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(.8rem,2vw,1.05rem);
+  letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;text-shadow:0 0 10px var(--g);
+}
+.sc-vibe{
+  font-size:.52rem;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.32);
+  margin-top:2px;
+}
+
+/* ── INTENSITY BAR (abaixo do canvas, dentro do card) ── */
+.sc-bar-wrap{
+  background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(255,255,255,.08);
+  border-top:none;
+  border-radius:0 0 18px 18px;
+  padding:10px 12px 12px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.sc-bar-top{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sc-bar-label{
+  font-family:'Fredoka One',cursive;
+  font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.35);
+}
+.sc-bar-value{
+  font-family:'Fredoka One',cursive;
+  font-size:.85rem;color:#fff;
+  min-width:60px;text-align:right;
+  transition:color .2s;
+}
+
+/* the track */
+.sc-track{
+  position:relative;height:10px;border-radius:6px;
+  background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.14);
+  cursor:pointer;
+  overflow:visible;
+}
+.sc-fill{
+  position:absolute;top:0;left:0;bottom:0;
+  border-radius:5px;
+  transition:width .08s linear;
+  /* glow effect */
+  box-shadow:0 0 8px var(--g), 0 0 16px var(--g);
+}
+.sc-thumb{
+  position:absolute;top:50%;
+  width:20px;height:20px;border-radius:50%;
+  background:#fff;
+  border:3px solid var(--g);
+  box-shadow:0 0 10px var(--g), 0 0 20px var(--g);
+  transform:translate(-50%,-50%);
+  transition:left .08s linear, box-shadow .2s;
+  pointer-events:none;
+}
+.sc-track:active .sc-thumb{
+  box-shadow:0 0 16px var(--g), 0 0 32px var(--g);
+}
+
+/* stage label */
+.sc-stage{
+  font-family:'Fredoka One',cursive;
+  font-size:.68rem;letter-spacing:.1em;
+  text-align:center;
+  transition:color .3s;
+  min-height:1em;
+}
+
+/* sparkle */
+.sparkle{
+  position:absolute;pointer-events:none;border-radius:50%;
+  width:5px;height:5px;
+  animation:sp .5s ease-out forwards;z-index:20;
+}
+@keyframes sp{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+}
+
+/* toast */
+#toast{
+  position:fixed;bottom:20px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:linear-gradient(135deg,#FFD426,#FF6B00);
+  color:#000;font-family:'Fredoka One',cursive;font-size:.9rem;
+  padding:8px 22px;border-radius:40px;
+  box-shadow:0 4px 24px rgba(255,180,0,.5);
+  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
+  z-index:999;white-space:nowrap;pointer-events:none;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:620px){#grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:0 12px 24px}}
+@media(max-width:380px){#grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ SOUL STORM ⚡</div>
+  <div class="tagline">✦ arrasta a barra e transforma a alma ✦</div>
+</header>
+
+<div id="grid"></div>
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════
+   SOULS — cada um com transformação própria
+════════════════════════════════════ */
+const SOULS = [
+  {
+    id:'a', h:205, s:22, l:48, a3:[196,245,183],
+    speed:.004, phase:0,   bperiod:7800,
+    label:'Névoa', vibe:'alma etérea', rune:'🌫️',
+    mana:1, glow:'rgba(196,245,183,.5)',
+    glowHex:'#c4f5b7',
+    fx:'trail',
+    stages:['adormecida','acordando','flutuando','voando','transcendendo'],
+  },
+  {
+    id:'b', h:18,  s:22, l:42, a3:[189,121,146],
+    speed:.011, phase:1.3, bperiod:8200,
+    label:'Terra', vibe:'alma ancestral', rune:'🌍',
+    mana:3, glow:'rgba(189,121,146,.5)',
+    glowHex:'#bd7992',
+    fx:'pulse',
+    stages:['dormindo','respirando','tremendo','rugindo','eruptando'],
+  },
+  {
+    id:'c', h:150, s:18, l:40, a3:[205,158,74],
+    speed:.021, phase:2.7, bperiod:7400,
+    label:'Bosque', vibe:'alma selvagem', rune:'🌿',
+    mana:4, glow:'rgba(205,158,74,.5)',
+    glowHex:'#cd9e4a',
+    fx:'orbit',
+    stages:['quieto','brotando','crescendo','florescendo','explodindo'],
+  },
+  {
+    id:'d', h:270, s:20, l:48, a3:[192,117,180],
+    speed:.038, phase:4.1, bperiod:8600,
+    label:'Cosmos', vibe:'alma cósmica', rune:'✨',
+    mana:6, glow:'rgba(192,117,180,.6)',
+    glowHex:'#c075b4',
+    fx:'stars',
+    stages:['apagada','piscando','brilhando','irradiando','supernova'],
+  },
+  {
+    id:'e', h:38,  s:22, l:44, a3:[128,138,86],
+    speed:.062, phase:5.5, bperiod:7100,
+    label:'Areia', vibe:'alma efêmera', rune:'⏳',
+    mana:2, glow:'rgba(200,180,80,.45)',
+    glowHex:'#c8b450',
+    fx:'dust',
+    stages:['parada','mexendo','girando','redemoinhando','tempestade'],
+  },
+  {
+    id:'f', h:320, s:18, l:45, a3:[126,200,192],
+    speed:.104, phase:.8,  bperiod:9000,
+    label:'Crepúsculo', vibe:'alma aurora', rune:'🌅',
+    mana:7, glow:'rgba(255,100,180,.5)',
+    glowHex:'#ff64b4',
+    fx:'aurora',
+    stages:['noite','madrugada','amanhecendo','aurorada','ascendendo'],
+  },
+];
+
+/* ════════════════════════════════════
+   STATE — intensidade 0..1 por alma
+════════════════════════════════════ */
+const T   = {};  // time tick
+const INT = {};  // intensity 0..1
+SOULS.forEach(s => { T[s.id] = s.phase; INT[s.id] = 0.3; });
+
+/* ════════════════════════════════════
+   SMOKE ENGINE
+════════════════════════════════════ */
+function n2(t,f,p){
+  return .42*Math.sin(t*f+p)+.28*Math.sin(t*f*1.618+p*1.3)
+        +.18*Math.sin(t*f*2.618+p*2.1)+.12*Math.sin(t*f*4.236+p*3.4);
+}
+function hsl2rgb(h,s,l){
+  s/=100;l/=100;const a=s*Math.min(l,1-l);
+  const f=(n,k=(n+h/30)%12)=>l-a*Math.max(Math.min(k-3,9-k,1),-1);
+  return[Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)];
+}
+function breathwave(s){
+  const ph=(performance.now()%s.bperiod)/s.bperiod;
+  return .5-.5*Math.cos(ph*Math.PI*2);
+}
+function heartbeat(s){
+  const bpm=62*(s.speed/.011),period=60000/bpm;
+  const ph=(performance.now()%period)/period;
+  const g=(x,m,sg)=>Math.exp(-.5*((x-m)/sg)**2);
+  return Math.max(0,g(ph,.1,.045)+g(ph,.22,.055)*.58);
+}
+
+function drawSmoke(oc, soul, W, H, intensity){
+  const cx=W/2, cy=H/2, R=W*.46;
+  const t=T[soul.id], HB=heartbeat(soul), BW=breathwave(soul);
+  const iv = intensity; // 0..1
+
+  /* intensity drives visual parameters */
+  const density    = .3 + iv*2.2;      // 0.3 → 2.5
+  const turbulence = iv*3.5;           // 0 → 3.5
+  const centrifugal= .8 + iv*2.2;      // 0.8 → 3.0
+  const drift      = (iv-.5)*1.4;      // -0.7 → 0.7
+  const halo       = .5 + iv*2.0;      // 0.5 → 2.5
+  const dissipation= .4 + iv*1.6;      // 0.4 → 2.0
+  const speedMult  = .4 + iv*3.0;      // speed scales too
+
+  const om=1+.09*BW*centrifugal;
+
+  oc.clearRect(0,0,W,H);oc.save();
+  oc.beginPath();oc.arc(cx,cy,R,0,Math.PI*2);oc.clip();
+  oc.fillStyle='#020208';oc.fillRect(0,0,W,H);
+
+  const bRGB=hsl2rgb(soul.h,Math.min(soul.s*2.8,72),52+iv*18);
+  const a3=soul.a3;
+
+  const PUFFS=[
+    {s:1,ox:Math.cos(t*.5)*R*.44*om,     oy:Math.sin(t*.4)*R*.4*om,    col:bRGB,al:.72},
+    {s:2,ox:Math.cos(t*.7+2.1)*R*.42*om, oy:Math.sin(t*.6+1)*R*.44*om, col:bRGB,al:.58},
+    {s:3,ox:Math.cos(t*.9+4.2)*R*.46*om, oy:Math.sin(t*.8+3)*R*.42*om, col:a3,  al:.52},
+    {s:4,ox:Math.cos(t*.38+3.1)*R*.48*om,oy:Math.sin(t*.32+1.7)*R*.44*om,col:a3,al:.40},
+    {s:5,ox:Math.cos(t*.55+5.4)*R*.32*om,oy:Math.sin(t*.48+4.2)*R*.3*om,col:bRGB,al:.46},
+  ];
+
+  oc.globalCompositeOperation='screen';
+  PUFFS.forEach(p=>{
+    const db=drift*.18, ox=p.ox, oy=p.oy-R*db*(1+p.s*.12);
+    const sx=1+.38*n2(t,.13,p.s*1.3), sy=1+.32*n2(t,.11,p.s*2.1);
+    const rot=n2(t,.17,p.s*.7)*.9;
+    const pSz=R*(.3+.18*n2(t,.23,p.s*1.1))*(1+.12*HB);
+    for(let i=0;i<4;i++){
+      const fi=i/4;
+      const fdx=pSz*.45*n2(t,.31+i*.07,p.s*.9+i*1.1);
+      const fdy=pSz*.38*n2(t,.29+i*.05,p.s*1.7+i*.9);
+      const fr=pSz*(.55-fi*.25);
+      const fa=p.al*density*(1-Math.pow(fi,.5+dissipation*.6)*.72)*(1+.22*HB);
+      oc.save();oc.translate(cx+ox,cy+oy);oc.rotate(rot);oc.scale(sx,sy);
+      const g=oc.createRadialGradient(fdx,fdy,0,fdx,fdy,fr);
+      const [r,gv,b]=p.col;
+      const rl=Math.min(r+Math.round(50*halo),255);
+      const gl=Math.min(gv+Math.round(50*halo),255);
+      const bl=Math.min(b+Math.round(50*halo),255);
+      g.addColorStop(0,  `rgba(${r},${gv},${b},${Math.min(fa,.95)})`);
+      g.addColorStop(.2, `rgba(${rl},${gl},${bl},${fa*.55*Math.min(halo,1.5)})`);
+      g.addColorStop(.5, `rgba(${r},${gv},${b},${fa*.25})`);
+      g.addColorStop(1,  `rgba(${r},${gv},${b},0)`);
+      oc.fillStyle=g;oc.beginPath();oc.arc(fdx,fdy,fr,0,Math.PI*2);oc.fill();oc.restore();
+    }
+  });
+
+  /* turbulence */
+  if(turbulence>.1){
+    const nv=Math.round(2+turbulence*3.5);
+    for(let k=0;k<nv;k++){
+      const ka=k*(Math.PI*2/nv)+t*.03, kn=n2(t,.07+k*.03,k*2.3);
+      const tx1=cx+R*.7*Math.cos(ka)*kn, ty1=cy+R*.7*Math.sin(ka)*kn;
+      const vr=R*(.06+.07*turbulence)*(.6+.4*Math.abs(kn));
+      const [r,gv,b]=bRGB;
+      const vg=oc.createRadialGradient(tx1,ty1,0,tx1,ty1,vr);
+      vg.addColorStop(0,`rgba(${r},${gv},${b},${.1*turbulence})`);
+      vg.addColorStop(1,`rgba(${r},${gv},${b},0)`);
+      oc.fillStyle=vg;oc.beginPath();oc.arc(tx1,ty1,vr,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  /* inner shine */
+  oc.globalCompositeOperation='screen';
+  const lx=cx+Math.cos(t*.45+1)*R*.3, ly=cy+Math.sin(t*.55+.5)*R*.26;
+  const sh=oc.createRadialGradient(lx,ly,0,lx,ly,R*(.22+iv*.15));
+  const [r,gv,b]=hsl2rgb(soul.h,48,82);
+  sh.addColorStop(0,`rgba(${r},${gv},${b},${.18+BW*.07+HB*.05+iv*.15})`);
+  sh.addColorStop(.5,`rgba(${r},${gv},${b},.05)`);
+  sh.addColorStop(1,'rgba(0,0,0,0)');
+  oc.fillStyle=sh;oc.fillRect(0,0,W,H);
+
+  /* vignette — less at high intensity */
+  oc.globalCompositeOperation='source-over';
+  const vg2=oc.createRadialGradient(cx,cy,R*.25,cx,cy,R);
+  const vigAmt=.5-iv*.2;
+  vg2.addColorStop(0,'rgba(0,0,0,0)');
+  vg2.addColorStop(.6,`rgba(1,1,7,${vigAmt})`);
+  vg2.addColorStop(1,`rgba(1,1,9,${.9-iv*.15})`);
+  oc.fillStyle=vg2;oc.fillRect(0,0,W,H);
+
+  /* ── UNIQUE FX ── */
+  oc.save();oc.beginPath();oc.arc(cx,cy,R,0,Math.PI*2);oc.clip();
+  oc.globalCompositeOperation='screen';
+  const fx=soul.fx;
+
+  if(fx==='trail'){
+    const count=Math.round(4+iv*10);
+    for(let i=0;i<count;i++){
+      const a=t*.3+i*(Math.PI*2/count);
+      const rr=R*(.28+iv*.18)+R*.08*Math.sin(t*.7+i);
+      const x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr*.8;
+      const gs=oc.createRadialGradient(x,y,0,x,y,R*(.05+iv*.04));
+      gs.addColorStop(0,`rgba(196,245,183,${.12+iv*.22})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(x,y,R*(.05+iv*.04),0,Math.PI*2);oc.fill();
+    }
+  }
+
+  if(fx==='pulse'){
+    const rings=Math.round(1+iv*4);
+    for(let i=0;i<rings;i++){
+      const ph=((performance.now()/( 2200-iv*1200))+i/rings)%1;
+      const pr2=ph*R*.88, al=(1-ph)*(.15+iv*.2)*(1+HB*.4);
+      oc.globalAlpha=al;
+      oc.strokeStyle=`rgba(189,121,146,1)`;
+      oc.lineWidth=1+iv*2;
+      oc.beginPath();oc.arc(cx,cy,pr2,0,Math.PI*2);oc.stroke();
+    }
+    oc.globalAlpha=1;
+  }
+
+  if(fx==='orbit'){
+    const count=Math.round(3+iv*8);
+    for(let i=0;i<count;i++){
+      const angle=t*(1+iv*1.5)+i*(Math.PI*2/count);
+      const orr=R*(.25+iv*.2), ex=.6+iv*.3;
+      const ox2=cx+Math.cos(angle)*orr, oy2=cy+Math.sin(angle)*orr*ex;
+      const sz=R*(.025+iv*.025);
+      const gs=oc.createRadialGradient(ox2,oy2,0,ox2,oy2,sz);
+      gs.addColorStop(0,`rgba(205,158,74,${.7+iv*.25})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(ox2,oy2,sz,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  if(fx==='stars'){
+    const count=Math.round(6+iv*20);
+    for(let i=0;i<count;i++){
+      const sx2=cx+Math.sin(i*137.5)*R*.44, sy2=cy+Math.cos(i*97.3)*R*.4;
+      const al=(.1+iv*.5)*(.5+.5*Math.sin(t*(1+iv)+i*1.7));
+      const sz=R*(.012+iv*.018);
+      const gs=oc.createRadialGradient(sx2,sy2,0,sx2,sy2,sz);
+      gs.addColorStop(0,`rgba(255,255,255,${al})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(sx2,sy2,sz,0,Math.PI*2);oc.fill();
+    }
+    /* at high intensity: cross-shaped star bursts */
+    if(iv>.6){
+      const burst=Math.round((iv-.6)/.4*5);
+      for(let i=0;i<burst;i++){
+        const bx=cx+Math.sin(i*83.7+t*.5)*R*.35, by=cy+Math.cos(i*61.3+t*.4)*R*.3;
+        const al=(iv-.6)/.4*.6;
+        for(let arm=0;arm<4;arm++){
+          const ax=Math.cos(arm*Math.PI/2+t*.3)*R*.06, ay=Math.sin(arm*Math.PI/2+t*.3)*R*.06;
+          const lg=oc.createLinearGradient(bx,by,bx+ax,by+ay);
+          lg.addColorStop(0,`rgba(255,255,255,${al})`);
+          lg.addColorStop(1,'rgba(255,255,255,0)');
+          oc.strokeStyle=lg;oc.lineWidth=1.5;
+          oc.beginPath();oc.moveTo(bx,by);oc.lineTo(bx+ax,by+ay);oc.stroke();
+        }
+      }
+    }
+  }
+
+  if(fx==='dust'){
+    const count=Math.round(6+iv*16);
+    for(let i=0;i<count;i++){
+      const speed=300+iv*1200;
+      const dx=Math.sin(i*73.1+t*(iv*.8))*R*(.3+iv*.15);
+      const dy=((performance.now()/speed+i*40)%H)-H/2;
+      const sz=R*(.012+iv*.016);
+      const al=.1+iv*.15;
+      const gs=oc.createRadialGradient(cx+dx,cy+dy,0,cx+dx,cy+dy,sz);
+      gs.addColorStop(0,`rgba(200,180,100,${al})`);
+      gs.addColorStop(1,'rgba(0,0,0,0)');
+      oc.fillStyle=gs;oc.beginPath();oc.arc(cx+dx,cy+dy,sz,0,Math.PI*2);oc.fill();
+    }
+  }
+
+  if(fx==='aurora'){
+    const hues=[320,160,200,290,350,120];
+    const count=Math.round(2+iv*4);
+    for(let i=0;i<count;i++){
+      const y1=cy+Math.sin(t*.4+i*1.3)*R*(.2+iv*.18);
+      const x1=cx-R*.9+(i/count)*R*1.8, x2=x1+R*.45;
+      const rgb=hsl2rgb(hues[i%hues.length],60+iv*20,65+iv*15);
+      const g2=oc.createLinearGradient(x1,y1,x2,y1+R*.24);
+      const a2=.08+iv*.14;
+      g2.addColorStop(0,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+      g2.addColorStop(.5,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a2})`);
+      g2.addColorStop(1,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+      oc.fillStyle=g2;
+      oc.beginPath();oc.moveTo(x1,y1);oc.bezierCurveTo(x1+R*.1,y1-R*.1,x2-R*.1,y1+R*.1,x2,y1+R*.24);
+      oc.lineTo(x2,y1+R*.3);oc.bezierCurveTo(x2,y1+R*.14,x1,y1+R*.06,x1,y1+R*.3);oc.closePath();oc.fill();
+    }
+  }
+
+  oc.restore();
+  oc.restore();
+}
+
+/* ════════════════════════════════════
+   BUILD CARDS
+════════════════════════════════════ */
+const cvs_map={}, off_map={};
+
+function buildCards(){
+  const grid=document.getElementById('grid');
+
+  SOULS.forEach(soul=>{
+    /* card root */
+    const sc=document.createElement('div');
+    sc.className='sc';
+    sc.style.setProperty('--g', soul.glow);
+
+    /* canvas wrapper */
+    const wrap=document.createElement('div');
+    wrap.className='sc-wrap';
+
+    const cv=document.createElement('canvas');cv.className='sc-canvas';
+    cvs_map[soul.id]=cv;
+
+    const off=document.createElement('canvas');
+    off_map[soul.id]={canvas:off, ctx:off.getContext('2d')};
+
+    const rune=document.createElement('div');rune.className='sc-rune';rune.textContent=soul.rune;
+    rune.style.animationDelay=(Math.random()*2.5)+'s';
+
+    const mana=document.createElement('div');mana.className='sc-mana';mana.textContent=soul.mana;
+
+    const lbl=document.createElement('div');lbl.className='sc-label';
+    lbl.innerHTML=`<div class="sc-name">${soul.label}</div><div class="sc-vibe">${soul.vibe}</div>`;
+
+    wrap.append(cv, rune, mana, lbl);
+
+    /* intensity bar */
+    const barWrap=document.createElement('div');barWrap.className='sc-bar-wrap';
+    barWrap.style.borderColor=`rgba(255,255,255,.1)`;
+
+    const barTop=document.createElement('div');barTop.className='sc-bar-top';
+    const barLabel=document.createElement('div');barLabel.className='sc-bar-label';barLabel.textContent='INTENSIDADE';
+    const barValue=document.createElement('div');barValue.className='sc-bar-value';
+
+    barTop.append(barLabel, barValue);
+
+    const track=document.createElement('div');track.className='sc-track';
+    track.style.setProperty('--g', soul.glowHex);
+
+    const fill=document.createElement('div');fill.className='sc-fill';
+    fill.style.background=`linear-gradient(90deg, ${soul.glowHex}88, ${soul.glowHex})`;
+
+    const thumb=document.createElement('div');thumb.className='sc-thumb';
+    thumb.style.setProperty('--g', soul.glowHex);
+
+    track.append(fill, thumb);
+
+    const stageEl=document.createElement('div');stageEl.className='sc-stage';
+    stageEl.style.color=soul.glowHex;
+
+    barWrap.append(barTop, track, stageEl);
+    sc.append(wrap, barWrap);
+    grid.appendChild(sc);
+
+    /* update bar UI */
+    function updateBar(){
+      const iv=INT[soul.id];
+      const pct=iv*100;
+      fill.style.width=pct+'%';
+      thumb.style.left=pct+'%';
+      const si=Math.min(Math.floor(iv*soul.stages.length), soul.stages.length-1);
+      stageEl.textContent=soul.stages[si].toUpperCase();
+      barValue.textContent=Math.round(pct)+'%';
+      /* glow on wrap intensifies */
+      wrap.style.boxShadow=iv>.05
+        ? `0 0 ${8+iv*28}px ${soul.glow}, 0 8px 24px rgba(0,0,0,.6)`
+        : '';
+      wrap.style.borderColor=iv>.05 ? soul.glow : 'rgba(255,255,255,.06)';
+    }
+    updateBar();
+
+    /* drag logic */
+    function setFromEvent(e){
+      const rect=track.getBoundingClientRect();
+      const clientX=e.touches?e.touches[0].clientX:e.clientX;
+      const raw=(clientX-rect.left)/rect.width;
+      INT[soul.id]=Math.max(0,Math.min(1,raw));
+      updateBar();
+    }
+
+    let dragging=false;
+    track.addEventListener('mousedown',  e=>{dragging=true;setFromEvent(e);e.preventDefault();});
+    track.addEventListener('touchstart', e=>{dragging=true;setFromEvent(e);},{passive:true});
+    window.addEventListener('mousemove', e=>{if(dragging)setFromEvent(e);});
+    window.addEventListener('touchmove', e=>{if(dragging)setFromEvent(e);},{passive:true});
+    window.addEventListener('mouseup',   ()=>dragging=false);
+    window.addEventListener('touchend',  ()=>dragging=false);
+
+    /* tilt on canvas hover */
+    wrap.addEventListener('mousemove',e=>tilt(wrap,e));
+    wrap.addEventListener('mouseleave',()=>{wrap.style.transform='';});
+
+    /* click canvas = burst sparkles */
+    wrap.addEventListener('click',e=>{sparkle(wrap,e); toast(soul.rune+' '+soul.label);});
+  });
+}
+
+/* ════════════════════════════════════
+   INTERACTIONS
+════════════════════════════════════ */
+function tilt(el,e){
+  const rect=el.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width-.5;
+  const y=(e.clientY-rect.top)/rect.height-.5;
+  el.style.transform=`perspective(500px) rotateX(${y*-14}deg) rotateY(${x*14}deg)`;
+}
+
+function sparkle(el,e){
+  const rect=el.getBoundingClientRect();
+  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+  const cols=['#FFD426','#FF3FA0','#00D4FF','#C040FF','#39FF14','#FF6B00'];
+  for(let i=0;i<10;i++){
+    const sp=document.createElement('div');sp.className='sparkle';
+    const a=Math.random()*Math.PI*2, d=20+Math.random()*45;
+    sp.style.cssText=`left:${cx}px;top:${cy}px;background:${cols[i%cols.length]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px`;
+    el.appendChild(sp);sp.addEventListener('animationend',()=>sp.remove());
+  }
+}
+
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent='✨ '+msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1600);
+}
+
+/* ════════════════════════════════════
+   RENDER LOOP
+════════════════════════════════════ */
+function loop(){
+  SOULS.forEach(soul=>{
+    const iv=INT[soul.id];
+    /* speed scales with intensity */
+    T[soul.id]+= soul.speed*(.4+iv*3);
+
+    const cv=cvs_map[soul.id];if(!cv)return;
+    const W=cv.clientWidth||120, H=cv.clientHeight||160;
+    if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+    const o=off_map[soul.id];
+    o.canvas.width=W;o.canvas.height=H;
+    drawSmoke(o.ctx, soul, W, H, iv);
+    cv.getContext('2d').drawImage(o.canvas,0,0);
+  });
+  requestAnimationFrame(loop);
+}
+
+buildCards();
+loop();
+</script>
+</body>
+</html>

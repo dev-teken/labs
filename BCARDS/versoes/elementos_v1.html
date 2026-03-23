@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Elementos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════
+   RESET & BASE
+════════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html{height:100%;overflow:hidden;}
+body{
+  height:100dvh;overflow:hidden;
+  background:#080c10;
+  font-family:'Cinzel',serif;
+  color:#e8dcc8;
+  display:flex;flex-direction:column;
+  max-width:430px;margin:0 auto;
+  position:relative;
+}
+
+/* ── CAMADA DE NÉVOA AMBIENTE ── */
+#ambience{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  transition:background 1.2s ease;
+}
+#ambience.fire{background:radial-gradient(ellipse at 50% 100%,rgba(180,40,0,.18),transparent 65%);}
+#ambience.water{background:radial-gradient(ellipse at 50% 100%,rgba(0,80,160,.18),transparent 65%);}
+#ambience.earth{background:radial-gradient(ellipse at 50% 100%,rgba(30,90,30,.18),transparent 65%);}
+#ambience.air{background:radial-gradient(ellipse at 50% 100%,rgba(120,140,180,.12),transparent 65%);}
+#ambience.lightning{background:radial-gradient(ellipse at 50% 100%,rgba(140,100,0,.18),transparent 65%);}
+
+/* partículas flutuantes */
+.particle{
+  position:fixed;pointer-events:none;z-index:0;
+  border-radius:50%;
+  animation:float linear infinite;
+  opacity:0;
+}
+@keyframes float{
+  0%{transform:translateY(100dvh) scale(0);opacity:0;}
+  10%{opacity:.6;}
+  90%{opacity:.3;}
+  100%{transform:translateY(-20px) scale(1.2);opacity:0;}
+}
+
+/* ════════════════════════════════════════════════
+   HUD TOPO
+════════════════════════════════════════════════ */
+#hud{
+  flex:0 0 auto;
+  position:relative;z-index:10;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  padding:12px 14px 6px;
+}
+
+/* bloco de player */
+.player-block{display:flex;flex-direction:column;gap:4px;}
+.player-block.right{align-items:flex-end;}
+.player-label{
+  font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  opacity:.5;
+}
+.player-label.p1{color:#6ec6f0;}
+.player-label.p2{color:#f06e6e;}
+.player-hearts{display:flex;gap:4px;}
+.player-block.right .player-hearts{flex-direction:row-reverse;}
+.hrt{
+  font-size:18px;line-height:1;
+  transition:transform .3s,filter .3s;
+  filter:drop-shadow(0 0 4px currentColor);
+}
+.hrt.dead{filter:grayscale(1) opacity(.25);transform:scale(.7);}
+.hrt.losing{animation:heartcrack .4s ease forwards;}
+@keyframes heartcrack{0%{transform:scale(1.4)}50%{transform:scale(.5) rotate(15deg)}100%{transform:scale(.7)}  }
+
+/* rodada central */
+#round-center{
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
+#round-lbl{font-size:7px;letter-spacing:3px;text-transform:uppercase;color:#c8a84a;opacity:.7;}
+#round-n{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(22px,5dvh,32px);
+  color:#c8a84a;
+  line-height:1;
+  text-shadow:0 0 20px rgba(200,168,74,.5);
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.8));
+}
+
+/* ════════════════════════════════════════════════
+   ARENA — dois mini-slots revelados
+════════════════════════════════════════════════ */
+#arena{
+  flex:0 0 auto;
+  position:relative;z-index:5;
+  display:grid;
+  grid-template-columns:1fr 28px 1fr;
+  gap:0;
+  padding:0 12px;
+  align-items:center;
+}
+
+/* mini-slot */
+.mslot{
+  border-radius:12px;
+  border:1.5px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);
+  padding:8px 6px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  min-height:clamp(80px,15dvh,110px);
+  position:relative;overflow:hidden;
+  transition:border-color .4s,background .4s,box-shadow .4s,transform .35s cubic-bezier(.34,1.5,.64,1);
+}
+.mslot::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 50%);
+  pointer-events:none;
+}
+.mslot.has-card{background:rgba(255,255,255,.05);}
+.mslot.winner{
+  border-color:rgba(200,168,74,.7);
+  box-shadow:0 0 0 1px rgba(200,168,74,.4),0 0 24px rgba(200,168,74,.15);
+  transform:translateY(-4px) scale(1.03);
+}
+.mslot.loser{filter:saturate(.2) brightness(.5);transform:scale(.93);}
+.mslot.draw{border-color:rgba(255,255,255,.22);}
+
+.mslot-owner{
+  font-size:7px;letter-spacing:2.5px;text-transform:uppercase;
+  position:absolute;top:5px;left:7px;opacity:.55;
+}
+.mslot-owner.p1{color:#6ec6f0;}
+.mslot-owner.p2{color:#f06e6e;}
+
+.mslot-em{font-size:clamp(18px,3.5dvh,26px);line-height:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,.8));}
+.mslot-name{font-size:clamp(8px,1.6vw,11px);letter-spacing:.5px;text-transform:uppercase;font-weight:600;text-align:center;}
+.mslot-variant{font-size:7px;font-style:italic;color:rgba(232,220,200,.45);font-family:'Crimson Pro',serif;letter-spacing:.3px;}
+.mslot-stats{display:flex;gap:4px;}
+.mstat{
+  font-size:9px;font-weight:600;letter-spacing:.5px;
+  background:rgba(0,0,0,.4);border-radius:4px;
+  padding:1px 5px;border:1px solid rgba(255,255,255,.1);
+}
+.mstat.atk{color:#f08080;}
+.mstat.def{color:#80b8f0;}
+.mslot-pips{display:flex;gap:2px;margin-top:1px;}
+.mpip{
+  width:7px;height:7px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.15);
+  transition:background .4s,box-shadow .4s;
+}
+.mpip.on{background:#52c46a;box-shadow:0 0 5px #52c46a;}
+.mpip.hurt{background:#f4a030;box-shadow:0 0 5px #f4a030;}
+.mpip.dead{background:rgba(255,255,255,.08);}
+.mpip.flash{animation:pipcrack .4s ease;}
+@keyframes pipcrack{0%{transform:scale(1.8);background:#fff}100%{transform:scale(1)}}
+
+.mslot-badge{
+  position:absolute;bottom:4px;right:5px;
+  font-size:8px;letter-spacing:.5px;border-radius:20px;padding:1px 6px;
+  font-weight:700;
+  animation:popIn .25s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{opacity:0;transform:scale(.3) translateY(4px)}to{opacity:1;transform:none}}
+.badge-win{background:rgba(200,168,74,.9);color:#1a1000;}
+.badge-lose{background:rgba(200,50,50,.85);color:#fff;}
+.badge-draw{background:rgba(255,255,255,.12);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.2);}
+
+.arena-vs{
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel Decorative',serif;
+  font-size:11px;color:#c8a84a;
+  text-shadow:0 0 12px rgba(200,168,74,.5);
+  opacity:.7;
+}
+
+/* ════════════════════════════════════════════════
+   MÃO DE CARTAS (na tela principal)
+════════════════════════════════════════════════ */
+#hand-section{
+  flex:1;min-height:0;
+  position:relative;z-index:5;
+  display:flex;flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:6px 10px 0;
+  gap:5px;
+}
+
+#phase-line{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:#c8a84a;opacity:.65;text-align:center;min-height:14px;
+}
+
+/* grade de cartas */
+#hand-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(5px,1.5vw,9px);
+  width:100%;
+}
+/* se 2 cartas: centralizar */
+#hand-grid.two{grid-template-columns:repeat(2,1fr);max-width:70%;}
+#hand-grid.one{grid-template-columns:1fr;max-width:46%;}
+
+/* ── CARTA ── */
+.hcard{
+  aspect-ratio:2/3;
+  border-radius:14px;
+  position:relative;overflow:hidden;
+  cursor:pointer;
+  border:2px solid rgba(255,255,255,.1);
+  box-shadow:0 6px 18px rgba(0,0,0,.7),0 2px 4px rgba(0,0,0,.5);
+  transition:
+    transform .2s cubic-bezier(.34,1.56,.64,1),
+    box-shadow .2s,
+    border-color .2s,
+    filter .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.hcard:active{transform:scale(.88) translateY(4px)!important;}
+.hcard.selected{
+  transform:translateY(-16px) scale(1.12)!important;
+  border-color:rgba(200,168,74,.8)!important;
+  box-shadow:
+    0 12px 32px rgba(0,0,0,.8),
+    0 0 0 2px rgba(200,168,74,.5),
+    0 0 40px var(--card-glow,rgba(200,168,74,.25))!important;
+  z-index:20;
+}
+.hcard.dead{opacity:.15;pointer-events:none;filter:grayscale(1);}
+.hcard.dimmed{filter:brightness(.45) saturate(.3);}
+
+/* fundo da carta — gradiente elemental */
+.card-bg{
+  position:absolute;inset:0;
+  transition:filter .3s;
+}
+/* ruído de textura */
+.card-bg::after{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;opacity:.4;
+}
+
+/* brilho de topo */
+.card-shine{
+  position:absolute;top:0;left:0;right:0;height:45%;
+  background:linear-gradient(180deg,rgba(255,255,255,.18),transparent);
+  border-radius:12px 12px 0 0;pointer-events:none;
+}
+
+/* corpo da carta */
+.card-inner{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  padding:6px 5px 5px;
+}
+
+/* topo da carta */
+.card-top{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.card-element-badge{
+  font-size:6px;letter-spacing:2px;text-transform:uppercase;
+  background:rgba(0,0,0,.45);border-radius:20px;
+  padding:1px 5px;
+  color:rgba(255,255,255,.6);
+  border:1px solid rgba(255,255,255,.1);
+}
+.card-emoji{
+  font-size:clamp(20px,5dvh,30px);line-height:1;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.8));
+  margin:2px 0;
+}
+.card-name{
+  font-size:clamp(6px,1.4vw,9px);font-weight:700;letter-spacing:.8px;
+  text-transform:uppercase;text-align:center;
+  text-shadow:0 1px 4px rgba(0,0,0,.9);
+  color:#fff;
+}
+.card-variant{
+  font-size:clamp(5px,1.1vw,7px);
+  font-family:'Crimson Pro',serif;font-style:italic;
+  color:rgba(255,255,255,.45);
+  letter-spacing:.2px;text-align:center;
+}
+
+/* baixo da carta */
+.card-bottom{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.card-stats-row{display:flex;gap:3px;width:100%;}
+.cstat{
+  flex:1;border-radius:5px;padding:2px 3px;
+  display:flex;flex-direction:column;align-items:center;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+.cstat-l{font-size:4px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);line-height:1;}
+.cstat-v{font-size:clamp(10px,2.5vw,14px);font-weight:700;color:#fff;line-height:1.1;}
+.cstat.atk .cstat-v{color:#f4a0a0;}
+.cstat.def .cstat-v{color:#90c0f4;}
+
+/* pips de HP */
+.card-pips{display:flex;gap:2px;justify-content:center;}
+.cpip{
+  width:6px;height:6px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.15);
+  transition:background .4s,box-shadow .4s;
+}
+.cpip.on{background:#52c46a;box-shadow:0 0 4px #52c46a;}
+.cpip.hurt{background:#f4a030;box-shadow:0 0 4px #f4a030;}
+.cpip.dead{background:rgba(255,255,255,.07);}
+
+/* ════════════════════════════════════════════════
+   BOTÃO PRINCIPAL
+════════════════════════════════════════════════ */
+#action-btn{
+  flex:0 0 auto;
+  margin:5px 12px 4px;
+  font-family:'Cinzel',serif;
+  font-size:clamp(13px,3dvh,17px);
+  font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  border:none;border-radius:14px;
+  padding:clamp(12px,2.6dvh,16px) 0;
+  width:calc(100% - 24px);
+  cursor:pointer;
+  transition:transform .1s,box-shadow .1s,opacity .2s;
+  position:relative;overflow:hidden;
+  box-shadow:0 5px 0 rgba(0,0,0,.5),0 6px 18px rgba(0,0,0,.4);
+}
+#action-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 55%);
+  pointer-events:none;border-radius:14px;
+}
+#action-btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.5);}
+#action-btn:disabled{opacity:.18;cursor:default;}
+
+/* ════════════════════════════════════════════════
+   TELA DE PASSE
+════════════════════════════════════════════════ */
+#pass-screen{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:radial-gradient(ellipse at center,#0d1a0d,#080c10);
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(16px,4dvh,28px);padding:32px 28px;
+}
+#pass-screen.show{display:flex;}
+#pass-icon{font-size:clamp(60px,14dvh,88px);animation:sway 2.4s ease-in-out infinite;filter:drop-shadow(0 4px 18px rgba(0,0,0,.6));}
+@keyframes sway{0%,100%{transform:rotate(-5deg) scale(1)}50%{transform:rotate(5deg) scale(1.06)}}
+#pass-who{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(17px,4dvh,24px);text-align:center;
+  text-shadow:0 2px 12px rgba(0,0,0,.9);
+}
+#pass-msg{
+  font-family:'Crimson Pro',serif;
+  font-size:clamp(14px,3dvh,19px);font-style:italic;
+  color:rgba(232,220,200,.55);text-align:center;max-width:280px;line-height:1.5;
+}
+#pass-btn{
+  font-family:'Cinzel',serif;font-size:clamp(14px,3.2dvh,19px);font-weight:700;letter-spacing:1px;
+  border:none;border-radius:14px;
+  padding:clamp(13px,3dvh,18px) clamp(36px,10vw,60px);
+  cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 5px 0 rgba(0,0,0,.5),0 6px 20px rgba(0,0,0,.4);
+  transition:transform .1s,box-shadow .1s;
+}
+#pass-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 55%);pointer-events:none;}
+#pass-btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.5);}
+
+/* ════════════════════════════════════════════════
+   TELA DE CARTA EXPANDIDA + PPR
+════════════════════════════════════════════════ */
+#card-stage{
+  display:none;position:fixed;inset:0;z-index:90;
+  flex-direction:column;align-items:center;justify-content:space-between;
+  padding:clamp(14px,3dvh,24px) 18px clamp(12px,2.5dvh,18px);
+  background:#080c10;
+  transition:background .6s;
+}
+#card-stage.show{display:flex;}
+
+/* a carta grande */
+#stage-card-wrap{
+  flex:0 0 auto;
+  width:clamp(175px,44vw,220px);
+  aspect-ratio:2/3;
+  perspective:1000px;
+}
+#stage-card{
+  width:100%;height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  animation:cardReveal .55s cubic-bezier(.34,1.2,.64,1) both;
+}
+@keyframes cardReveal{
+  from{transform:rotateY(-90deg) scale(.7);opacity:0;}
+  to{transform:rotateY(0deg) scale(1);opacity:1;}
+}
+#stage-card-front{
+  position:absolute;inset:0;
+  border-radius:20px;overflow:hidden;
+  border:3px solid rgba(200,168,74,.55);
+  box-shadow:0 12px 40px rgba(0,0,0,.85),0 0 0 1px rgba(200,168,74,.3),0 0 60px var(--stage-glow,rgba(200,168,74,.2));
+}
+#stage-bg{position:absolute;inset:0;}
+#stage-shine{
+  position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(180deg,rgba(255,255,255,.22),transparent);
+  border-radius:17px 17px 0 0;pointer-events:none;
+}
+#stage-inner{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  padding:12px 10px 10px;
+}
+#stage-element-badge{
+  align-self:center;
+  font-size:7px;letter-spacing:2.5px;text-transform:uppercase;
+  background:rgba(0,0,0,.5);border-radius:20px;
+  padding:2px 8px;
+  color:rgba(255,255,255,.65);
+  border:1px solid rgba(255,255,255,.15);
+}
+#stage-emoji{
+  text-align:center;
+  font-size:clamp(44px,11dvh,68px);line-height:1;
+  filter:drop-shadow(0 4px 18px rgba(0,0,0,.8));
+}
+#stage-card-name{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(13px,3dvh,18px);
+  text-align:center;color:#fff;
+  text-shadow:0 2px 8px rgba(0,0,0,.95);letter-spacing:.5px;
+}
+#stage-variant{
+  text-align:center;
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:clamp(10px,2.2dvh,14px);
+  color:rgba(255,255,255,.45);letter-spacing:.5px;
+}
+#stage-stats{
+  display:flex;gap:8px;width:100%;
+}
+.ststat{
+  flex:1;border-radius:8px;padding:5px 4px;
+  display:flex;flex-direction:column;align-items:center;
+  background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+.ststat-l{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);line-height:1;}
+.ststat-v{font-size:clamp(18px,4.5dvh,28px);font-weight:700;color:#fff;line-height:1.1;}
+.ststat.atk .ststat-v{color:#f4a0a0;text-shadow:0 0 12px rgba(244,100,100,.4);}
+.ststat.def .ststat-v{color:#90c0f4;text-shadow:0 0 12px rgba(100,160,244,.4);}
+
+/* PPR section */
+#ppr-area{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;
+  gap:clamp(8px,2dvh,14px);
+  width:100%;
+  padding-top:6px;
+}
+#ppr-prompt{
+  text-align:center;
+  font-size:clamp(10px,2.2dvh,14px);letter-spacing:2px;text-transform:uppercase;
+  color:#c8a84a;opacity:.85;
+}
+#ppr-subtitle{
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:clamp(11px,2.4dvh,15px);
+  color:rgba(232,220,200,.4);text-align:center;
+  line-height:1.4;max-width:300px;
+  margin-top:-4px;
+}
+#ppr-btns{
+  display:flex;gap:clamp(8px,2.5vw,14px);
+  justify-content:center;align-items:stretch;
+}
+.ppr-opt{
+  width:clamp(80px,24vw,104px);
+  border-radius:14px;
+  border:2px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;
+  padding:clamp(10px,2.5dvh,16px) 6px;
+  cursor:pointer;
+  transition:
+    transform .18s cubic-bezier(.34,1.56,.64,1),
+    box-shadow .18s,border-color .18s,background .18s;
+  position:relative;overflow:hidden;
+  -webkit-user-select:none;user-select:none;
+  box-shadow:0 4px 14px rgba(0,0,0,.6);
+}
+.ppr-opt::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:45%;
+  background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);
+  pointer-events:none;
+}
+.ppr-opt:active{transform:scale(.88) translateY(4px)!important;box-shadow:0 1px 6px rgba(0,0,0,.5)!important;}
+.ppr-opt.chosen{
+  border-color:rgba(200,168,74,.8)!important;
+  box-shadow:0 6px 0 rgba(0,0,0,.4),0 0 0 2px rgba(200,168,74,.45),0 0 30px rgba(200,168,74,.2)!important;
+  transform:translateY(-10px) scale(1.1)!important;
+  background:rgba(200,168,74,.1)!important;
+}
+.ppr-em{font-size:clamp(26px,6.5dvh,38px);line-height:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,.7));}
+.ppr-nm{
+  font-family:'Cinzel',serif;
+  font-size:clamp(8px,1.8vw,11px);font-weight:600;letter-spacing:.5px;
+  color:rgba(255,255,255,.7);text-align:center;
+}
+.ppr-rule{font-size:clamp(6px,1.3vw,8px);color:rgba(255,255,255,.25);letter-spacing:.3px;text-align:center;}
+
+/* ── confirm btn ── */
+#ppr-go{
+  font-family:'Cinzel',serif;font-size:clamp(12px,2.8dvh,16px);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  border:none;border-radius:12px;
+  padding:clamp(11px,2.4dvh,15px) clamp(30px,8vw,50px);
+  cursor:pointer;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#a0800a,#5c4800);
+  color:#f4e090;text-shadow:0 1px 4px rgba(0,0,0,.7);
+  box-shadow:0 4px 0 rgba(0,0,0,.45),0 6px 18px rgba(0,0,0,.4);
+  transition:transform .1s,box-shadow .1s,opacity .2s;
+}
+#ppr-go::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 55%);pointer-events:none;}
+#ppr-go:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.45);}
+#ppr-go:disabled{opacity:.18;cursor:default;}
+
+/* ════════════════════════════════════════════════
+   GAME OVER
+════════════════════════════════════════════════ */
+#gameover{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.9);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;
+}
+#gameover.show{display:flex;}
+#go-box{
+  background:linear-gradient(160deg,#1a140a,#0d0b08);
+  border:2px solid rgba(200,168,74,.4);border-radius:22px;
+  padding:clamp(28px,6dvh,44px) clamp(26px,8vw,44px);
+  text-align:center;max-width:300px;width:88%;
+  box-shadow:0 0 0 1px rgba(200,168,74,.2),0 24px 60px rgba(0,0,0,.9),0 0 80px rgba(200,168,74,.06);
+  position:relative;overflow:hidden;
+}
+#go-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(200,168,74,.6),transparent);
+}
+#go-trophy{font-size:clamp(44px,11dvh,64px);margin-bottom:6px;filter:drop-shadow(0 0 20px rgba(200,168,74,.4));}
+#go-title{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(20px,5dvh,30px);color:#c8a84a;
+  text-shadow:0 2px 0 #5c4800,0 0 30px rgba(200,168,74,.4);
+  margin-bottom:6px;letter-spacing:.5px;
+}
+#go-sub{
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:clamp(12px,2.8vw,16px);color:rgba(232,220,200,.4);
+  margin-bottom:24px;line-height:1.6;
+}
+#go-btn{
+  font-family:'Cinzel',serif;font-size:clamp(12px,2.8vw,16px);font-weight:700;letter-spacing:1px;
+  background:linear-gradient(160deg,#c8a840,#7a6018);color:#1a1000;
+  border:none;border-radius:12px;padding:11px 32px;cursor:pointer;
+  box-shadow:0 4px 0 rgba(0,0,0,.4),0 0 20px rgba(200,168,74,.2);
+  position:relative;overflow:hidden;transition:transform .1s,box-shadow .1s;
+}
+#go-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.25),transparent 50%);pointer-events:none;}
+#go-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.4);}
+</style>
+</head>
+<body>
+
+<div id="ambience"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="player-block left">
+    <div class="player-label p1">Jogador 1</div>
+    <div class="player-hearts" id="hearts1"></div>
+  </div>
+  <div id="round-center">
+    <div id="round-lbl">Rodada</div>
+    <div id="round-n">1</div>
+  </div>
+  <div class="player-block right">
+    <div class="player-label p2">Jogador 2</div>
+    <div class="player-hearts" id="hearts2"></div>
+  </div>
+</div>
+
+<!-- ARENA (slots revelados) -->
+<div id="arena">
+  <div class="mslot" id="ms1">
+    <div style="font-size:22px;opacity:.12">✦</div>
+  </div>
+  <div class="arena-vs">VS</div>
+  <div class="mslot" id="ms2">
+    <div style="font-size:22px;opacity:.12">✦</div>
+  </div>
+</div>
+
+<!-- MÃO + BOTÃO -->
+<div id="hand-section">
+  <div id="phase-line"></div>
+  <div id="hand-grid"></div>
+</div>
+<button id="action-btn" disabled></button>
+
+<!-- PASSE DE TURNO -->
+<div id="pass-screen">
+  <div id="pass-icon"></div>
+  <div id="pass-who"></div>
+  <div id="pass-msg">Passe o dispositivo e toque para ver sua mão</div>
+  <button id="pass-btn" onclick="onPass()"></button>
+</div>
+
+<!-- CARTA EXPANDIDA + PPR -->
+<div id="card-stage">
+  <div id="stage-card-wrap">
+    <div id="stage-card">
+      <div id="stage-card-front">
+        <div id="stage-bg"></div>
+        <div id="stage-shine"></div>
+        <div id="stage-inner">
+          <div id="stage-element-badge"></div>
+          <div id="stage-emoji"></div>
+          <div>
+            <div id="stage-card-name"></div>
+            <div id="stage-variant"></div>
+          </div>
+          <div id="stage-stats">
+            <div class="ststat atk">
+              <div class="ststat-l">Ataque</div>
+              <div class="ststat-v" id="stage-atk">0</div>
+            </div>
+            <div class="ststat def">
+              <div class="ststat-l">Defesa</div>
+              <div class="ststat-v" id="stage-def">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ppr-area">
+    <div id="ppr-prompt">Escolha seu golpe</div>
+    <div id="ppr-subtitle">Pedra esmaga Tesoura · Papel cobre Pedra · Tesoura corta Papel</div>
+    <div id="ppr-btns">
+      <div class="ppr-opt" data-ppr="rock" onclick="selectPPR(this)">
+        <div class="ppr-em">🪨</div>
+        <div class="ppr-nm">Pedra</div>
+        <div class="ppr-rule">vence tesoura</div>
+      </div>
+      <div class="ppr-opt" data-ppr="paper" onclick="selectPPR(this)">
+        <div class="ppr-em">📜</div>
+        <div class="ppr-nm">Papel</div>
+        <div class="ppr-rule">vence pedra</div>
+      </div>
+      <div class="ppr-opt" data-ppr="scissors" onclick="selectPPR(this)">
+        <div class="ppr-em">✂️</div>
+        <div class="ppr-nm">Tesoura</div>
+        <div class="ppr-rule">vence papel</div>
+      </div>
+    </div>
+    <button id="ppr-go" disabled onclick="confirmPPR()">Confirmar golpe</button>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameover">
+  <div id="go-box">
+    <div id="go-trophy"></div>
+    <div id="go-title"></div>
+    <div id="go-sub"></div>
+    <button id="go-btn" onclick="init()">↺ Jogar novamente</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════
+   DADOS DO JOGO
+════════════════════════════════════════════════ */
+
+/* Gradientes e glows por elemento */
+const EL_THEME = {
+  fire:      { bg:'linear-gradient(160deg,#c43000,#5a0800,#1a0300)', glow:'rgba(196,60,0,.6)',  particle:'#ff6030', pip:'#f4804a', accent:'#f06030' },
+  water:     { bg:'linear-gradient(160deg,#0070b0,#003070,#000c2a)', glow:'rgba(0,120,200,.6)', particle:'#40a0ff', pip:'#60b8ff', accent:'#50a8f0' },
+  earth:     { bg:'linear-gradient(160deg,#2d7a30,#0e3a10,#060e06)', glow:'rgba(50,130,50,.6)', particle:'#60c060', pip:'#80d880', accent:'#50b050' },
+  air:       { bg:'linear-gradient(160deg,#6080a0,#2a3848,#101820)', glow:'rgba(120,160,200,.5)',particle:'#c0d8f0', pip:'#b0cce8', accent:'#90b8d8' },
+  lightning: { bg:'linear-gradient(160deg,#b08000,#604400,#1a1000)', glow:'rgba(200,160,0,.6)', particle:'#ffe040', pip:'#f4c030', accent:'#e8b820' },
+};
+
+/* Elementos base com 3 variações internas cada */
+const ELEMENTS = {
+  fire: { name:'Fogo', emoji:'🔥', beats:['air','earth'],
+    variants:[
+      { name:'Chama Viva',   suffix:'Comum',   atk:5, def:1 },
+      { name:'Braseiro',     suffix:'Tático',  atk:4, def:3 },
+      { name:'Inferno',      suffix:'Supremo', atk:7, def:0 },
+    ]},
+  water: { name:'Água', emoji:'💧', beats:['fire','earth'],
+    variants:[
+      { name:'Maré Suave',   suffix:'Comum',   atk:2, def:5 },
+      { name:'Torrente',     suffix:'Tática',  atk:4, def:3 },
+      { name:'Tsunami',      suffix:'Supremo', atk:6, def:1 },
+    ]},
+  earth: { name:'Terra', emoji:'🌍', beats:['lightning','water'],
+    variants:[
+      { name:'Pedra Firme',  suffix:'Comum',   atk:2, def:6 },
+      { name:'Avalanche',    suffix:'Tática',  atk:4, def:4 },
+      { name:'Terremoto',    suffix:'Supremo', atk:6, def:2 },
+    ]},
+  air: { name:'Ar', emoji:'🌪️', beats:['fire','lightning'],
+    variants:[
+      { name:'Brisa Leve',   suffix:'Comum',   atk:3, def:3 },
+      { name:'Vendaval',     suffix:'Tático',  atk:5, def:1 },
+      { name:'Furacão',      suffix:'Supremo', atk:6, def:0 },
+    ]},
+  lightning: { name:'Elétrico', emoji:'⚡', beats:['water','air'],
+    variants:[
+      { name:'Faísca',       suffix:'Comum',   atk:4, def:2 },
+      { name:'Relâmpago',    suffix:'Tático',  atk:5, def:1 },
+      { name:'Tempestade',   suffix:'Supremo', atk:7, def:0 },
+    ]},
+};
+
+/* PPR */
+const PPR_BEATS = { rock:'scissors', paper:'rock', scissors:'paper' };
+const PPR_EM    = { rock:'🪨', paper:'📜', scissors:'✂️' };
+const PPR_NM    = { rock:'Pedra', paper:'Papel', scissors:'Tesoura' };
+
+/* gera o deck completo (5 cartas, 1 por elemento, variante aleatória) */
+function makeDeck(){
+  return Object.entries(ELEMENTS).map(([eid, el])=>{
+    const v = el.variants[Math.floor(Math.random()*el.variants.length)];
+    return {
+      eid, name:v.name, suffix:v.suffix,
+      emoji:el.emoji, beats:el.beats,
+      atk:v.atk, def:v.def,
+      hp:3, maxHp:3,
+    };
+  });
+}
+
+/* ════════════════════════════════════════════════
+   ESTADO
+════════════════════════════════════════════════ */
+const MAX_PLAYER_HP = 3;
+let p1HP, p2HP, p1Deck, p2Deck;
+let p1Pick, p2Pick, p1PPR, p2PPR;
+let phase, activeCard, roundNum;
+let stageCallback = null, stagePlayer = null;
+let activePPRId = null;
+
+const $ = id => document.getElementById(id);
+
+/* ════════════════════════════════════════════════
+   PARTÍCULAS
+════════════════════════════════════════════════ */
+let particleInterval = null;
+function spawnParticles(eid){
+  if(particleInterval) clearInterval(particleInterval);
+  document.querySelectorAll('.particle').forEach(p=>p.remove());
+  if(!eid) return;
+  const col = EL_THEME[eid].particle;
+  particleInterval = setInterval(()=>{
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 3+Math.random()*5;
+    p.style.cssText=`
+      width:${size}px;height:${size}px;
+      background:${col};
+      left:${10+Math.random()*80}%;
+      animation-duration:${3+Math.random()*4}s;
+      animation-delay:${Math.random()*1}s;
+      box-shadow:0 0 ${size*2}px ${col};
+    `;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 8000);
+  }, 600);
+}
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+function init(){
+  p1HP = MAX_PLAYER_HP; p2HP = MAX_PLAYER_HP;
+  p1Deck = makeDeck(); p2Deck = makeDeck();
+  p1Pick = p2Pick = p1PPR = p2PPR = activeCard = null;
+  roundNum = 1;
+  $('gameover').classList.remove('show');
+  $('card-stage').classList.remove('show');
+  $('pass-screen').classList.remove('show');
+  spawnParticles(null);
+  updHud();
+  resetArena();
+  showPass('p1');
+}
+
+/* ════════════════════════════════════════════════
+   HUD
+════════════════════════════════════════════════ */
+function updHud(){
+  $('round-n').textContent = roundNum;
+  makeHearts('hearts1', p1HP, 'p1');
+  makeHearts('hearts2', p2HP, 'p2');
+}
+function makeHearts(id, hp, cls){
+  let h='';
+  for(let i=0;i<MAX_PLAYER_HP;i++){
+    const alive = i < hp;
+    h += `<div class="hrt ${alive?'':'dead'}">${alive?'❤️':'🖤'}</div>`;
+  }
+  $(id).innerHTML = h;
+}
+function loseHeart(player){
+  if(player==='p1') p1HP = Math.max(0,p1HP-1);
+  else              p2HP = Math.max(0,p2HP-1);
+  // animação na bolinha que sumiu
+  const id = player==='p1'?'hearts1':'hearts2';
+  const hrts = $(id).querySelectorAll('.hrt');
+  const target = player==='p1'
+    ? hrts[p1HP]   // a que acabou de morrer
+    : hrts[p2HP];
+  if(target){ target.classList.add('losing'); }
+  updHud();
+}
+
+/* ════════════════════════════════════════════════
+   ARENA (mini-slots)
+════════════════════════════════════════════════ */
+function resetArena(){
+  ['ms1','ms2'].forEach(id=>{
+    const s=$(id);s.className='mslot';s.style='';
+    s.innerHTML=`<div style="font-size:22px;opacity:.1">✦</div>`;
+  });
+}
+function slotPlaced(id, player){
+  const col = player==='p1'?'rgba(110,198,240,.3)':'rgba(240,110,110,.3)';
+  const lbl = player==='p1'?'J1':'J2';
+  const s = $(id); s.className='mslot has-card';
+  s.style.borderColor = player==='p1'?'rgba(110,198,240,.35)':'rgba(240,110,110,.35)';
+  s.innerHTML=`
+    <div class="mslot-owner ${player}">${lbl}</div>
+    <div style="font-size:28px;opacity:.25;margin-top:12px">🂠</div>
+    <div style="font-size:9px;letter-spacing:1.5px;color:${player==='p1'?'#6ec6f0':'#f06e6e'};font-weight:700;margin-top:4px">✔ Pronto</div>`;
+}
+function slotReveal(id, card, player, outcome){
+  const th = EL_THEME[card.eid];
+  const lbl = player==='p1'?'J1':'J2';
+  const s = $(id);
+  s.className = `mslot has-card ${outcome}`;
+  s.style.background = th.bg;
+  s.style.borderColor = outcome==='winner'?'rgba(200,168,74,.7)':th.accent+'88';
+  if(outcome==='winner') s.style.boxShadow=`0 0 0 1px rgba(200,168,74,.4),0 0 24px rgba(200,168,74,.15)`;
+
+  let pips='';
+  for(let i=0;i<card.maxHp;i++){
+    const st = i<card.hp ? (card.hp===1?'hurt':'on') : 'dead';
+    pips += `<div class="mpip ${st}"></div>`;
+  }
+
+  const badge = outcome==='winner'
+    ? `<div class="mslot-badge badge-win">⚔ Vitória</div>`
+    : outcome==='loser'
+    ? `<div class="mslot-badge badge-lose">💀</div>`
+    : `<div class="mslot-badge badge-draw">— Empate</div>`;
+
+  s.innerHTML=`
+    <div class="mslot-owner ${player}">${lbl}</div>
+    <div class="mslot-em">${card.emoji}</div>
+    <div class="mslot-name" style="color:${th.accent}">${card.name}</div>
+    <div class="mslot-variant">${card.suffix}</div>
+    <div class="mslot-stats">
+      <div class="mstat atk">⚔${card.atk}</div>
+      <div class="mstat def">🛡${card.def}</div>
+    </div>
+    <div class="mslot-pips">${pips}</div>
+    ${badge}`;
+}
+
+/* ════════════════════════════════════════════════
+   PASS DE TURNO
+════════════════════════════════════════════════ */
+function showPass(player){
+  phase = player+'-pass';
+  const p1 = player==='p1';
+  $('pass-icon').textContent = p1?'⚔️':'🛡️';
+  $('pass-who').style.color = p1?'#6ec6f0':'#f06e6e';
+  $('pass-who').textContent = p1?'Vez do Jogador 1':'Vez do Jogador 2';
+  const gc = p1
+    ? 'linear-gradient(160deg,#1a70a0,#0a3860)'
+    : 'linear-gradient(160deg,#a01a1a,#600a0a)';
+  $('pass-btn').style.cssText=`background:${gc};color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);`;
+  $('pass-btn').textContent = p1?'👁 Ver minha mão':'👁 Ver minha mão';
+  clearMain();
+  $('pass-screen').classList.add('show');
+}
+function onPass(){
+  $('pass-screen').classList.remove('show');
+  if(phase==='p1-pass')       startPick('p1');
+  else if(phase==='p2-pass')  startPick('p2');
+  else if(phase==='next'){    roundNum++; updHud(); newRound(); }
+}
+function clearMain(){
+  $('hand-grid').innerHTML='';
+  $('phase-line').textContent='';
+  const b=$('action-btn');b.disabled=true;b.textContent='';b.style='';
+  activeCard=null;
+}
+
+/* ════════════════════════════════════════════════
+   ESCOLHA DE CARTA
+════════════════════════════════════════════════ */
+function startPick(player){
+  phase = player+'-pick';
+  const deck = player==='p1'?p1Deck:p2Deck;
+  activeCard = null;
+  const col = player==='p1'?'#6ec6f0':'#f06e6e';
+  $('phase-line').style.color = col;
+  $('phase-line').textContent = (player==='p1'?'Jogador 1':'Jogador 2')+' — escolha uma carta';
+  renderHand(deck, player);
+
+  const b = $('action-btn');
+  const gc = player==='p1'
+    ? 'linear-gradient(160deg,#1a70a0,#0a3860)'
+    : 'linear-gradient(160deg,#a01a1a,#600a0a)';
+  b.style.cssText=`background:${gc};color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);`;
+  b.textContent='Selecionar carta';
+  b.disabled=true;
+  b.onclick=()=>goToStage(player);
+}
+
+function renderHand(deck, player){
+  const alive = deck.filter(c=>c.hp>0);
+  const n = alive.length;
+  const grid = $('hand-grid');
+  grid.className = n<=1?'hand-grid one':n<=2?'hand-grid two':'hand-grid';
+  grid.innerHTML='';
+
+  deck.forEach(card=>{
+    const dead = card.hp<=0;
+    const sel  = activeCard===card;
+    const th   = EL_THEME[card.eid];
+    const pct  = card.hp/card.maxHp;
+    const pipColor = pct<=.34?'hurt':'on';
+
+    const d = document.createElement('div');
+    d.className='hcard'+(dead?' dead':'')+(sel?' selected':'')+((!dead&&!sel)&&activeCard?' dimmed':'');
+
+    // pips
+    let pips='';
+    for(let i=0;i<card.maxHp;i++){
+      const st=i<card.hp?pipColor:'dead';
+      pips+=`<div class="cpip ${st}"></div>`;
+    }
+
+    d.innerHTML=`
+      <div class="card-bg" style="background:${th.bg}"></div>
+      <div class="card-shine"></div>
+      <div class="card-inner">
+        <div class="card-top">
+          <div class="card-element-badge">${ELEMENTS[card.eid].name}</div>
+          <div class="card-emoji">${card.emoji}</div>
+          <div class="card-name">${card.name}</div>
+          <div class="card-variant">${card.suffix}</div>
+        </div>
+        <div class="card-bottom">
+          <div class="card-stats-row">
+            <div class="cstat atk"><div class="cstat-l">ATK</div><div class="cstat-v">${card.atk}</div></div>
+            <div class="cstat def"><div class="cstat-l">DEF</div><div class="cstat-v">${card.def}</div></div>
+          </div>
+          <div class="card-pips">${pips}</div>
+        </div>
+      </div>`;
+
+    if(!dead){
+      d.onclick=()=>{
+        activeCard=card;
+        spawnParticles(card.eid);
+        $('ambience').className=card.eid;
+        renderHand(deck,player);
+        $('action-btn').disabled=false;
+        $('action-btn').style.background=`linear-gradient(160deg,${th.accent},${th.glow.replace('.6','.3').replace('rgba','rgba').replace('rgba','rgba')})`;
+        // simplificado:
+        $('action-btn').style.cssText=`background:linear-gradient(160deg,${th.accent}cc,#000a);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);box-shadow:0 5px 0 rgba(0,0,0,.5),0 0 20px ${th.glow};border:1px solid ${th.accent}55;`;
+        $('action-btn').textContent=`Jogar ${card.name}`;
+      };
+    }
+    grid.appendChild(d);
+  });
+}
+
+/* ════════════════════════════════════════════════
+   TELA DE CARTA + PPR
+════════════════════════════════════════════════ */
+function goToStage(player){
+  if(!activeCard) return;
+  const card = activeCard;
+  const th   = EL_THEME[card.eid];
+  activePPRId = null;
+
+  /* preencher carta grande */
+  $('stage-bg').style.background = th.bg;
+  $('stage-card-front').style.setProperty('--stage-glow', th.glow);
+  $('stage-card-front').style.boxShadow = `0 12px 40px rgba(0,0,0,.85),0 0 0 1px ${th.accent}44,0 0 60px ${th.glow}`;
+  $('stage-element-badge').textContent = ELEMENTS[card.eid].name.toUpperCase();
+  $('stage-emoji').textContent = card.emoji;
+  $('stage-card-name').textContent = card.name;
+  $('stage-variant').textContent = card.suffix;
+  $('stage-atk').textContent = card.atk;
+  $('stage-def').textContent = card.def;
+
+  /* PPR prompt */
+  const col = player==='p1'?'#6ec6f0':'#f06e6e';
+  $('ppr-prompt').style.color = col;
+  $('ppr-prompt').textContent = (player==='p1'?'Jogador 1':'Jogador 2')+' — seu golpe secreto';
+
+  /* reset PPR */
+  document.querySelectorAll('.ppr-opt').forEach(b=>b.classList.remove('chosen'));
+  $('ppr-go').disabled = true;
+
+  /* fundo da tela de stage */
+  $('card-stage').style.background = `radial-gradient(ellipse at 50% 30%,${th.glow.replace('.6',',.08')},#080c10 65%)`;
+
+  /* reset animação da carta */
+  const sc = $('stage-card');
+  sc.style.animation='none'; sc.offsetHeight; // reflow
+  sc.style.animation='';
+
+  stagePlayer = player;
+  stageCallback = player==='p1'
+    ? ()=>{ p1Pick=card; slotPlaced('ms1','p1'); clearMain(); showPass('p2'); }
+    : ()=>{ p2Pick=card; slotPlaced('ms2','p2'); clearMain(); showRevealBtn(); };
+
+  $('card-stage').classList.add('show');
+  spawnParticles(card.eid);
+}
+
+function selectPPR(el){
+  document.querySelectorAll('.ppr-opt').forEach(b=>b.classList.remove('chosen'));
+  el.classList.add('chosen');
+  activePPRId = el.dataset.ppr;
+  $('ppr-go').disabled = false;
+}
+
+function confirmPPR(){
+  if(!activePPRId) return;
+  if(stagePlayer==='p1') p1PPR = activePPRId;
+  else                   p2PPR = activePPRId;
+  $('card-stage').classList.remove('show');
+  spawnParticles(null);
+  $('ambience').className='';
+  if(stageCallback) stageCallback();
+}
+
+/* ════════════════════════════════════════════════
+   REVELAR
+════════════════════════════════════════════════ */
+function showRevealBtn(){
+  phase='reveal';
+  $('phase-line').style.color='#c8a84a';
+  $('phase-line').textContent='⚔ Ambos prontos — revelar!';
+  const b = $('action-btn');
+  b.style.cssText='background:linear-gradient(160deg,#a08010,#5c4800);color:#f4e090;text-shadow:0 1px 4px rgba(0,0,0,.7);box-shadow:0 5px 0 rgba(0,0,0,.5),0 0 22px rgba(200,168,74,.3);';
+  b.textContent='⚡ Revelar cartas';
+  b.disabled=false;b.onclick=doReveal;
+}
+
+function doReveal(){
+  const c1=p1Pick, c2=p2Pick;
+
+  /* ── quem ataca: PPR decide ── */
+  const p1WinPPR = p2PPR && p1PPR && PPR_BEATS[p1PPR]===p2PPR;
+  const p2WinPPR = p1PPR && p2PPR && PPR_BEATS[p2PPR]===p1PPR;
+  const drawPPR  = !p1WinPPR && !p2WinPPR;
+
+  /* ── vantagem elemental (bônus de ataque) ── */
+  const p1ElBonus = c1.beats.includes(c2.eid) ? 2 : 0;
+  const p2ElBonus = c2.beats.includes(c1.eid) ? 2 : 0;
+
+  /* ── cálculo de dano ──
+     Atacante: quem ganhou PPR (ou ambos em empate)
+     Dano = atk do atacante (+ bônus elemental) - def do defensor
+     Se resultado negativo → 0 (defesa absorve)
+     Carta perde vida proporcional ao dano
+  */
+  let dmgTo1=0, dmgTo2=0;
+  let p1Attacked=false, p2Attacked=false;
+
+  if(p1WinPPR || drawPPR){
+    // P1 ataca P2
+    dmgTo2 = Math.max(0, (c1.atk + p1ElBonus) - c2.def);
+    p1Attacked = true;
+  }
+  if(p2WinPPR || drawPPR){
+    // P2 ataca P1
+    dmgTo1 = Math.max(0, (c2.atk + p2ElBonus) - c1.def);
+    p2Attacked = true;
+  }
+
+  /* aplica dano */
+  c1.hp = Math.max(0, c1.hp - dmgTo1);
+  c2.hp = Math.max(0, c2.hp - dmgTo2);
+
+  /* ── vidas do jogador ──
+     Carta morta (hp=0) → jogador dono perde 1 coração
+  */
+  if(c1.hp===0){ loseHeart('p1'); }
+  if(c2.hp===0){ loseHeart('p2'); }
+
+  /* ── resultado visual ── */
+  // quem teve a carta mais danificada perde
+  let out1='draw', out2='draw';
+  if(dmgTo2 > dmgTo1){ out1='winner'; out2='loser'; }
+  else if(dmgTo1 > dmgTo2){ out1='loser';  out2='winner'; }
+  else if(dmgTo2>0||dmgTo1>0){ out1='draw'; out2='draw'; } // dano igual
+
+  slotReveal('ms1',c1,'p1',out1);
+  slotReveal('ms2',c2,'p2',out2);
+
+  /* descrição PPR */
+  const pprDesc = p1PPR&&p2PPR
+    ? `${PPR_EM[p1PPR]} ${PPR_NM[p1PPR]} vs ${PPR_EM[p2PPR]} ${PPR_NM[p2PPR]} — ${p1WinPPR?'J1 ataca':p2WinPPR?'J2 ataca':'Troca mútua'}`
+    : '';
+  $('phase-line').style.color='rgba(200,168,74,.7)';
+  $('phase-line').textContent=pprDesc;
+
+  /* ── próximo passo ── */
+  const b=$('action-btn');
+  const alive1=p1Deck.filter(c=>c.hp>0).length;
+  const alive2=p2Deck.filter(c=>c.hp>0).length;
+  const over = p1HP<=0||p2HP<=0||alive1===0||alive2===0;
+
+  if(over){
+    b.style.cssText='background:linear-gradient(160deg,#700,#300);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);box-shadow:0 5px 0 rgba(0,0,0,.5);';
+    b.textContent='🏁 Ver resultado final';b.disabled=false;b.onclick=endGame;
+  }else{
+    b.style.cssText='background:rgba(255,255,255,.06);color:rgba(232,220,200,.5);border:1px solid rgba(255,255,255,.1);box-shadow:0 3px 0 rgba(0,0,0,.4);';
+    b.textContent='▶ Próxima rodada';b.disabled=false;
+    b.onclick=()=>{phase='next';showPass('p1');};
+  }
+}
+
+function newRound(){
+  p1Pick=p2Pick=p1PPR=p2PPR=activeCard=null;
+  resetArena();clearMain();showPass('p1');
+}
+
+function endGame(){
+  const alive1=p1Deck.filter(c=>c.hp>0).length;
+  const alive2=p2Deck.filter(c=>c.hp>0).length;
+  let trophy='🏆', title='', sub='';
+
+  if((p1HP<=0&&p2HP<=0)||(alive1===0&&alive2===0)){
+    trophy='🤝';title='Empate!';sub='Os dois guerreiros caíram juntos.';
+  }else if(p2HP<=0||alive2===0){
+    title='Jogador 1 Venceu!';
+    sub=p2HP<=0?'O oponente perdeu todas as vidas.':'O oponente ficou sem cartas.';
+  }else{
+    title='Jogador 2 Venceu!';
+    sub=p1HP<=0?'O oponente perdeu todas as vidas.':'O oponente ficou sem cartas.';
+  }
+  $('go-trophy').textContent=trophy;
+  $('go-title').textContent=title;
+  $('go-sub').textContent=sub;
+  $('gameover').classList.add('show');
+  spawnParticles(null);
+}
+
+/* ════════════════════════════════════════════════
+   START
+════════════════════════════════════════════════ */
+init();
+</script>
+</body>
+</html>
